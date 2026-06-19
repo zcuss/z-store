@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Pesanan Saya — Z Store</title>
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.ord-wrap{max-width:1100px;margin:0 auto;padding:24px}
+.ord-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.ord-head h1{margin:0;font-size:24px;display:flex;align-items:center;gap:10px}
+.ord-head h1 i{color:var(--accent)}
+.ord-tabs{display:flex;gap:6px;border-bottom:1px solid var(--glass-border);margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ord-tabs::-webkit-scrollbar{display:none}
+.ord-tab{padding:12px 18px;background:transparent;border:none;color:var(--text-dim);font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-size:14px}
+.ord-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.ord-tab .count{margin-left:6px;background:rgba(255,255,255,.1);padding:1px 6px;border-radius:6px;font-size:11px}
+.ord-list{display:flex;flex-direction:column;gap:12px}
+.ord-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:16px;transition:all .2s;cursor:pointer}
+.ord-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.ord-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.ord-id{font-weight:700;font-size:16px}
+.ord-date{color:var(--text-mute);font-size:12px}
+.ord-status{display:inline-block;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;text-transform:uppercase}
+.ord-status.pending{background:rgba(251,191,36,.2);color:#fbbf24}
+.ord-status.paid{background:rgba(14,165,233,.2);color:#38bdf8}
+.ord-status.delivered{background:rgba(34,197,94,.2);color:#22c55e}
+.ord-status.completed{background:rgba(34,197,94,.3);color:#22c55e}
+.ord-status.cancelled{background:rgba(244,63,94,.2);color:#fb7185}
+.ord-items{color:var(--text-dim);font-size:14px;line-height:1.5;margin-bottom:8px}
+.ord-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--glass-border);padding-top:12px;flex-wrap:wrap;gap:8px}
+.ord-total{font-size:18px;font-weight:800;color:var(--accent)}
+.ord-action{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.ord-action:hover{background:var(--accent);color:#fff}
+.ord-action.primary{background:var(--accent);color:#fff}
+.ord-action.primary:hover{background:#0284c7}
+.ord-empty{text-align:center;padding:80px 20px;color:var(--text-dim)}
+.ord-empty i{font-size:64px;color:var(--text-mute);margin-bottom:16px;display:block;opacity:.5}
+.ord-empty h3{margin:0 0 8px;color:var(--text)}
+.ord-detail{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:24px;margin-bottom:16px}
+.ord-detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:14px}
+.ord-detail-row:last-child{border-bottom:none}
+.ord-detail-row .lbl{color:var(--text-dim)}
+.ord-detail-row .val{color:var(--text);font-weight:600}
+.ord-timeline{margin:20px 0;padding:20px;background:rgba(0,0,0,.2);border-radius:12px}
+.timeline-step{display:flex;gap:12px;margin-bottom:12px;position:relative}
+.timeline-step:not(:last-child)::after{content:"";position:absolute;left:11px;top:24px;bottom:-12px;width:2px;background:var(--glass-border)}
+.timeline-dot{width:24px;height:24px;border-radius:50%;background:var(--glass);border:2px solid var(--glass-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--text-mute)}
+.timeline-dot.done{background:linear-gradient(135deg,#22c55e,#10b981);border-color:transparent;color:#fff}
+.timeline-info{flex:1;padding-top:2px}
+.timeline-info b{display:block;color:var(--text);font-size:13px}
+.timeline-info small{color:var(--text-mute);font-size:11px}
+.escrow-bar{padding:12px 16px;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(244,63,94,.1));border:1px solid rgba(251,191,36,.3);border-radius:12px;margin:12px 0;font-size:13px}
+.escrow-bar b{color:#fbbf24}
+.delivery-info{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);padding:12px 16px;border-radius:12px;margin:12px 0;font-size:13px;color:#86efac}
+.delivery-info code{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-family:monospace}
+.ord-loading{padding:40px;text-align:center;color:var(--text-dim)}
+.ord-guard{padding:80px 24px;text-align:center;color:var(--text-dim)}
+.ord-guard i{font-size:64px;color:var(--accent);margin-bottom:16px;display:block}
+.cred-box{background:rgba(0,0,0,.3);padding:16px;border-radius:10px;font-family:monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;margin:12px 0;max-height:300px;overflow-y:auto}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">PESANAN SAYA</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="hdr-btn cart-btn" onclick="openCart()" title="Cart">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="ord-wrap">
+  <div id="ordGuard" class="ord-guard" style="display:none">
+    <i class="fa-solid fa-user-lock"></i>
+    <h2>Login dulu</h2>
+    <p>Kamu perlu login untuk melihat pesanan.</p>
+    <a href="/shop/" class="btn btn-primary" style="margin-top:12px"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a>
+  </div>
+
+  <div id="ordContent" style="display:none">
+    <div class="ord-head">
+      <h1><i class="fa-solid fa-box"></i> Pesanan Saya</h1>
+      <button class="ord-action" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+    </div>
+
+    <div class="ord-tabs" id="ordTabs">
+      <button class="ord-tab active" data-status="" onclick="filterOrders('',this)">Semua <span class="count" id="cnt-all">0</span></button>
+      <button class="ord-tab" data-status="pending" onclick="filterOrders('pending',this)">Pending <span class="count" id="cnt-pending">0</span></button>
+      <button class="ord-tab" data-status="paid" onclick="filterOrders('paid',this)">Paid <span class="count" id="cnt-paid">0</span></button>
+      <button class="ord-tab" data-status="delivered" onclick="filterOrders('delivered',this)">Delivered <span class="count" id="cnt-delivered">0</span></button>
+      <button class="ord-tab" data-status="completed" onclick="filterOrders('completed',this)">Completed <span class="count" id="cnt-completed">0</span></button>
+      <button class="ord-tab" data-status="cancelled" onclick="filterOrders('cancelled',this)">Cancelled <span class="count" id="cnt-cancelled">0</span></button>
+    </div>
+
+    <div id="ordList" class="ord-list"></div>
+  </div>
+</main>
+
+<!-- Order Detail Modal -->
+<div class="modal" id="detailModal">
+  <div class="modal-content modal-lg glass">
+    <button class="modal-close" onclick="closeDetail()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<!-- Cart Drawer -->
+<div class="drawer" id="cartDrawer">
+  <div class="drawer-head glass">
+    <b><i class="fa-solid fa-cart-shopping"></i> Keranjang <span class="badge-pill" id="cartDrawerCount">0</span></b>
+    <button class="drawer-close" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="drawer-body" id="cartItems">
+    <div class="cd-empty">
+      <div class="empty-ico"><i class="fa-solid fa-cart-arrow-down"></i></div>
+      <p>Keranjang kosong</p>
+    </div>
+  </div>
+  <div class="drawer-foot glass" id="cartFoot" style="display:none">
+    <div class="cart-row cart-total"><span>Total</span><b id="cartTotal">Rp 0</b></div>
+    <a href="/shop/" class="btn btn-primary full" onclick="closeCart()">Lanjut Belanja</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let cart = JSON.parse(localStorage.getItem('zs_cart') || '[]');
+let orders = [];
+let activeFilter = '';
+
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtDate = d => new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+const fmtDateShort = d => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
+
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.body.style.overflow = ''; }
+function updateCartBadge() { const total = cart.reduce((s, x) => s + x.qty, 0); const b = document.getElementById('cartBadge'); if (b) { b.textContent = total; b.style.display = total > 0 ? 'flex' : 'none'; } }
+function renderCartDrawer() {
+  const items = document.getElementById('cartItems');
+  const foot = document.getElementById('cartFoot');
+  if (!cart.length) { items.innerHTML = `<div class="cd-empty"><div class="empty-ico"><i class="fa-solid fa-cart-arrow-down"></i></div><p>Keranjang kosong</p></div>`; foot.style.display = 'none'; return; }
+  items.innerHTML = cart.map(x => `<div class="cart-item"><div class="ci-info"><b>${x.name}</b><small>${fmtRp(x.price)} × ${x.qty}</small></div></div>`).join('');
+  document.getElementById('cartTotal').textContent = fmtRp(cart.reduce((s, x) => s + x.price * x.qty, 0));
+  foot.style.display = 'block';
+}
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
+}
+
+function filterOrders(s, btn) { activeFilter = s; document.querySelectorAll('.ord-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); renderList(); }
+
+async function loadOrders() {
+  if (!token || !user) { document.getElementById('ordGuard').style.display = 'block'; document.getElementById('ordContent').style.display = 'none'; return; }
+  document.getElementById('ordContent').style.display = 'block';
+  document.getElementById('ordList').innerHTML = '<div class="ord-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>';
+  const r = await api('/api/orders/me');
+  if (r.error) { document.getElementById('ordList').innerHTML = `<div class="ord-empty">${r.error}</div>`; return; }
+  orders = Array.isArray(r) ? r : [];
+  // Update counts
+  const counts = { all: orders.length, pending: 0, paid: 0, delivered: 0, completed: 0, cancelled: 0 };
+  orders.forEach(o => { if (counts[o.status] !== undefined) counts[o.status]++; });
+  Object.keys(counts).forEach(k => { const el = document.getElementById('cnt-' + k); if (el) el.textContent = counts[k]; });
+  renderList();
+}
+
+function renderList() {
+  const list = document.getElementById('ordList');
+  const filtered = activeFilter ? orders.filter(o => o.status === activeFilter) : orders;
+  if (!filtered.length) { list.innerHTML = `<div class="ord-empty"><i class="fa-solid fa-box-open"></i><h3>Tidak ada pesanan</h3><p>${activeFilter ? 'Belum ada pesanan dengan status ' + activeFilter : 'Yuk checkout produk pertama kamu!'}</p><a href="/shop/" class="btn btn-primary" style="margin-top:16px"><i class="fa-solid fa-store"></i> Mulai Belanja</a></div>`; return; }
+  list.innerHTML = filtered.map(o => {
+    const escrow = (o.status === 'paid' || o.status === 'delivered') ? `<div class="escrow-bar"><i class="fa-solid fa-clock"></i> <b>Escrow aktif</b> · Dana akan diteruskan ke seller dalam 7 hari setelah delivery.</div>` : '';
+    return `<div class="ord-card" onclick="openDetail(${o.id})">
+      <div class="ord-card-head">
+        <div>
+          <div class="ord-id">Order #${o.id}</div>
+          <div class="ord-date">${fmtDate(o.created_at)}</div>
+        </div>
+        <span class="ord-status ${o.status}">${o.status}</span>
+      </div>
+      <div class="ord-items">${o.items || '—'}</div>
+      ${escrow}
+      <div class="ord-foot">
+        <div class="ord-total">${fmtRp(o.total)}</div>
+        <div style="display:flex;gap:8px">
+          <button class="ord-action" onclick="event.stopPropagation();openDetail(${o.id})">Detail</button>
+          ${(o.status === 'paid' || o.status === 'delivered') ? `<button class="ord-action primary" onclick="event.stopPropagation();confirmDelivery(${o.id})"><i class="fa-solid fa-circle-check"></i> Konfirmasi</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openDetail(id) {
+  const r = await api('/api/orders/' + id);
+  if (r.error) return toast(r.error, 'error');
+  document.getElementById('detailBody').innerHTML = `
+    <h2 style="margin:0 0 16px"><i class="fa-solid fa-receipt"></i> Order #${r.id}</h2>
+    <div class="ord-detail">
+      <div class="ord-detail-row"><span class="lbl">Status</span><span class="val"><span class="ord-status ${r.status}">${r.status}</span></span></div>
+      <div class="ord-detail-row"><span class="lbl">Total</span><span class="val">${fmtRp(r.total)}</span></div>
+      <div class="ord-detail-row"><span class="lbl">Email Delivery</span><span class="val">${r.buyer_email || '—'}</span></div>
+      <div class="ord-detail-row"><span class="lbl">Midtrans Order ID</span><span class="val"><code>${r.midtrans_order_id || '—'}</code></span></div>
+      <div class="ord-detail-row"><span class="lbl">Payment Type</span><span class="val">${r.payment_type || '—'}</span></div>
+      <div class="ord-detail-row"><span class="lbl">Created</span><span class="val">${fmtDate(r.created_at)}</span></div>
+      ${r.paid_at ? `<div class="ord-detail-row"><span class="lbl">Paid at</span><span class="val">${fmtDate(r.paid_at)}</span></div>` : ''}
+      ${r.delivered_at ? `<div class="ord-detail-row"><span class="lbl">Delivered at</span><span class="val">${fmtDate(r.delivered_at)}</span></div>` : ''}
+      ${r.confirmed_at ? `<div class="ord-detail-row"><span class="lbl">Confirmed at</span><span class="val">${fmtDate(r.confirmed_at)}</span></div>` : ''}
+    </div>
+
+    <h3 style="margin:20px 0 12px"><i class="fa-solid fa-cube"></i> Items</h3>
+    <div class="ord-detail">
+      ${(r.items || []).map(it => `<div class="ord-detail-row"><span class="lbl">${it.emoji || '📦'} ${it.name} × ${it.qty}</span><span class="val">${fmtRp(it.price * it.qty)}</span></div>`).join('')}
+    </div>
+
+    ${(r.status === 'paid' || r.status === 'delivered') ? `<div class="escrow-bar"><i class="fa-solid fa-clock"></i> <b>Escrow aktif.</b> Dana ditahan 7 hari setelah delivery. Konfirmasi sekarang untuk release lebih cepat.</div>` : ''}
+
+    ${(r.deliveries && r.deliveries.length) ? `<div class="delivery-info"><i class="fa-solid fa-circle-check"></i> <b>Credentials terkirim!</b> Cek email <code>${r.buyer_email}</code> untuk detail akun.</div>` : ''}
+
+    ${(r.escrow && r.escrow.length) ? `<h3 style="margin:20px 0 12px"><i class="fa-solid fa-hand-holding-dollar"></i> Escrow</h3><div class="ord-detail">${r.escrow.map(e => `<div class="ord-detail-row"><span class="lbl">Seller #${e.seller_id} · ${e.status}</span><span class="val">${fmtRp(e.seller_amount)} <small style="color:var(--text-mute)">/ gross ${fmtRp(e.amount)}</small></span></div>${e.release_at ? `<div class="ord-detail-row"><span class="lbl">Release at</span><span class="val">${fmtDate(e.release_at)}</span></div>` : ''}`).join('')}</div>` : ''}
+
+    <div class="ord-timeline">
+      <div class="timeline-step"><div class="timeline-dot ${['pending','paid','delivered','completed'].includes(r.status) ? 'done' : ''}">1</div><div class="timeline-info"><b>Order dibuat</b><small>${fmtDate(r.created_at)}</small></div></div>
+      <div class="timeline-step"><div class="timeline-dot ${['paid','delivered','completed'].includes(r.status) ? 'done' : ''}">2</div><div class="timeline-info"><b>Pembayaran</b><small>${r.paid_at ? fmtDate(r.paid_at) : 'Menunggu pembayaran'}</small></div></div>
+      <div class="timeline-step"><div class="timeline-dot ${['delivered','completed'].includes(r.status) ? 'done' : ''}">3</div><div class="timeline-info"><b>Delivery</b><small>${r.delivered_at ? fmtDate(r.delivered_at) : 'Otomatis setelah bayar'}</small></div></div>
+      <div class="timeline-step"><div class="timeline-dot ${r.status === 'completed' ? 'done' : ''}">4</div><div class="timeline-info"><b>Selesai</b><small>${r.confirmed_at ? fmtDate(r.confirmed_at) : (r.status === 'delivered' ? 'Konfirmasi untuk selesaikan' : '—')}</small></div></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px">
+      ${(r.status === 'paid' || r.status === 'delivered') ? `<button class="ord-action primary" onclick="confirmDelivery(${r.id})"><i class="fa-solid fa-circle-check"></i> Konfirmasi & Release Escrow</button>` : ''}
+      <a class="ord-action" href="https://wa.me/628xxxxxxxxxx?text=Halo%20saya%20butuh%20bantuan%20untuk%20Order%20%23${r.id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> Hubungi CS</a>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDetail() { document.getElementById('detailModal').classList.remove('open'); document.body.style.overflow = ''; }
+
+async function confirmDelivery(id) {
+  if (!confirm('Konfirmasi order ini? Dana escrow akan diteruskan ke seller.')) return;
+  const r = await api('/api/orders/' + id + '/confirm-delivery', { method: 'POST' });
+  if (r.error) return toast(r.error, 'error');
+  toast('Order dikonfirmasi! Saldo seller sudah di-release.', 'success');
+  loadOrders();
+  closeDetail();
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+updateCartBadge();
+renderCartDrawer();
+loadOrders();
+// Auto-refresh every 30s
+setInterval(() => { if (document.visibilityState === 'visible' && token) loadOrders(); }, 30000);
+</script>
+</body>
+</html>
