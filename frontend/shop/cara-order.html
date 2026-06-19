@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cara Order — Z Store</title>
+<meta name="description" content="Panduan lengkap cara order produk digital di Z Store. Instant delivery via email, bayar via Midtrans (QRIS, VA, GoPay, ShopeePay), escrow 7 hari, garansi 30 hari.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=28">
+<style>
+.doc-wrap{max-width:880px;margin:0 auto;padding:32px 24px 80px}
+.doc-hero{text-align:center;margin-bottom:48px;padding:48px 24px;background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:14px}
+.doc-hero h1{font-size:36px;font-weight:800;letter-spacing:-1px;margin:0 0 12px;color:var(--text)}
+.doc-hero p{font-size:15px;color:var(--text-2);max-width:600px;margin:0 auto;line-height:1.6}
+.doc-toc{background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:12px;padding:20px 24px;margin-bottom:32px}
+.doc-toc h3{font-size:11px;font-weight:700;color:var(--text-mute);letter-spacing:1.5px;margin:0 0 12px;text-transform:uppercase}
+.doc-toc ol{margin:0;padding-left:20px;color:var(--text-2);font-size:14px;line-height:2}
+.doc-toc ol li a{color:var(--accent);text-decoration:none}
+.doc-toc ol li a:hover{text-decoration:underline}
+.doc-section{margin-bottom:48px}
+.doc-section h2{font-size:24px;font-weight:700;color:var(--text);margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;gap:10px}
+.doc-section h2 i{color:var(--accent);font-size:20px}
+.doc-section h3{font-size:17px;font-weight:700;color:var(--text);margin:24px 0 8px}
+.doc-section p{font-size:14px;color:var(--text-2);line-height:1.7;margin:0 0 12px}
+.doc-section ul,.doc-section ol{font-size:14px;color:var(--text-2);line-height:1.8;padding-left:20px;margin:0 0 16px}
+.doc-section ul li,.doc-section ol li{margin-bottom:6px}
+.doc-section code{background:var(--bg);padding:2px 6px;border-radius:4px;font-family:'SF Mono',Monaco,monospace;font-size:13px;color:var(--accent)}
+.doc-step{display:flex;gap:16px;padding:16px;background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:10px;margin-bottom:12px}
+.doc-step-num{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#000;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.doc-step-content{flex:1}
+.doc-step-content strong{display:block;font-size:14px;color:var(--text);margin-bottom:4px}
+.doc-step-content small{font-size:13px;color:var(--text-dim);line-height:1.5;display:block}
+.doc-callout{padding:16px 20px;border-radius:10px;margin:16px 0;font-size:13px;line-height:1.6}
+.doc-callout.warn{background:rgba(245,158,11,.08);border-left:3px solid var(--warn);color:#fcd34d}
+.doc-callout.tip{background:rgba(56,189,248,.08);border-left:3px solid var(--accent);color:#7dd3fc}
+.doc-callout strong{color:var(--text);font-weight:700}
+.doc-pay-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:16px 0}
+.doc-pay-item{padding:12px;background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:8px;text-align:center;font-size:12px;color:var(--text-2)}
+.doc-pay-item i{display:block;font-size:20px;margin-bottom:6px;color:var(--accent)}
+.doc-cta{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:var(--accent);color:#000;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;margin-top:8px}
+.doc-cta:hover{background:#0ea5e9}
+.doc-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim);text-decoration:none;margin-bottom:16px}
+.doc-back:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">CARA ORDER</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-right">
+    <a href="/shop/" class="hdr-btn" title="Kembali ke Toko"><i class="fa-solid fa-arrow-left"></i> <span class="hdr-label">Kembali</span></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke" id="themeIcon"></i></button>
+    <button class="hdr-btn cart-btn" onclick="openCart()"><i class="fa-solid fa-cart-shopping"></i><span class="hdr-badge" id="cartCount">0</span></button>
+  </div>
+</header>
+
+<main id="main" class="doc-wrap">
+  <a href="/shop/" class="doc-back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a>
+
+  <div class="doc-hero">
+    <h1>Cara Order di Z Store</h1>
+    <p>Panduan lengkap belanja produk digital premium — AI tools, software original, voucher, joki, dan akun. Instant delivery ke email kamu, bayar via Midtrans, garansi 30 hari.</p>
+  </div>
+
+  <div class="doc-toc">
+    <h3>Daftar Isi</h3>
+    <ol>
+      <li><a href="#syarat">Syarat & Ketentuan Order</a></li>
+      <li><a href="#cara-order">5 Langkah Order</a></li>
+      <li><a href="#pembayaran">Metode Pembayaran</a></li>
+      <li><a href="#delivery">Delivery & Akses Produk</a></li>
+      <li><a href="#escrow">Sistem Escrow & Garansi</a></li>
+      <li><a href="#masalah">Kalau Ada Masalah</a></li>
+      <li><a href="#faq">FAQ Singkat</a></li>
+    </ol>
+  </div>
+
+  <section class="doc-section" id="syarat">
+    <h2><i class="fa-solid fa-file-contract"></i> 1. Syarat & Ketentuan</h2>
+    <ul>
+      <li>Usia minimal 17 tahun (atau sesuai hukum yurisdiksi kamu)</li>
+      <li>Email aktif untuk verifikasi akun + terima kredensial produk</li>
+      <li>Akun yang kamu beli <strong>hanya untuk penggunaan pribadi/non-komersial</strong> kecuali dinyatakan commercial license</li>
+      <li>Dilarang memperjualbelikan kembali kredensial yang dibeli di Z Store</li>
+      <li>Untuk produk dengan <strong>commercial license</strong> (Midjourney Pro, ChatGPT Team, dll), boleh dipakai untuk deliverable klien</li>
+      <li>Dengan order, kamu setuju dengan <a href="/shop/terms.html">Terms of Service</a> + <a href="/shop/refund-policy.html">Refund Policy</a></li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="cara-order">
+    <h2><i class="fa-solid fa-list-check"></i> 2. Lima Langkah Order</h2>
+
+    <div class="doc-step">
+      <div class="doc-step-num">1</div>
+      <div class="doc-step-content">
+        <strong>Daftar / Login</strong>
+        <small>Buat akun via email + password (wajib OTP verify) ATAU login cepat via Google / Telegram / Discord / WhatsApp. Setelah login, kamu bisa link semua platform jadi satu akun.</small>
+      </div>
+    </div>
+
+    <div class="doc-step">
+      <div class="doc-step-num">2</div>
+      <div class="doc-step-content">
+        <strong>Pilih Produk</strong>
+        <small>Browse di <a href="/shop/">homepage</a> atau klik kategori. Setiap produk ada detail: harga, garansi, format (akun | voucher | API key | joki), dan reviews dari buyer lain.</small>
+      </div>
+    </div>
+
+    <div class="doc-step">
+      <div class="doc-step-num">3</div>
+      <div class="doc-step-content">
+        <strong>Add to Cart & Checkout</strong>
+        <small>Klik "CART" untuk masukkan ke keranjang, atau "BELI" untuk langsung checkout. Review pesanan, masukkan kode promo kalau ada (mis. <code>WELCOME50</code> untuk diskon Rp 50k), klik <strong>Checkout</strong>.</small>
+      </div>
+    </div>
+
+    <div class="doc-step">
+      <div class="doc-step-num">4</div>
+      <div class="doc-step-content">
+        <strong>Bayar via Midtrans</strong>
+        <small>Pilih metode pembayaran favorit (QRIS / Virtual Account / GoPay / ShopeePay / Credit Card). Pembayaran diproses real-time. Setelah bayar, status berubah ke <code>paid</code> otomatis.</small>
+      </div>
+    </div>
+
+    <div class="doc-step">
+      <div class="doc-step-num">5</div>
+      <div class="doc-step-content">
+        <strong>Terima & Konfirmasi</strong>
+        <small>Kredensial produk dikirim ke email kamu dalam <strong>&lt;10 menit</strong>. Cek inbox + spam folder. Login ke produk, test apakah jalan. Kalau ada masalah, klik "Konfirmasi Terima" di halaman order setelah 24 jam (escrow release).</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="pembayaran">
+    <h2><i class="fa-solid fa-credit-card"></i> 3. Metode Pembayaran</h2>
+    <p>Semua pembayaran diproses via <strong>Midtrans</strong> (Payment Gateway Indonesia resmi, terdaftar Bank Indonesia).</p>
+
+    <div class="doc-pay-grid">
+      <div class="doc-pay-item"><i class="fa-solid fa-qrcode"></i>QRIS</div>
+      <div class="doc-pay-item"><i class="fa-solid fa-building-columns"></i>Virtual Account</div>
+      <div class="doc-pay-item"><i class="fa-brands fa-google"></i>GoPay</div>
+      <div class="doc-pay-item"><i class="fa-solid fa-wallet"></i>ShopeePay</div>
+      <div class="doc-pay-item"><i class="fa-solid fa-credit-card"></i>Credit Card</div>
+      <div class="doc-pay-item"><i class="fa-brands fa-cc-visa"></i>Visa / MC</div>
+    </div>
+
+    <div class="doc-callout tip">
+      <strong>Tips:</strong> Pembayaran QRIS via GoPay / OVO paling cepat konfirmasi (≤10 detik). Virtual Account butuh ~1-3 menit untuk verifikasi.
+    </div>
+  </section>
+
+  <section class="doc-section" id="delivery">
+    <h2><i class="fa-solid fa-truck-fast"></i> 4. Delivery & Akses Produk</h2>
+
+    <h3>Format Pengiriman</h3>
+    <ul>
+      <li><strong>Akun (email + password)</strong> → Dikirim via email + tampil di dashboard <a href="/shop/orders/">Orders</a></li>
+      <li><strong>Voucher / License Key</strong> → Kode unik dikirim via email. Redeem di website resmi produk</li>
+      <li><strong>API Key</strong> → String key + dokumentasi cara pakai</li>
+      <li><strong>Joki Service</strong> → Tim kami akan request akses (opsional) + deliver hasil via Dashboard / Google Drive</li>
+      <li><strong>Source Code</strong> → Download link (Google Drive / GitHub Release)</li>
+    </ul>
+
+    <h3>Waktu Pengiriman</h3>
+    <div class="doc-callout warn">
+      <strong>Target Delivery: &lt;10 menit</strong> setelah pembayaran confirmed. Kalau lebih dari 30 menit belum terima, hubungi WhatsApp CS. Kemungkinan penyebab: email salah ketik, inbox spam, atau delay stok.
+    </div>
+
+    <h3>Test & Konfirmasi</h3>
+    <p>Setelah terima kredensial:</p>
+    <ol>
+      <li>Login ke produk dengan kredensial yang diberikan</li>
+      <li>Test semua fitur utama (jangan ubah password sebelum konfirmasi)</li>
+      <li>Kalau jalan → klik <strong>Konfirmasi Terima</strong> di halaman order (escrow released ke seller)</li>
+      <li>Kalau ada masalah → klik <strong>Bantuan</strong> di halaman order untuk komplain</li>
+    </ol>
+  </section>
+
+  <section class="doc-section" id="escrow">
+    <h2><i class="fa-solid fa-shield-halved"></i> 5. Sistem Escrow & Garansi</h2>
+
+    <h3>Perlindungan Escrow 7 Hari</h3>
+    <p>Setelah pembayaran, dana ditahan di escrow (bukan langsung diteruskan ke seller). Hanya released kalau:</p>
+    <ul>
+      <li>Kamu klik <strong>Konfirmasi Terima</strong> (release instant)</li>
+      <li>Lewat 7 hari tanpa komplain (auto-release)</li>
+    </ul>
+
+    <h3>Garansi 30 Hari</h3>
+    <p>Semua produk digital bergaransi 30 hari. Kalau:</p>
+    <ul>
+      <li>Akun tiba-tiba tidak bisa login (credential invalid / banned)</li>
+      <li>Voucher sudah redeemed sebelumnya (double-use)</li>
+      <li>API key mati sebelum masa aktif</li>
+      <li>Joki tidak deliver hasil sesuai pesanan</li>
+    </ul>
+    <p>→ Kamu berhak dapat <strong>replacement baru</strong> atau <strong>refund 100%</strong>. Buka tiket di <a href="/shop/support.html">Bantuan</a>.</p>
+
+    <div class="doc-callout warn">
+      <strong>Penting:</strong> Jangan ganti password / logout dari produk sebelum konfirmasi terima. Kalau ganti password dan ternyata akun invalid, kami tidak bisa verifikasi keasliannya.
+    </div>
+  </section>
+
+  <section class="doc-section" id="masalah">
+    <h2><i class="fa-solid fa-triangle-exclamation"></i> 6. Kalau Ada Masalah</h2>
+
+    <h3>Komplain Order</h3>
+    <ol>
+      <li>Buka halaman <a href="/shop/orders/">Orders</a></li>
+      <li>Klik order yang bermasalah</li>
+      <li>Klik tombol <strong>Komplain / Bantuan</strong></li>
+      <li>Jelaskan masalah + screenshot (jangan sertakan password baru yang kamu set!)</li>
+      <li>Tim CS balas dalam &lt;1 jam (jam kerja 09:00-22:00 WIB)</li>
+    </ol>
+
+    <h3>Saluran Bantuan</h3>
+    <ul>
+      <li><strong>WhatsApp:</strong> +62 812-3456-7890 (fastest, 24/7)</li>
+      <li><strong>Email:</strong> zcusgt@gmail.com</li>
+      <li><strong>Telegram:</strong> @zstore_support</li>
+      <li><strong>Discord:</strong> discord.gg/zstore (channel #support)</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="faq">
+    <h2><i class="fa-solid fa-circle-question"></i> 7. FAQ Singkat</h2>
+
+    <h3>Q: Berapa lama kredensial dikirim?</h3>
+    <p>A: <strong>&lt;10 menit</strong> setelah pembayaran confirmed. Via email + dashboard.</p>
+
+    <h3>Q: Bisa order tanpa akun?</h3>
+    <p>A: Bisa via Guest Checkout, tapi lebih cepat kalau punya akun (riwayat order tersimpan, tidak perlu input alamat berulang).</p>
+
+    <h3>Q: Bisa refund?</h3>
+    <p>A: Bisa dalam 24 jam pertama selama kredensial belum digunakan. Setelah 24 jam atau setelah dikonfirmasi, garansi 30 hari via replacement. Lihat <a href="/shop/refund-policy.html">Refund Policy</a>.</p>
+
+    <h3>Q: Bisa order via WhatsApp / Telegram / Discord?</h3>
+    <p>A: Bisa. Bot Z Store di platform tersebut akan kirim katalog + link checkout. Atau langsung balas pesan dengan kode produk, CS yang proses manual.</p>
+
+    <h3>Q: Gimana cara joki service?</h3>
+    <p>A: Order produk "Joki [nama game/service]" → setelah bayar, tim akan DM kamu via WhatsApp/Telegram untuk request akses + detail task. Deliver dalam 1-7 hari tergantung kompleksitas.</p>
+  </section>
+
+  <div style="text-align:center;margin-top:48px;padding:32px;background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:12px">
+    <h2 style="margin:0 0 8px;font-size:20px">Siap Order?</h2>
+    <p style="margin:0 0 16px;color:var(--text-dim)">Browse 100+ produk digital premium. Instant delivery, garansi 30 hari.</p>
+    <a href="/shop/" class="doc-cta"><i class="fa-solid fa-bag-shopping"></i> Browse Products</a>
+  </div>
+</main>
+
+<div class="drawer" id="cartDrawer">
+  <div class="drawer-head glass">
+    <b><i class="fa-solid fa-cart-shopping"></i> Keranjang <span class="hdr-badge" id="cartDrawerCount">0</span></b>
+    <button class="drawer-close" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="drawer-body" id="cartItems"><div class="drawer-empty"><i class="fa-solid fa-cart-arrow-down"></i><b>Keranjang kosong</b><small>Yuk mulai belanja!</small></div></div>
+  <div class="drawer-foot glass" id="cartFoot" style="display:none">
+    <div class="dr-row total"><span>Total</span><b id="cartTotal">Rp 0</b></div>
+    <a href="/shop/payment.html" class="btn btn-primary full" onclick="closeCart()">Checkout</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="products.js?v=26"></script>
+<script src="app.js?v=28"></script>
+</body>
+</html>

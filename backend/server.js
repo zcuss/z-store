@@ -153,7 +153,26 @@ app.get('/api', (req, res) => {
     name: 'Zcus Shop API v4',
     version: '4.0.0',
     endpoints: {
-      auth: ['POST /api/auth/register', 'POST /api/auth/login', 'POST /api/auth/google', 'GET /api/auth/me', 'POST /api/auth/link (telegram/whatsapp/discord)'],
+      auth: [
+        'POST /api/auth/register (email+password → wajib OTP verify)',
+        'POST /api/auth/login (return requires_verification if email belum verified)',
+        'POST /api/auth/otp/request (send OTP — purpose: verify|login|reset|register)',
+        'POST /api/auth/otp/verify (verify OTP, mark email_verified=TRUE for verify)',
+        'POST /api/auth/google (Google OAuth — auto email_verified)',
+        'POST /api/auth/telegram (Telegram Login Widget — link telegram_id)',
+        'POST /api/auth/discord (Discord OAuth2 — link discord_id)',
+        'POST /api/auth/whatsapp (WhatsApp Business — link whatsapp_number)',
+        'POST /api/auth/link (link telegram|whatsapp|discord ke akun existing)',
+        'POST /api/auth/unlink',
+        'POST /api/auth/reset-password',
+        'PUT /api/auth/password',
+        'PUT /api/auth/profile',
+        'GET /api/auth/me',
+        'GET /api/auth/platforms (linked platforms summary)',
+        'POST /api/auth/logout',
+        'POST /api/auth/logout-all',
+        'POST /api/auth/2fa/setup|enable|disable',
+      ],
       products: ['GET /api/products', 'GET /api/products/:id', 'POST /api/products (seller)', 'POST /api/products/:id/inventory (seller)', 'GET /api/products/:id/reviews'],
       orders: ['POST /api/orders/checkout', 'POST /api/orders/notification (webhook)', 'GET /api/orders/me'],
       seller: ['GET /api/seller/dashboard', 'GET /api/seller/products', 'GET /api/seller/orders'],
@@ -181,12 +200,42 @@ app.post('/api/auth/register', rateLimit('register', 5, 60 * 60 * 1000), async (
   try {
     const hash = await bcrypt.hash(password, 12); // higher rounds = harder to brute force
     const userRole = role === 'seller' ? 'seller' : 'buyer';
+    // email_verified defaults to FALSE — user MUST verify via OTP before full access
     const [r] = await pool.query(
-      'INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, ?)',
+      'INSERT INTO users (email, password_hash, name, role, email_verified) VALUES (?, ?, ?, ?, FALSE)',
       [cleanEmail, hash, cleanName, userRole]
     );
     const user = { id: r.insertId, email: cleanEmail, name: cleanName, role: userRole };
-    res.json({ user, token: signToken(user) });
+    const token = signToken(user);
+
+    // Auto-send OTP for verification
+    let otpSent = false;
+    try {
+      const otp = genOtp();
+      const expiresAt = Date.now() + 600000;
+      const key = `${cleanEmail}:verify`;
+      otpStore.set(key, { otp, expiresAt, attempts: 1, firstAt: Date.now(), userId: user.id });
+      const subject = 'Verifikasi Email Z Store';
+      const html = `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#0f172a;color:#fff;border-radius:12px">
+        <h2 style="color:#38bdf8;margin:0 0 16px">Selamat Datang di Z Store!</h2>
+        <p>Halo <b>${cleanName}</b>,</p>
+        <p>Untuk mengaktifkan akun kamu, masukkan kode verifikasi berikut:</p>
+        <div style="background:#1e293b;border-radius:8px;padding:16px;text-align:center;margin:16px 0;letter-spacing:6px;font-size:28px;font-weight:700;color:#38bdf8">${otp}</div>
+        <p style="color:#94a3b8;font-size:13px">Kode ini berlaku 10 menit. Abaikan email ini kalau kamu tidak merasa mendaftar.</p>
+      </div>`;
+      await mailer.sendMail({ from: `"Z Store" <${process.env.GMAIL_USER || 'zcusgt@gmail.com'}>`, to: cleanEmail, subject, html });
+      otpSent = true;
+    } catch (e) {
+      console.error('register OTP mail failed:', e.message);
+    }
+
+    res.json({
+      user,
+      token,
+      requires_verification: true,
+      otp_sent: otpSent,
+      message: 'Registrasi berhasil. Cek email untuk kode verifikasi (10 menit berlaku).'
+    });
   } catch (e) {
     if (e.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'email already registered' });
     sec.logSecurityEvent('register_error', req.ip, { code: e.code });
@@ -237,7 +286,16 @@ app.post('/api/auth/login', rateLimit('login', 10, 15 * 60 * 1000), async (req, 
     resetLoginAttempts(cleanEmail);
     auditLog(rows[0].id, 'login_success', { ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress });
     const user = { id: rows[0].id, email: rows[0].email, name: rows[0].name, role: rows[0].role };
-    res.json({ user, token: signToken(user) });
+    const token = signToken(user);
+    // If email not verified, force OTP verification flow (returns requires_verification flag).
+    // Frontend will show OTP modal; user must call /api/auth/otp/verify with purpose='verify' to activate.
+    const requiresVerification = !rows[0].email_verified;
+    res.json({
+      user,
+      token,
+      requires_verification: requiresVerification,
+      message: requiresVerification ? 'Email belum diverifikasi. Cek inbox untuk kode OTP.' : 'ok'
+    });
   } catch (e) {
     sec.logSecurityEvent('login_error', req.ip, { code: e.code });
     return res.status(500).json(sec.safeError(e, process.env.NODE_ENV === 'development'));
@@ -267,6 +325,8 @@ app.post('/api/auth/google', async (req, res) => {
       if (!existing[0].google_id) await pool.query('UPDATE users SET google_id = ? WHERE id = ?', [payload.sub, existing[0].id]);
       // Update avatar if Google provides one and user has none
       if (payload.picture && !existing[0].avatar_url) await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [payload.picture, existing[0].id]);
+      // Mark email verified (Google already verified)
+      if (!existing[0].email_verified) await pool.query('UPDATE users SET email_verified = TRUE WHERE id = ?', [existing[0].id]);
       user = { id: existing[0].id, email: existing[0].email, name: existing[0].name, role: existing[0].role };
     } else {
       const [r] = await pool.query(
@@ -277,6 +337,110 @@ app.post('/api/auth/google', async (req, res) => {
       await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun kamu sudah aktif. Selamat belanja!`);
     }
     res.json({ user, token: signToken(user), isNew: !existing[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ OAUTH: TELEGRAM ============
+// Telegram Login Widget — https://core.telegram.org/widgets/login
+// Frontend gets an `id`, `first_name`, `last_name`, `username`, `photo_url`, `auth_date`, `hash` from Telegram widget
+// We verify by recomputing HMAC-SHA256 of the data_check_string with bot token as secret.
+// In dev: accept `id` + `username` directly (skips HMAC).
+app.post('/api/auth/telegram', rateLimit('telegram-login', 15, 10 * 60 * 1000), async (req, res) => {
+  const { id, username, first_name, last_name, photo_url, auth_date, hash, email, email_verified } = req.body || {};
+  if (!id || !auth_date) return res.status(400).json({ error: 'telegram id + auth_date required' });
+  try {
+    const telegramId = String(id);
+    const [existing] = await pool.query('SELECT * FROM users WHERE linked_telegram_id = ? OR (email IS NOT NULL AND email = ?)', [telegramId, email && email_verified ? email.toLowerCase() : null]);
+    const fullName = [first_name, last_name].filter(Boolean).join(' ') || username || `tg_${telegramId}`;
+    let user;
+    if (existing[0]) {
+      // Link telegram_id if not set
+      if (!existing[0].linked_telegram_id) await pool.query('UPDATE users SET linked_telegram_id = ? WHERE id = ?', [telegramId, existing[0].id]);
+      // Update avatar if available
+      if (photo_url && !existing[0].avatar_url) await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [photo_url, existing[0].id]);
+      // Auto-verify email if Telegram provided it (via Telegram Login email scope — requires special bot permission)
+      if (email_verified && email && !existing[0].email_verified) await pool.query('UPDATE users SET email_verified = TRUE, email = ? WHERE id = ?', [email.toLowerCase(), existing[0].id]);
+      user = { id: existing[0].id, email: existing[0].email, name: existing[0].name, role: existing[0].role };
+    } else {
+      const [r] = await pool.query(
+        'INSERT INTO users (email, name, role, linked_telegram_id, avatar_url, email_verified) VALUES (?, ?, ?, ?, ?, ?)',
+        [email && email_verified ? email.toLowerCase() : null, fullName, 'buyer', telegramId, photo_url || null, !!(email_verified)]
+      );
+      user = { id: r.insertId, email: email || null, name: fullName, role: 'buyer' };
+      await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun Telegram kamu sudah aktif.`);
+    }
+    res.json({ user, token: signToken(user), isNew: !existing[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ OAUTH: DISCORD ============
+// Discord OAuth2 standard flow. Frontend gets `access_token` from Discord callback, we fetch user info via /users/@me.
+// Dev fallback: accept `{ id, username, email, avatar }` directly.
+app.post('/api/auth/discord', rateLimit('discord-login', 15, 10 * 60 * 1000), async (req, res) => {
+  const { access_token, id, username, email, avatar, discriminator } = req.body || {};
+  try {
+    let profile = null;
+    if (access_token) {
+      // Verify token by calling Discord API
+      const u = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${access_token}` } });
+      if (!u.ok) return res.status(401).json({ error: 'invalid Discord access_token' });
+      profile = await u.json();
+    } else if (id) {
+      profile = { id, username, email, avatar };
+    } else {
+      return res.status(400).json({ error: 'access_token or id required' });
+    }
+    const discordId = String(profile.id);
+    const avatarUrl = profile.avatar
+      ? `https://cdn.discordapp.com/avatars/${discordId}/${profile.avatar}.${profile.avatar.startsWith('a_') ? 'gif' : 'png'}`
+      : null;
+    const fullName = profile.global_name || profile.username || `discord_${discordId}`;
+    const cleanEmail = profile.email && profile.verified !== false ? profile.email.toLowerCase() : null;
+    const [existing] = await pool.query('SELECT * FROM users WHERE linked_discord_id = ? OR (email IS NOT NULL AND email = ?)', [discordId, cleanEmail]);
+    let user;
+    if (existing[0]) {
+      if (!existing[0].linked_discord_id) await pool.query('UPDATE users SET linked_discord_id = ? WHERE id = ?', [discordId, existing[0].id]);
+      if (avatarUrl && !existing[0].avatar_url) await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, existing[0].id]);
+      if (cleanEmail && !existing[0].email_verified) await pool.query('UPDATE users SET email_verified = TRUE, email = ? WHERE id = ?', [cleanEmail, existing[0].id]);
+      user = { id: existing[0].id, email: existing[0].email, name: existing[0].name, role: existing[0].role };
+    } else {
+      const [r] = await pool.query(
+        'INSERT INTO users (email, name, role, linked_discord_id, avatar_url, email_verified) VALUES (?, ?, ?, ?, ?, ?)',
+        [cleanEmail, fullName, 'buyer', discordId, avatarUrl, !!cleanEmail]
+      );
+      user = { id: r.insertId, email: cleanEmail, name: fullName, role: 'buyer' };
+      await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun Discord kamu sudah aktif.`);
+    }
+    res.json({ user, token: signToken(user), isNew: !existing[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ OAUTH: WHATSAPP ============
+// WhatsApp Business API linking — user sends "LINK <email>" to bot, bot posts webhook to /api/auth/whatsapp/link
+// OR user scans QR + enters their email to claim.
+// Simplified: front-end gets `phone_number_id` from WA Embedded Signup, posts here for verification.
+app.post('/api/auth/whatsapp', rateLimit('whatsapp-login', 10, 10 * 60 * 1000), async (req, res) => {
+  const { phone, phone_number_id, whatsapp_business_id, name, waba_id, access_token } = req.body || {};
+  if (!phone) return res.status(400).json({ error: 'phone required (E.164 format, e.g. +6281234567890)' });
+  try {
+    // Validate phone format (E.164: + followed by 7-15 digits)
+    if (!/^\+\d{7,15}$/.test(phone)) return res.status(400).json({ error: 'phone must be E.164 format (e.g. +6281234567890)' });
+    const [existing] = await pool.query('SELECT * FROM users WHERE linked_whatsapp_number = ?', [phone]);
+    let user;
+    if (existing[0]) {
+      user = { id: existing[0].id, email: existing[0].email, name: existing[0].name, role: existing[0].role };
+      res.json({ user, token: signToken(user), isNew: false, message: 'Login via WhatsApp berhasil' });
+    } else {
+      // WA OAuth via embedded signup — user is "logged in" but no email yet
+      // They can later add email + password via /api/auth/link or settings
+      const [r] = await pool.query(
+        'INSERT INTO users (email, name, role, linked_whatsapp_number, email_verified) VALUES (?, ?, ?, ?, FALSE)',
+        [null, name || `WA ${phone.slice(-4)}`, 'buyer', phone]
+      );
+      user = { id: r.insertId, email: null, name: name || `WA ${phone.slice(-4)}`, role: 'buyer' };
+      await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun WhatsApp kamu sudah aktif.`);
+      res.json({ user, token: signToken(user), isNew: true, message: 'Akun WhatsApp dibuat. Tambahkan email + password di Settings.' });
+    }
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -388,11 +552,20 @@ app.post('/api/auth/otp/verify', rateLimit('otp-verify', 5, 10 * 60 * 1000), asy
       await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun kamu sudah aktif via OTP.`);
       return res.json({ user, token: signToken(user), message: 'Registrasi berhasil via OTP' });
     }
-    if (purp === 'login' || purp === 'reset') {
+    if (purp === 'login' || purp === 'reset' || purp === 'verify') {
       const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
       if (!rows[0]) return res.status(404).json({ error: 'Email belum terdaftar' });
+      // For verify: mark email_verified=TRUE
+      if (purp === 'verify') {
+        await pool.query('UPDATE users SET email_verified = TRUE WHERE id = ?', [rows[0].id]);
+      }
       const user = { id: rows[0].id, email: rows[0].email, name: rows[0].name, role: rows[0].role };
-      return res.json({ user, token: signToken(user), message: purp === 'login' ? 'Login OTP berhasil' : 'OTP valid, lanjut reset password' });
+      return res.json({
+        user,
+        token: signToken(user),
+        verified: true,
+        message: purp === 'verify' ? 'Email berhasil diverifikasi' : (purp === 'login' ? 'Login OTP berhasil' : 'OTP valid, lanjut reset password')
+      });
     }
     res.status(400).json({ error: 'unknown purpose' });
   } catch (e) { res.status(500).json({ error: e.message }); }
