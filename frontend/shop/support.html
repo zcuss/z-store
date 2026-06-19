@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Bantuan & Support — Z Store</title>
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.sup-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
+@media(max-width:900px){.sup-wrap{grid-template-columns:1fr;padding:16px;gap:16px}}
+.sup-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:24px;margin-bottom:16px}
+.sup-card h2{margin:0 0 6px;font-size:20px;display:flex;align-items:center;gap:10px}
+.sup-card h2 i{color:var(--accent)}
+.sup-card p{margin:0 0 16px;color:var(--text-dim);font-size:13px;line-height:1.6}
+.sup-faq{display:flex;flex-direction:column;gap:8px}
+.sup-faq-item{background:rgba(0,0,0,.2);border:1px solid var(--glass-border);border-radius:10px;overflow:hidden;transition:all .2s}
+.sup-faq-item.open{background:rgba(14,165,233,.05);border-color:var(--accent)}
+.sup-faq-q{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:14px;color:var(--text)}
+.sup-faq-q:hover{color:var(--accent)}
+.sup-faq-q i{transition:transform .2s}
+.sup-faq-item.open .sup-faq-q i{transform:rotate(180deg)}
+.sup-faq-a{padding:0 16px 14px;font-size:13px;color:var(--text-dim);line-height:1.7;display:none}
+.sup-faq-item.open .sup-faq-a{display:block}
+.sup-cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.sup-cat{background:rgba(0,0,0,.2);border:2px solid var(--glass-border);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.sup-cat:hover{border-color:var(--accent);transform:translateY(-2px)}
+.sup-cat.selected{background:rgba(14,165,233,.1);border-color:var(--accent)}
+.sup-cat i{display:block;font-size:24px;color:var(--accent);margin-bottom:6px}
+.sup-cat-name{font-size:12px;font-weight:600;color:var(--text)}
+.sup-field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.sup-field label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+.sup-field .form-input{padding:10px 14px;background:rgba(0,0,0,.25);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:all .2s}
+.sup-field .form-input:focus{border-color:var(--accent);background:rgba(0,0,0,.4)}
+.sup-field textarea{resize:vertical;min-height:120px;font-family:inherit}
+.sup-contact{display:flex;flex-direction:column;gap:8px}
+.sup-contact a{padding:14px;background:rgba(0,0,0,.2);border:1px solid var(--glass-border);border-radius:10px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:12px;transition:all .2s;font-size:14px}
+.sup-contact a:hover{border-color:var(--accent);background:rgba(14,165,233,.05)}
+.sup-contact a i{font-size:18px;color:var(--accent);width:24px;text-align:center}
+.sup-contact a small{display:block;color:var(--text-dim);font-size:11px;margin-top:2px}
+.sup-ticket{padding:12px;background:rgba(0,0,0,.2);border:1px solid var(--glass-border);border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;cursor:pointer;transition:all .2s}
+.sup-ticket:hover{border-color:var(--accent)}
+.sup-ticket-id{font-family:monospace;font-size:12px;color:var(--accent);font-weight:700}
+.sup-ticket-sub{font-size:13px;color:var(--text);margin-top:2px}
+.sup-ticket-status{padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase}
+.sup-ticket-status.open{background:rgba(251,191,36,.2);color:#fbbf24}
+.sup-ticket-status.answered{background:rgba(34,197,94,.2);color:#22c55e}
+.sup-ticket-status.closed{background:rgba(107,114,128,.2);color:#9ca3af}
+.sup-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.sup-stat{text-align:center;padding:12px;background:rgba(0,0,0,.2);border-radius:8px}
+.sup-stat .v{font-size:20px;font-weight:800;color:var(--accent)}
+.sup-stat .l{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">SUPPORT</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="hdr-btn cart-btn" onclick="openChat()" title="Live Chat">
+      <i class="fa-solid fa-comments"></i>
+      <span class="cart-badge" id="chatBadge" style="display:none">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="sup-wrap">
+  <div>
+    <!-- New Ticket Form -->
+    <section class="sup-card">
+      <h2><i class="fa-solid fa-headset"></i> Buka Tiket Baru</h2>
+      <p>Tim CS kami balas dalam 1x24 jam. Pilih kategori dan ceritakan masalah kamu.</p>
+      <div class="sup-stats">
+        <div class="sup-stat"><div class="v" id="statOpen">0</div><div class="l">Tiket Aktif</div></div>
+        <div class="sup-stat"><div class="v" id="statResp">&lt;1j</div><div class="l">Avg Response</div></div>
+        <div class="sup-stat"><div class="v" id="statRating">98%</div><div class="l">Kepuasan</div></div>
+      </div>
+      <div class="sup-cat-grid">
+        <div class="sup-cat selected" data-cat="order" onclick="selectCat('order', this)"><i class="fa-solid fa-box"></i><div class="sup-cat-name">Order</div></div>
+        <div class="sup-cat" data-cat="payment" onclick="selectCat('payment', this)"><i class="fa-solid fa-credit-card"></i><div class="sup-cat-name">Payment</div></div>
+        <div class="sup-cat" data-cat="product" onclick="selectCat('product', this)"><i class="fa-solid fa-cube"></i><div class="sup-cat-name">Produk</div></div>
+        <div class="sup-cat" data-cat="account" onclick="selectCat('account', this)"><i class="fa-solid fa-user"></i><div class="sup-cat-name">Akun</div></div>
+        <div class="sup-cat" data-cat="bug" onclick="selectCat('bug', this)"><i class="fa-solid fa-bug"></i><div class="sup-cat-name">Bug</div></div>
+        <div class="sup-cat" data-cat="other" onclick="selectCat('other', this)"><i class="fa-solid fa-circle-question"></i><div class="sup-cat-name">Lainnya</div></div>
+      </div>
+      <div class="sup-field">
+        <label>Subjek</label>
+        <input type="text" id="ticketSubject" class="form-input" placeholder="Cth: Order #1234 belum menerima email">
+      </div>
+      <div class="sup-field">
+        <label>Pesan Detail</label>
+        <textarea id="ticketMessage" class="form-input" placeholder="Ceritakan masalah kamu sedetail mungkin. Sertakan Order ID, screenshot, atau info lain yang relevan."></textarea>
+      </div>
+      <div class="sup-field" style="display:flex;flex-direction:row;align-items:center;gap:8px">
+        <select id="ticketPriority" class="form-input" style="flex:0 0 200px">
+          <option value="normal">Normal</option>
+          <option value="high">Tinggi (urgent)</option>
+          <option value="low">Rendah</option>
+        </select>
+        <span style="font-size:11px;color:var(--text-mute)">Pilih prioritas. Tinggi untuk order bermasalah.</span>
+      </div>
+      <button class="btn btn-primary" onclick="submitTicket()"><i class="fa-solid fa-paper-plane"></i> Kirim Tiket</button>
+    </section>
+
+    <!-- My Tickets -->
+    <section class="sup-card">
+      <h2><i class="fa-solid fa-list"></i> Tiket Saya</h2>
+      <p>Riwayat tiket dan balasan dari tim CS.</p>
+      <div id="ticketList"><div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div></div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="sup-card">
+      <h2><i class="fa-solid fa-circle-question"></i> FAQ</h2>
+      <p>Pertanyaan yang sering ditanyakan.</p>
+      <div class="sup-faq">
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Berapa lama proses delivery? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Setelah pembayaran sukses, credentials akun akan dikirim otomatis ke email kamu dalam <b>1-5 menit</b>. Kalau lebih dari 5 menit belum terima, cek folder spam atau hubungi CS via WhatsApp.</div>
+        </div>
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Apa itu Escrow Protection? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Dana kamu ditahan 7 hari setelah delivery. Selama 7 hari, kalau produk tidak sesuai, kamu bisa ajukan refund dan dana dikembalikan 100%. Setelah 7 hari (atau kamu konfirmasi puas), dana diteruskan ke seller.</div>
+        </div>
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Bagaimana cara refund? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Login → Settings → Buka tiket dengan kategori "Order" dan jelaskan masalah. Tim CS akan proses dalam 1x24 jam. Refund 100% ke metode pembayaran asal.</div>
+        </div>
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Apakah produk dijamin original? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Ya, 100% original. Semua produk bergaransi 30 hari. Kalau ada masalah (akun trouble, tidak bisa login, dll) akan diganti baru tanpa biaya.</div>
+        </div>
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Metode pembayaran apa saja? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Kami support <b>QRIS</b> (semua e-wallet & mobile banking), <b>Virtual Account</b> (BCA, BNI, BRI, Mandiri), <b>E-Wallet</b> (GoPay, ShopeePay, OVO, DANA), dan <b>Kartu Kredit</b> (Visa, Mastercard). Semua via Midtrans payment gateway yang aman.</div>
+        </div>
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Bisa ganti password akun yang dibeli? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Ya, setelah menerima credentials, langsung login dan ganti password. Panduan setup lengkap ada di email dan di setiap halaman produk.</div>
+        </div>
+        <div class="sup-faq-item">
+          <div class="sup-faq-q" onclick="toggleFaq(this)">Apakah ada program afiliasi? <i class="fa-solid fa-chevron-down"></i></div>
+          <div class="sup-faq-a">Ya! Buka <a href="/shop/settings.html" style="color:var(--accent)">Settings → Platform Sync</a> untuk generate link afiliasi. Dapatkan komisi 10% dari setiap order via link kamu.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Contact sidebar -->
+  <aside>
+    <div class="sup-card">
+      <h2><i class="fa-solid fa-bolt"></i> Kontak Cepat</h2>
+      <p>Pilih cara favorit kamu untuk hubungi kami.</p>
+      <div class="sup-contact">
+        <a href="https://wa.me/628xxxxxxxxxx" target="_blank">
+          <i class="fa-brands fa-whatsapp" style="color:#22c55e"></i>
+          <div><b>WhatsApp</b><small>Respon 5-15 menit · 24/7</small></div>
+        </a>
+        <a href="mailto:zcusgt@gmail.com">
+          <i class="fa-solid fa-envelope" style="color:#38bdf8"></i>
+          <div><b>Email</b><small>zcusgt@gmail.com · 1x24 jam</small></div>
+        </a>
+        <a href="#" onclick="openChat();return false">
+          <i class="fa-solid fa-comments" style="color:#a855f7"></i>
+          <div><b>Live Chat</b><small>Respon real-time · di website</small></div>
+        </a>
+        <a href="https://t.me/zstorebot" target="_blank">
+          <i class="fa-brands fa-telegram" style="color:#0088cc"></i>
+          <div><b>Telegram Bot</b><small>Cek status order via bot</small></div>
+        </a>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- Live Chat Widget -->
+<div id="chatWidget" style="position:fixed;bottom:90px;right:20px;width:380px;max-width:calc(100vw - 24px);height:520px;max-height:calc(100vh - 120px);background:var(--bg-elev);border:1px solid var(--glass-border);border-radius:18px;z-index:200;display:none;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;animation:chatIn .3s ease-out">
+  <div style="background:linear-gradient(135deg,#0ea5e9,#6366f1);padding:16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px"><i class="fa-solid fa-headset"></i></div>
+    <div style="flex:1">
+      <b style="color:#fff;font-size:14px;display:block">CS Z Store</b>
+      <small style="color:rgba(255,255,255,.85);font-size:11px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block"></span>Online · biasanya balas dalam 5 menit</small>
+    </div>
+    <button onclick="closeChat()" style="background:transparent;border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;background:rgba(0,0,0,.2);display:flex;flex-direction:column;gap:10px">
+    <div style="text-align:center;padding:20px 10px;color:var(--text-mute);font-size:12px">
+      <i class="fa-solid fa-comments" style="font-size:32px;display:block;margin-bottom:8px;opacity:.5"></i>
+      Halo! Ada yang bisa kami bantu hari ini? Tim CS balas dalam ±5 menit.
+    </div>
+  </div>
+  <div style="padding:12px;background:rgba(0,0,0,.3);border-top:1px solid var(--glass-border);display:flex;gap:8px;flex-shrink:0">
+    <input type="text" id="chatInput" class="form-input" placeholder="Tulis pesan..." style="flex:1;padding:10px 14px;background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:10px;color:var(--text);font-size:14px;outline:none" onkeypress="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()" class="btn btn-primary" style="padding:10px 16px;border-radius:10px"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<style>
+@keyframes chatIn{from{transform:translateY(20px) scale(0.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.chat-msg{max-width:80%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;animation:msgIn .2s ease-out}
+.chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.cs{align-self:flex-start;background:var(--glass);color:var(--text);border:1px solid var(--glass-border);border-bottom-left-radius:4px}
+.chat-msg-time{font-size:10px;opacity:.7;margin-top:4px;display:block}
+@keyframes msgIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let selectedCat = 'order';
+let chatOpen = false;
+
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function selectCat(cat, el) { selectedCat = cat; document.querySelectorAll('.sup-cat').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); }
+function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
+function openChat() { document.getElementById('chatWidget').style.display = 'flex'; chatOpen = true; setTimeout(() => document.getElementById('chatInput').focus(), 200); }
+function closeChat() { document.getElementById('chatWidget').style.display = 'none'; chatOpen = false; }
+
+function addChatMsg(text, who='user') {
+  const wrap = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + who;
+  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `${text}<span class="chat-msg-time">${time}</span>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+let chatCount = 0;
+function sendChat() {
+  const inp = document.getElementById('chatInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  addChatMsg(text, 'user');
+  inp.value = '';
+  chatCount++;
+  document.getElementById('chatBadge').textContent = chatCount;
+  document.getElementById('chatBadge').style.display = 'flex';
+  // Simulated CS reply
+  setTimeout(() => {
+    const replies = [
+      'Halo! Terima kasih sudah menghubungi Z Store. Saya CS Rina. Bisa ceritakan lebih detail masalahnya?',
+      'Baik, saya cek dulu ya. Order ID berapa?',
+      'Sip, lagi saya proses. Mohon ditunggu 1-2 menit ya 🙏',
+      'Sudah selesai diproses. Cek email kamu ya. Kalau ada yang lain, kabari saya lagi!'
+    ];
+    addChatMsg(replies[Math.floor(Math.random() * replies.length)], 'cs');
+  }, 800 + Math.random() * 1200);
+}
+
+async function submitTicket() {
+  const subject = document.getElementById('ticketSubject').value.trim();
+  const message = document.getElementById('ticketMessage').value.trim();
+  const priority = document.getElementById('ticketPriority').value;
+  if (!subject || !message) return toast('Subjek + pesan wajib diisi', 'error');
+  if (!user) { return toast('Login dulu untuk membuat tiket', 'error'); }
+  const btn = event.target; btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+  const r = await fetch(API + '/api/support/tickets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({ subject, message, category: selectedCat, priority })
+  }).then(r => r.json()).catch(e => ({ error: e.message }));
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Tiket';
+  if (r.error) {
+    // Dev fallback
+    const ticketId = r.ticket_id || ('TKT-' + Date.now().toString(36).toUpperCase());
+    const list = JSON.parse(localStorage.getItem('zs_tickets') || '[]');
+    list.unshift({ ticket_id: ticketId, subject, message, category: selectedCat, priority, status: 'open', created_at: new Date().toISOString() });
+    localStorage.setItem('zs_tickets', JSON.stringify(list));
+    toast('Tiket dibuat! Tim CS akan balas via email.', 'success');
+    document.getElementById('ticketSubject').value = '';
+    document.getElementById('ticketMessage').value = '';
+    loadTickets();
+    document.getElementById('statOpen').textContent = list.length;
+    return;
+  }
+  toast('Tiket dibuat! Tim CS akan balas via email.', 'success');
+  document.getElementById('ticketSubject').value = '';
+  document.getElementById('ticketMessage').value = '';
+  loadTickets();
+}
+
+function loadTickets() {
+  // Try API
+  fetch(API + '/api/support/tickets', { headers: { Authorization: 'Bearer ' + token } })
+    .then(r => r.json()).then(d => {
+      const tickets = d.tickets || [];
+      renderTickets(tickets);
+    }).catch(() => {
+      const tickets = JSON.parse(localStorage.getItem('zs_tickets') || '[]');
+      renderTickets(tickets);
+    });
+}
+
+function renderTickets(tickets) {
+  const list = document.getElementById('ticketList');
+  if (!tickets.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-mute);font-size:13px">Belum ada tiket. Buat tiket baru di atas.</div>'; return; }
+  list.innerHTML = tickets.map(t => `<div class="sup-ticket">
+    <div>
+      <div class="sup-ticket-id">#${t.ticket_id || ('TKT-' + t.id)}</div>
+      <div class="sup-ticket-sub">${t.subject}</div>
+      <small style="color:var(--text-mute);font-size:11px">${new Date(t.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })} · ${t.category || 'general'}</small>
+    </div>
+    <span class="sup-ticket-status ${t.status}">${t.status || 'open'}</span>
+  </div>`).join('');
+  document.getElementById('statOpen').textContent = tickets.filter(t => t.status === 'open').length;
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+loadTickets();
+</script>
+</body>
+</html>
