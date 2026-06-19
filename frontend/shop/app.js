@@ -271,6 +271,10 @@ function productCard(p) {
         <span class="stock-dot"></span> <i class="fa-solid ${p.stock < 5 ? 'fa-circle-exclamation' : 'fa-box'}"></i> ${stockText}
       </div>
     </div>
+    <div class="pc-actions">
+      <button class="pc-action-btn" onclick="event.stopPropagation();addToCart(${p.id})"><i class="fa-solid fa-cart-plus"></i> Cart</button>
+      <button class="pc-action-btn primary" onclick="event.stopPropagation();viewProduct(${p.id})"><i class="fa-solid fa-bolt"></i> Beli</button>
+    </div>
   </div>`;
 }
 
