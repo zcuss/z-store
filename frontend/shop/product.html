@@ -17,7 +17,11 @@
 .pdp-wrap{max-width:1280px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
 @media(max-width:900px){.pdp-wrap{grid-template-columns:1fr;padding:0 16px;gap:24px}}
 .pdp-gallery{position:sticky;top:96px;align-self:start}
-.pdp-img-main{aspect-ratio:1/1;border-radius:24px;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:flex;align-items:center;justify-content:center;font-size:120px;color:#fff;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(14,165,233,.25)}
+.pdp-img-main{aspect-ratio:1/1;border-radius:24px;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:flex;align-items:center;justify-content:center;font-size:120px;color:#fff;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(14,165,233,.25);cursor:zoom-in;transition:transform .3s}
+.pdp-img-main:hover{transform:scale(1.01)}
+.pdp-img-main.zoomed{cursor:zoom-out;transform:scale(1.8);z-index:50}
+.pdp-zoom-hint{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);padding:6px 10px;border-radius:8px;font-size:11px;color:#fff;display:flex;align-items:center;gap:6px;opacity:.7;transition:opacity .2s}
+.pdp-img-main:hover .pdp-zoom-hint{opacity:1}
 .pdp-img-main::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 50%)}
 .pdp-img-main .pdp-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.15);filter:blur(40px);top:-50px;left:-50px}
 .pdp-thumbs{display:flex;gap:8px;margin-top:12px}
@@ -371,15 +375,17 @@ function renderProduct() {
   root.innerHTML = `
   <div class="pdp-wrap">
     <div class="pdp-gallery">
-      <div class="pdp-img-main">
+      <div class="pdp-img-main" id="pdpImgMain">
         <div class="pdp-glow"></div>
-        <span style="position:relative;z-index:1">${emoji}</span>
+        <span style="position:relative;z-index:1" id="pdpImgEmoji">${emoji}</span>
+        <div class="pdp-zoom-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Klik untuk zoom</div>
       </div>
       <div class="pdp-thumbs">
-        <div class="pdp-thumb active">${emoji}</div>
-        <div class="pdp-thumb"><i class="fa-solid fa-image"></i></div>
-        <div class="pdp-thumb"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="pdp-thumb"><i class="fa-solid fa-truck-fast"></i></div>
+        <div class="pdp-thumb active" onclick="selectThumb(0, this)">${emoji}</div>
+        <div class="pdp-thumb" onclick="selectThumb(1, this)"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="pdp-thumb" onclick="selectThumb(2, this)"><i class="fa-solid fa-truck-fast"></i></div>
+        <div class="pdp-thumb" onclick="selectThumb(3, this)"><i class="fa-solid fa-award"></i></div>
+        <div class="pdp-thumb" onclick="selectThumb(4, this)"><i class="fa-solid fa-headset"></i></div>
       </div>
     </div>
     <div class="pdp-info">
@@ -527,6 +533,29 @@ function showTab(name, btn) {
   btn.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
 }
+
+function selectThumb(idx, el) {
+  document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const icons = [product?.emoji || '📦', '<i class="fa-solid fa-shield-halved"></i>', '<i class="fa-solid fa-truck-fast"></i>', '<i class="fa-solid fa-award"></i>', '<i class="fa-solid fa-headset"></i>'];
+  const target = document.getElementById('pdpImgEmoji');
+  if (target) target.innerHTML = icons[idx] || icons[0];
+}
+
+document.addEventListener('click', e => {
+  const main = document.getElementById('pdpImgMain');
+  if (!main) return;
+  if (e.target.closest('#pdpImgMain')) {
+    main.classList.toggle('zoomed');
+    if (main.classList.contains('zoomed')) {
+      const hint = main.querySelector('.pdp-zoom-hint');
+      if (hint) hint.innerHTML = '<i class="fa-solid fa-magnifying-glass-minus"></i> Klik untuk unzoom';
+    } else {
+      const hint = main.querySelector('.pdp-zoom-hint');
+      if (hint) hint.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i> Klik untuk zoom';
+    }
+  }
+});
 
 async function loadReviews() {
   const r = await api('/api/products/' + product.id + '/reviews');
