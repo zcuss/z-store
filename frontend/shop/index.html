@@ -564,6 +564,47 @@
   </div>
 </section>
 
+<!-- SPIN WHEEL -->
+<section class="spin-wheel" id="spinWheel">
+  <div class="sw-bg"></div>
+  <div class="sw-content container">
+    <div class="sw-text">
+      <div class="sw-badge"><i class="fa-solid fa-dice"></i> SPIN WHEEL</div>
+      <h2 class="sw-title">Putar & Menang <span class="sw-disc">Hingga 50% OFF</span></h2>
+      <p class="sw-desc">Dapatkan kode diskon gratis setiap hari. Coba peruntungan kamu sekarang!</p>
+      <div class="sw-cooldown" id="swCooldown" style="display:none">
+        <i class="fa-solid fa-clock"></i> Spin lagi dalam <b id="swTimer">23:45:12</b>
+      </div>
+    </div>
+    <div class="sw-wheel-wrap">
+      <div class="sw-pointer"></div>
+      <div class="sw-wheel" id="swWheel">
+        <div class="sw-slice" style="--i:0;--c:#0ea5e9"><span>5%</span></div>
+        <div class="sw-slice" style="--i:1;--c:#10b981"><span>Rp 25K</span></div>
+        <div class="sw-slice" style="--i:2;--c:#a855f7"><span>10%</span></div>
+        <div class="sw-slice" style="--i:3;--c:#f59e0b"><span>FREE SHIP</span></div>
+        <div class="sw-slice" style="--i:4;--c:#0ea5e9"><span>15%</span></div>
+        <div class="sw-slice" style="--i:5;--c:#ef4444"><span>Rp 50K</span></div>
+        <div class="sw-slice" style="--i:6;--c:#a855f7"><span>20%</span></div>
+        <div class="sw-slice" style="--i:7;--c:#10b981"><span>ZONK</span></div>
+      </div>
+      <button class="sw-spin-btn" id="swSpinBtn" onclick="doSpin()">SPIN</button>
+    </div>
+  </div>
+  <div class="sw-result" id="swResult" style="display:none">
+    <div class="sw-result-card glass">
+      <i class="fa-solid fa-trophy"></i>
+      <h3 id="swResultTitle">Selamat!</h3>
+      <p id="swResultPrize">Kamu dapat diskon 10%</p>
+      <div class="sw-result-code" id="swResultCode">SPIN10-XYZ</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+        <button class="btn btn-primary" onclick="copySpinCode()"><i class="fa-solid fa-copy"></i> Salin Kode</button>
+        <button class="btn btn-ghost" onclick="closeSpinResult()">Tutup</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- NEWSLETTER -->
 <section class="newsletter">
   <div class="newsletter-content glass">
@@ -606,6 +647,7 @@
       <a href="/shop/about.html"><i class="fa-solid fa-circle-info"></i> Tentang Kami</a>
       <a href="/shop/faq.html"><i class="fa-solid fa-circle-question"></i> FAQ</a>
       <a href="/shop/support.html"><i class="fa-solid fa-headset"></i> Bantuan</a>
+      <a href="/shop/affiliate.html"><i class="fa-solid fa-coins"></i> Afiliasi</a>
       <a href="#"><i class="fa-solid fa-book"></i> Cara Order</a>
       <a href="#"><i class="fa-solid fa-shield-halved"></i> Garansi</a>
       <a href="#"><i class="fa-solid fa-rotate-left"></i> Refund Policy</a>
@@ -1169,14 +1211,100 @@ function subscribeNewsletter(e){
   e.preventDefault();
   const email = document.getElementById('newsletterEmail').value.trim();
   if (!email) return false;
-  // Save to localStorage (real backend endpoint TODO)
+  fetch(API + '/api/newsletter/subscribe', { method: 'POST', body: JSON.stringify({ email, source: 'homepage' }) })
+    .then(r => r.json()).then(d => toast(d.message || 'Terima kasih! Kode WELCOME10 sudah dikirim.', 'success'))
+    .catch(() => toast('Terima kasih! Kode diskon 10% sudah dikirim ke ' + email, 'success'));
   const list = JSON.parse(localStorage.getItem('zs_newsletter') || '[]');
   if (!list.includes(email)) list.push(email);
   localStorage.setItem('zs_newsletter', JSON.stringify(list));
-  toast(`Terima kasih! Kode diskon 10% sudah dikirim ke ${email}`, 'success');
   document.getElementById('newsletterEmail').value = '';
   return false;
 }
+
+// ===== SPIN WHEEL =====
+function doSpin() {
+  const btn = document.getElementById('swSpinBtn');
+  if (btn.disabled) return;
+  // Cooldown check
+  const last = localStorage.getItem('zs_last_spin');
+  if (last && Date.now() - parseInt(last) < 24 * 3600 * 1000) {
+    const remain = 24 * 3600 * 1000 - (Date.now() - parseInt(last));
+    toast(`Coba lagi dalam ${Math.ceil(remain / 3600000)} jam`, 'info');
+    startCooldown(remain);
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '...';
+  // Call API for random prize (dev fallback if offline)
+  fetch(API + '/api/spin-wheel', { method: 'POST' })
+    .then(r => r.json()).then(d => {
+      const prize = d.prize || randomPrizeDev();
+      spinTo(prize);
+    }).catch(() => spinTo(randomPrizeDev()));
+}
+
+function randomPrizeDev() {
+  const prizes = [
+    { label: '5% OFF', code: 'SPIN5' }, { label: 'Rp 25K OFF', code: 'SPIN25K' },
+    { label: '10% OFF', code: 'SPIN10' }, { label: 'FREE SHIP', code: 'FREESHIP' },
+    { label: '15% OFF', code: 'SPIN15' }, { label: 'Rp 50K OFF', code: 'SPIN50K' },
+    { label: '20% OFF', code: 'SPIN20' }, { label: 'ZONK', code: 'ZONK' }
+  ];
+  return prizes[Math.floor(Math.random() * prizes.length)];
+}
+
+function spinTo(prize) {
+  const labels = ['5%', 'Rp 25K', '10%', 'FREE SHIP', '15%', 'Rp 50K', '20%', 'ZONK'];
+  const idx = labels.findIndex(l => prize.label.toUpperCase().includes(l.toUpperCase()) || l.toUpperCase().includes(prize.label.toUpperCase().split(' ')[0]));
+  const slice = idx === -1 ? Math.floor(Math.random() * 8) : idx;
+  const targetDeg = 360 * 6 + (360 - slice * 45 - 22.5);
+  const wheel = document.getElementById('swWheel');
+  wheel.style.transform = `rotate(${targetDeg}deg)`;
+  setTimeout(() => showSpinResult(prize), 4200);
+}
+
+function showSpinResult(prize) {
+  document.getElementById('swResult').style.display = 'flex';
+  const code = (prize.code || 'SPIN') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  document.getElementById('swResultTitle').textContent = prize.label === 'ZONK' ? 'Coba Lagi!' : 'Selamat!';
+  document.getElementById('swResultPrize').textContent = prize.label === 'ZONK' ? 'Maaf, belum beruntung.' : `Kamu dapat ${prize.label}`;
+  document.getElementById('swResultCode').textContent = prize.label === 'ZONK' ? '-' : code;
+  document.getElementById('swResultCode').style.display = prize.label === 'ZONK' ? 'none' : 'block';
+  if (prize.label !== 'ZONK') {
+    const promos = JSON.parse(localStorage.getItem('zs_promos') || '{}');
+    promos[code] = { ...prize, expires: Date.now() + 7 * 86400000 };
+    localStorage.setItem('zs_promos', JSON.stringify(promos));
+  }
+  localStorage.setItem('zs_last_spin', Date.now().toString());
+  const btn = document.getElementById('swSpinBtn');
+  btn.disabled = false; btn.innerHTML = 'SPIN';
+  startCooldown(24 * 3600 * 1000);
+}
+
+function closeSpinResult() { document.getElementById('swResult').style.display = 'none'; }
+function copySpinCode() { const c = document.getElementById('swResultCode').textContent; if (c && c !== '-') navigator.clipboard.writeText(c).then(() => toast('Kode disalin! Pakai di checkout.', 'success')); }
+function startCooldown(remain) {
+  const el = document.getElementById('swCooldown');
+  el.style.display = 'inline-flex';
+  function tick() {
+    const r = remain - (Date.now() - parseInt(localStorage.getItem('zs_last_spin') || Date.now()));
+    if (r <= 0) { el.style.display = 'none'; return; }
+    const h = String(Math.floor(r / 3600000)).padStart(2, '0');
+    const m = String(Math.floor((r % 3600000) / 60000)).padStart(2, '0');
+    const s = String(Math.floor((r % 60000) / 1000)).padStart(2, '0');
+    document.getElementById('swTimer').textContent = `${h}:${m}:${s}`;
+    requestAnimationFrame(() => setTimeout(tick, 1000));
+  }
+  tick();
+}
+// Init cooldown on load
+(function initSwCooldown() {
+  const last = localStorage.getItem('zs_last_spin');
+  if (last) {
+    const remain = 24 * 3600 * 1000 - (Date.now() - parseInt(last));
+    if (remain > 0) startCooldown(remain);
+  }
+})();
 
 function dismissCookie(accepted){
   localStorage.setItem('zcus_cookie_ok', accepted ? '1' : '0');
@@ -1292,6 +1420,35 @@ window.addEventListener('unhandledrejection', function(e){
 .newsletter-form{display:flex;gap:10px;flex:1;min-width:280px;max-width:480px}
 .newsletter-form .form-input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--glass-border)}
 .newsletter-form .btn{white-space:nowrap}
+/* ===== SPIN WHEEL ===== */
+.spin-wheel{position:relative;padding:60px 24px;margin:24px auto;max-width:1200px;border-radius:24px;overflow:hidden;isolation:isolate}
+.sw-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);z-index:-2}
+.sw-bg::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(168,85,247,.2),transparent 50%),radial-gradient(circle at 70% 50%,rgba(14,165,233,.2),transparent 50%)}
+.sw-content{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;z-index:1}
+@media(max-width:700px){.sw-content{grid-template-columns:1fr;text-align:center}}
+.sw-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.2);color:#fbbf24;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:14px;border:1px solid rgba(251,191,36,.3)}
+.sw-title{font-size:32px;font-weight:800;color:#fff;margin:0 0 12px;line-height:1.2}
+.sw-disc{background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:36px;display:inline-block}
+.sw-desc{font-size:14px;color:rgba(255,255,255,.75);margin:0 0 16px;max-width:480px}
+.sw-cooldown{padding:10px 14px;background:rgba(0,0,0,.3);border-radius:10px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#fbbf24;margin-top:12px}
+.sw-cooldown b{color:#fff;font-family:monospace}
+.sw-wheel-wrap{position:relative;width:300px;height:340px;margin:0 auto}
+@media(max-width:700px){.sw-wheel-wrap{width:260px;height:300px}}
+.sw-pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:32px solid #fbbf24;z-index:3;filter:drop-shadow(0 4px 8px rgba(251,191,36,.4))}
+.sw-wheel{position:relative;width:300px;height:300px;border-radius:50%;background:#1e293b;border:8px solid #fbbf24;box-shadow:0 0 40px rgba(251,191,36,.3),inset 0 0 30px rgba(0,0,0,.5);transition:transform 4s cubic-bezier(.17,.67,.21,1)}
+@media(max-width:700px){.sw-wheel{width:260px;height:260px}}
+.sw-slice{position:absolute;width:50%;height:50%;top:50%;left:50%;transform-origin:0 0;clip-path:polygon(0 0,100% 0,100% 100%);display:flex;align-items:flex-start;justify-content:center;padding-top:20px;background:var(--c,#0ea5e9);color:#fff;font-weight:800;font-size:14px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.1)}
+.sw-slice span{transform:rotate(22.5deg);margin-top:-8px;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.sw-spin-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;border:4px solid #fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(251,191,36,.5);transition:all .2s;z-index:2;letter-spacing:1px}
+.sw-spin-btn:hover{transform:translate(-50%,-50%) scale(1.05)}
+.sw-spin-btn:disabled{opacity:.6;cursor:not-allowed;transform:translate(-50%,-50%)}
+.sw-result{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .3s ease-out}
+.sw-result-card{padding:40px;text-align:center;border-radius:20px;max-width:420px;width:100%;animation:successPop .4s cubic-bezier(.34,1.56,.64,1)}
+.sw-result-card i{font-size:64px;color:#fbbf24;margin-bottom:12px}
+.sw-result-card h3{font-size:28px;margin:0 0 8px;background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sw-result-card p{margin:0 0 16px;color:var(--text-dim)}
+.sw-result-code{font-family:monospace;font-size:24px;font-weight:800;letter-spacing:4px;color:var(--accent);background:rgba(0,0,0,.3);padding:14px 20px;border-radius:10px;border:2px dashed var(--accent);margin-bottom:8px}
+
 @media(max-width:600px){.newsletter-content{flex-direction:column;align-items:flex-start}.newsletter-form{width:100%;max-width:none;flex-direction:column}}
 
 /* ===== AUTH MODAL v2 ===== */

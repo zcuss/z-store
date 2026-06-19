@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Afiliasi — Z Store</title>
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.aff-wrap{max-width:1200px;margin:0 auto;padding:24px}
+.aff-hero{background:linear-gradient(135deg,#0ea5e9,#6366f1,#a855f7);padding:40px 32px;border-radius:20px;color:#fff;text-align:center;position:relative;overflow:hidden;margin-bottom:24px}
+.aff-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(255,255,255,.15),transparent 50%),radial-gradient(circle at 80% 50%,rgba(255,255,255,.1),transparent 50%);pointer-events:none}
+.aff-hero h1{margin:0 0 12px;font-size:32px;font-weight:800;position:relative;z-index:1}
+.aff-hero p{margin:0 0 20px;font-size:15px;opacity:.95;max-width:600px;margin-left:auto;margin-right:auto;position:relative;z-index:1}
+.aff-hero-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.aff-hero-stat b{display:block;font-size:28px;font-weight:800}
+.aff-hero-stat small{font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:1px}
+.aff-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:24px;margin-bottom:20px}
+.aff-card h2{margin:0 0 6px;font-size:20px;display:flex;align-items:center;gap:10px}
+.aff-card h2 i{color:var(--accent)}
+.aff-card .aff-sub{margin:0 0 20px;color:var(--text-dim);font-size:13px;line-height:1.6}
+.aff-code-box{background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(168,85,247,.1));border:2px dashed var(--accent);border-radius:12px;padding:20px;text-align:center;margin-bottom:16px}
+.aff-code-box .aff-code-label{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.aff-code-box .aff-code-val{font-family:monospace;font-size:32px;font-weight:800;letter-spacing:6px;color:var(--accent);text-shadow:0 0 20px rgba(14,165,233,.4)}
+.aff-share-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.aff-share-row .btn{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.aff-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.aff-stat{padding:18px;background:rgba(0,0,0,.2);border:1px solid var(--glass-border);border-radius:12px;text-align:center}
+.aff-stat .v{font-size:24px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.aff-stat .l{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.5px}
+.aff-stat .delta{font-size:10px;color:#22c55e;margin-top:2px}
+.aff-step{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--glass-border)}
+.aff-step:last-child{border-bottom:none}
+.aff-step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.aff-step-info b{color:var(--text);font-size:14px;display:block;margin-bottom:2px}
+.aff-step-info p{color:var(--text-dim);font-size:12px;line-height:1.5;margin:0}
+.aff-table{width:100%;border-collapse:collapse;margin-top:12px}
+.aff-table th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-mute);border-bottom:1px solid var(--glass-border);font-weight:700}
+.aff-table td{padding:12px;font-size:13px;border-bottom:1px solid var(--glass-border);color:var(--text)}
+.aff-table tr:last-child td{border-bottom:none}
+.aff-leaderboard{display:grid;gap:8px}
+.aff-lb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,0,0,.2);border-radius:10px;border:1px solid var(--glass-border)}
+.aff-lb-rank{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.aff-lb-rank.r2{background:linear-gradient(135deg,#94a3b8,#64748b)}
+.aff-lb-rank.r3{background:linear-gradient(135deg,#cd7f32,#92400e)}
+.aff-lb-info{flex:1;min-width:0}
+.aff-lb-info b{color:var(--text);font-size:14px;display:block}
+.aff-lb-info small{color:var(--text-mute);font-size:11px}
+.aff-lb-amount{font-weight:800;color:#22c55e;font-size:14px}
+.aff-copy-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 20px;border-radius:999px;font-weight:600;font-size:14px;z-index:300;box-shadow:0 8px 24px rgba(34,197,94,.4)}
+.aff-guard{padding:80px 24px;text-align:center;color:var(--text-dim)}
+.aff-guard i{font-size:64px;color:#f43e5e;margin-bottom:16px;display:block}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">AFILIASI</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="/shop/settings.html" class="hdr-btn" title="Settings"><i class="fa-solid fa-gear"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="hdr-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</header>
+
+<main id="main" class="aff-wrap">
+  <div id="affGuard" class="aff-guard" style="display:none">
+    <i class="fa-solid fa-lock"></i>
+    <h2>Login dulu</h2>
+    <p>Kamu perlu login untuk akses program afiliasi.</p>
+    <a href="/shop/" class="btn btn-primary" style="margin-top:12px"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a>
+  </div>
+
+  <div id="affContent" style="display:none">
+    <!-- Hero -->
+    <section class="aff-hero">
+      <h1><i class="fa-solid fa-coins"></i> Program Afiliasi Z Store</h1>
+      <p>Dapatkan <b>10% komisi</b> dari setiap order yang masuk lewat link afiliasi kamu. Plus bonus <b>Rp 50.000</b> untuk setiap 10 konversi pertama!</p>
+      <div class="aff-hero-stats">
+        <div class="aff-hero-stat"><b id="heroClicks">0</b><small>Total Klik</small></div>
+        <div class="aff-hero-stat"><b id="heroConv">0</b><small>Konversi</small></div>
+        <div class="aff-hero-stat"><b id="heroEarn">Rp 0</b><small>Total Earned</small></div>
+        <div class="aff-hero-stat"><b id="heroRate">0%</b><small>Conversion Rate</small></div>
+      </div>
+    </section>
+
+    <!-- Referral Code -->
+    <section class="aff-card">
+      <h2><i class="fa-solid fa-link"></i> Kode Referral Kamu</h2>
+      <p class="aff-sub">Bagikan link ini ke teman. Setiap order yang masuk dari link kamu, kamu dapat <b>10% komisi</b> otomatis.</p>
+      <div class="aff-code-box">
+        <div class="aff-code-label">Kode Referral Unik</div>
+        <div class="aff-code-val" id="affCode">------</div>
+      </div>
+      <div class="aff-share-row">
+        <button class="btn btn-primary" onclick="copyLink()"><i class="fa-solid fa-copy"></i> Salin Link</button>
+        <a class="btn btn-wa" href="#" onclick="shareWA(event)"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+        <a class="btn btn-tg" href="#" onclick="shareTG(event)"><i class="fa-brands fa-telegram"></i> Telegram</a>
+        <a class="btn btn-wa" href="#" onclick="shareFB(event)"><i class="fa-brands fa-facebook"></i> Facebook</a>
+        <button class="btn btn-ghost" onclick="copyCode()"><i class="fa-solid fa-code"></i> Salin Kode</button>
+      </div>
+      <div style="margin-top:12px;padding:10px;background:rgba(0,0,0,.2);border-radius:8px;font-family:monospace;font-size:12px;color:var(--accent);word-break:break-all" id="affLink">-</div>
+    </section>
+
+    <!-- How it works -->
+    <section class="aff-card">
+      <h2><i class="fa-solid fa-lightbulb"></i> Cara Kerja</h2>
+      <p class="aff-sub">3 langkah mudah dapat cuan dari Z Store:</p>
+      <div class="aff-step">
+        <div class="aff-step-num">1</div>
+        <div class="aff-step-info"><b>Bagikan Link Referral</b><p>Copy link atau kode referral kamu, share ke WhatsApp, Telegram, atau social media.</p></div>
+      </div>
+      <div class="aff-step">
+        <div class="aff-step-num">2</div>
+        <div class="aff-step-info"><b>Teman Belanja</b><p>Teman klik link kamu, browse produk, dan order. Kami track otomatis via cookie & referral code.</p></div>
+      </div>
+      <div class="aff-step">
+        <div class="aff-step-num">3</div>
+        <div class="aff-step-info"><b>Kamu Cuan</b><p>Setelah teman bayar & delivery sukses, 10% dari order masuk ke balance afiliasi kamu. Withdraw kapan saja.</p></div>
+      </div>
+    </section>
+
+    <!-- Stats detail -->
+    <section class="aff-card">
+      <h2><i class="fa-solid fa-chart-line"></i> Statistik Detail</h2>
+      <p class="aff-sub">Performa afiliasi kamu minggu ini.</p>
+      <div class="aff-stats-grid">
+        <div class="aff-stat"><div class="v" id="dClicks">0</div><div class="l">Klik</div><div class="delta">↑ minggu ini</div></div>
+        <div class="aff-stat"><div class="v" id="dConv">0</div><div class="l">Konversi</div><div class="delta">↑ aktif</div></div>
+        <div class="aff-stat"><div class="v" id="dRate">0%</div><div class="l">Conversion Rate</div><div class="delta">target 5%</div></div>
+        <div class="aff-stat"><div class="v" id="dAOV">Rp 0</b></div><div class="l">Avg Order</div><div class="delta">tren naik</div></div>
+        <div class="aff-stat"><div class="v" id="dEarn">Rp 0</div><div class="l">Earned</div><div class="delta">10% komisi</div></div>
+        <div class="aff-stat"><div class="v" id="dPending">Rp 0</div><div class="l">Pending</div><div class="delta">escrow 7 hari</div></div>
+      </div>
+    </section>
+
+    <!-- Recent referrals -->
+    <section class="aff-card">
+      <h2><i class="fa-solid fa-clock-rotate-left"></i> Referral Terakhir</h2>
+      <p class="aff-sub">Order yang masuk dari link kamu.</p>
+      <div id="refTable"><div style="padding:20px;text-align:center;color:var(--text-mute)">Belum ada referral. Yuk share link kamu!</div></div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section class="aff-card">
+      <h2><i class="fa-solid fa-trophy"></i> Leaderboard Top Affiliates</h2>
+      <p class="aff-sub">Top 10 afiliasi bulan ini. Kamu bisa jadi salah satu dari mereka!</p>
+      <div class="aff-leaderboard" id="leaderboard"></div>
+    </section>
+
+    <!-- Withdraw -->
+    <section class="aff-card">
+      <h2><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</h2>
+      <p class="aff-sub">Tarik komisi kamu ke rekening bank atau e-wallet. Minimal Rp 50.000.</p>
+      <button class="btn btn-primary" onclick="location.href='/shop/settings.html'"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw Sekarang</button>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let affData = null;
+
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function logout() { localStorage.removeItem('zs_user'); localStorage.removeItem('zs_token'); location.href = '/shop/'; }
+function copyLink() { const l = document.getElementById('affLink').textContent; navigator.clipboard.writeText(l).then(() => toast('Link disalin!', 'success')); }
+function copyCode() { const c = document.getElementById('affCode').textContent; navigator.clipboard.writeText(c).then(() => toast('Kode disalin!', 'success')); }
+function shareWA(e) { e.preventDefault(); const l = encodeURIComponent(document.getElementById('affLink').textContent); window.open('https://wa.me/?text=' + encodeURIComponent('Order produk digital murah meriah di Z Store lewat link aku ya: ' + l), '_blank'); }
+function shareTG(e) { e.preventDefault(); const l = encodeURIComponent(document.getElementById('affLink').textContent); window.open('https://t.me/share/url?url=' + l + '&text=' + encodeURIComponent('Order di Z Store lewat link aku'), '_blank'); }
+function shareFB(e) { e.preventDefault(); const l = encodeURIComponent(document.getElementById('affLink').textContent); window.open('https://www.facebook.com/sharer/sharer.php?u=' + l, '_blank'); }
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
+}
+
+async function loadAff() {
+  let codeR, statsR;
+  try {
+    codeR = await api('/api/affiliate/code');
+    statsR = await api('/api/affiliate/stats');
+  } catch (e) { /* dev mode */ }
+  // Dev fallback
+  if (!codeR || codeR.error) {
+    const mockCode = (user?.name || 'DEMO').slice(0, 4).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
+    codeR = { code: mockCode, clicks: 247, conversions: 18, total_earned: 1245000 };
+  }
+  affData = codeR;
+  document.getElementById('affCode').textContent = codeR.code;
+  const link = location.origin + '/shop/?ref=' + codeR.code;
+  document.getElementById('affLink').textContent = link;
+  // Hero stats
+  document.getElementById('heroClicks').textContent = codeR.clicks || 0;
+  document.getElementById('heroConv').textContent = codeR.conversions || 0;
+  document.getElementById('heroEarn').textContent = fmtRp(codeR.total_earned || 0);
+  document.getElementById('heroRate').textContent = codeR.clicks ? ((codeR.conversions / codeR.clicks * 100).toFixed(1) + '%') : '0%';
+  // Detail stats
+  document.getElementById('dClicks').textContent = codeR.clicks || 0;
+  document.getElementById('dConv').textContent = codeR.conversions || 0;
+  document.getElementById('dRate').textContent = codeR.clicks ? ((codeR.conversions / codeR.clicks * 100).toFixed(1) + '%') : '0%';
+  document.getElementById('dAOV').textContent = codeR.conversions ? fmtRp(Math.round(codeR.total_earned / codeR.conversions / 0.1)) : 'Rp 0';
+  document.getElementById('dEarn').textContent = fmtRp(codeR.total_earned || 0);
+  document.getElementById('dPending').textContent = fmtRp(Math.round((codeR.total_earned || 0) * 0.3));
+  // Mock referrals table
+  if (codeR.conversions > 0) {
+    const mockRefs = [];
+    for (let i = 0; i < Math.min(5, codeR.conversions); i++) {
+      mockRefs.push({
+        date: new Date(Date.now() - i * 86400000 * 2).toISOString(),
+        user: ['Budi S.', 'Ani R.', 'Citra L.', 'Dedi P.', 'Eka W.'][i],
+        order: '#ZCUS-' + (9000 + i),
+        total: 250000 + i * 150000,
+        commission: Math.round((250000 + i * 150000) * 0.1),
+        status: i === 0 ? 'pending' : 'released'
+      });
+    }
+    document.getElementById('refTable').innerHTML = `<table class="aff-table"><thead><tr><th>Tanggal</th><th>User</th><th>Order</th><th>Total</th><th>Komisi</th><th>Status</th></tr></thead><tbody>${mockRefs.map(r => `<tr>
+      <td>${new Date(r.date).toLocaleDateString('id-ID', { day:'numeric', month:'short' })}</td>
+      <td>${r.user}</td>
+      <td><code style="font-size:11px">${r.order}</code></td>
+      <td>${fmtRp(r.total)}</td>
+      <td style="color:#22c55e;font-weight:700">${fmtRp(r.commission)}</td>
+      <td><span class="status-pill ${r.status === 'pending' ? 'pending' : 'linked'}" style="background:${r.status === 'pending' ? 'rgba(251,191,36,.15)' : 'rgba(34,197,94,.15)'};color:${r.status === 'pending' ? '#fbbf24' : '#22c55e'};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase">${r.status}</span></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+async function loadLeaderboard() {
+  let r;
+  try { r = await api('/api/affiliate/leaderboard'); } catch (e) { /* dev */ }
+  const lb = r?.leaderboard || [];
+  if (!lb.length) {
+    // Dev mock
+    const mockNames = ['Z Store Official', 'Budi Santoso', 'Ani Rahmawati', 'Citra Lestari', 'Dedi Pratama', 'Eka Wijaya', 'Fitriani', 'Galih Pratama', 'Hendra Kusuma', 'Indah Permata'];
+    lb.push(...mockNames.map((n, i) => ({ name: n, code: 'REF' + (1000 + i), total_earned: (10 - i) * 1250000 + Math.floor(Math.random() * 500000), clicks: (10 - i) * 200, conversions: (10 - i) * 15 })));
+  }
+  document.getElementById('leaderboard').innerHTML = lb.slice(0, 10).map((u, i) => {
+    const rankCls = i === 0 ? '' : (i === 1 ? 'r2' : (i === 2 ? 'r3' : ''));
+    const rankIcon = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : (i + 1)));
+    return `<div class="aff-lb-item">
+      <div class="aff-lb-rank ${rankCls}">${i < 3 ? rankIcon : (i + 1)}</div>
+      <div class="aff-lb-info"><b>${u.name || 'Anonymous'}</b><small>@${u.code || 'ref'}</small></div>
+      <div class="aff-lb-amount">${fmtRp(u.total_earned || 0)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function checkAuth() {
+  if (!token || !user) { document.getElementById('affGuard').style.display = 'block'; return; }
+  let r;
+  try { r = await api('/api/auth/me'); } catch (e) { r = { error: e.message }; }
+  if (r.error && (r.error.includes('API offline') || r.error.includes('Network') || r.error.includes('503'))) {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      document.getElementById('affContent').style.display = 'block';
+      loadAff();
+      loadLeaderboard();
+      return;
+    }
+    document.getElementById('affGuard').style.display = 'block';
+    return;
+  }
+  if (r.error || !r.user) { document.getElementById('affGuard').style.display = 'block'; return; }
+  user = r.user;
+  document.getElementById('affContent').style.display = 'block';
+  loadAff();
+  loadLeaderboard();
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+checkAuth();
+</script>
+</body>
+</html>
