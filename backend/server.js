@@ -56,6 +56,42 @@ app.use((req, res, next) => {
   next();
 });
 
+// ============ STATIC FRONTEND (served at /shop/*) ============
+// Single-port mode: same Express serves static frontend + API.
+// Useful when behind a single Cloudflare tunnel / nginx upstream.
+const path = require('path');
+const FRONTEND_DIR = path.resolve(__dirname, '../frontend/shop');
+const fs = require('fs');
+if (fs.existsSync(FRONTEND_DIR)) {
+  app.use('/shop', (req, res, next) => {
+    // strip /shop prefix + query string → file path
+    const u = new URL(req.url, 'http://x');
+    let rel = u.pathname === '/' ? '/index.html' : u.pathname;
+    // strip trailing slash for file lookup
+    const cleanRel = rel.replace(/\/+$/, '') || '/';
+    const fpath = path.join(FRONTEND_DIR, cleanRel);
+    // prevent path traversal
+    if (!fpath.startsWith(FRONTEND_DIR)) return res.status(403).end();
+    fs.stat(fpath, (err, stat) => {
+      if (err || !stat.isFile()) {
+        // Try .html extension (SPA routing: /orders → orders.html)
+        if (!path.extname(cleanRel)) {
+          const htmlPath = path.join(FRONTEND_DIR, cleanRel + '.html');
+          if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
+        }
+        // Last resort: SPA fallback for paths with no extension
+        if (!path.extname(cleanRel)) return res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
+        return next();
+      }
+      res.setHeader('Cache-Control', /\.(css|js|woff2?|svg|png|jpg|webp)$/i.test(cleanRel) ? 'public, max-age=31536000, immutable' : 'public, max-age=3600');
+      res.sendFile(fpath);
+    });
+  });
+  app.get('/shop', (_req, res) => res.redirect('/shop/'));
+  app.get('/', (_req, res) => res.redirect('/shop/'));
+  console.log('[static] serving frontend at /shop/* from', FRONTEND_DIR);
+}
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST || '127.0.0.1',
   user: process.env.DB_USER || 'zcuss_zshop',

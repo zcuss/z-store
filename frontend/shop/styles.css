@@ -83,6 +83,7 @@ input,textarea,select{font-family:inherit;color:inherit;transition:all .15s ease
 }
 .announce-track i{margin-right:6px;color:var(--accent);font-size:11px}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.announce-track{animation-duration:60s!important}
 
 /* ===== HEADER ===== */
 .hdr{
@@ -632,6 +633,13 @@ input,textarea,select{font-family:inherit;color:inherit;transition:all .15s ease
 .toast.info i{color:var(--accent)}
 
 /* ===== FAB ===== */
+/* When inside .fab-stack (homepage), fab-wa is relatively positioned inside parent stack */
+.fab-stack .fab-wa{position:relative;bottom:auto;right:auto;width:48px;height:48px;font-size:18px}
+.fab-stack .fab-chat{position:relative;width:48px;height:48px;border-radius:50%;background:#a855f7;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(168,85,247,.4);transition:transform .15s;cursor:pointer;text-decoration:none;border:none}
+.fab-stack .fab-chat:hover{transform:scale(1.08)}
+.fab-stack .fab-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg)}
+
+/* Standalone fab-wa (other pages, outside stack) */
 .fab-wa{
   position:fixed;bottom:88px;right:20px;z-index:80;
   width:48px;height:48px;border-radius:50%;
