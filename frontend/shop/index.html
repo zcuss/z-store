@@ -283,13 +283,13 @@
     <a href="#trust" class="btn btn-ghost" aria-label="Why choose Z Store"><i class="fa-solid fa-circle-question"></i> Kenapa Z Store?</a>
   </div>
   <div class="hero-stats glass">
-    <div class="stat"><b id="statProducts">0</b><span>PRODUK AKTIF</span></div>
+    <div class="stat"><b id="statProducts" data-target="12">0</b><span>PRODUK AKTIF</span></div>
     <div class="stat-sep"></div>
-    <div class="stat"><b id="statSold">0</b><span>TERJUAL</span></div>
+    <div class="stat"><b id="statSold" data-target="1247">0</b><span>TERJUAL</span></div>
     <div class="stat-sep"></div>
-    <div class="stat"><b id="statBuyers">0</b><span>HAPPY BUYERS</span></div>
+    <div class="stat"><b id="statBuyers" data-target="697">0</b><span>HAPPY BUYERS</span></div>
     <div class="stat-sep"></div>
-    <div class="stat"><b>&lt;10m</b><span>DELIVERY</span></div>
+    <div class="stat"><b data-target="10" data-suffix="m">&lt;10m</b><span>DELIVERY</span></div>
   </div>
 </section>
 
@@ -1379,6 +1379,37 @@ document.addEventListener('keydown', e => {
     const pct = h > 0 ? (window.scrollY / h * 100) : 0;
     bar.style.width = pct + '%';
   }, { passive: true });
+})();
+
+// ===== HERO STATS COUNTER ANIMATION =====
+(function heroCounters() {
+  if (!('IntersectionObserver' in window)) return;
+  const animate = (el) => {
+    const target = parseInt(el.dataset.target || el.textContent.replace(/[^\d]/g, '')) || 0;
+    if (!target) return;
+    const suffix = el.dataset.suffix || '';
+    const dur = 1500;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased).toLocaleString('id-ID') + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('[data-target]').forEach(animate);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  setTimeout(() => {
+    const hero = document.querySelector('.hero-stats');
+    if (hero) observer.observe(hero);
+  }, 200);
 })();
 
 // ===== INTERSECTION OBSERVER FOR SCROLL ANIMATIONS =====
