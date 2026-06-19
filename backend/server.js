@@ -207,7 +207,10 @@ app.post('/api/auth/unlink', authMiddleware, async (req, res) => {
 // ============ PRODUCTS ============
 app.get('/api/products', async (req, res) => {
   const { category, search, limit = 50 } = req.query;
-  let sql = 'SELECT p.*, u.name as seller_name FROM products p JOIN users u ON p.seller_id = u.id WHERE p.status = ?';
+  let sql = `SELECT p.*, u.name as seller_name,
+    (SELECT COUNT(*) FROM reviews r WHERE r.product_id = p.id) as review_count,
+    (SELECT COALESCE(AVG(rating), 0) FROM reviews r WHERE r.product_id = p.id) as review_avg
+    FROM products p JOIN users u ON p.seller_id = u.id WHERE p.status = ?`;
   const args = ['active'];
   if (category) { sql += ' AND p.category = ?'; args.push(category); }
   if (search) { sql += ' AND (p.name LIKE ? OR p.description LIKE ?)'; args.push('%' + search + '%', '%' + search + '%'); }
@@ -215,6 +218,8 @@ app.get('/api/products', async (req, res) => {
   args.push(parseInt(limit));
   try {
     const [rows] = await pool.query(sql, args);
+    // Round review_avg to 1 decimal
+    rows.forEach(r => { if (r.review_avg) r.review_avg = Number(r.review_avg).toFixed(1); });
     res.json(rows);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

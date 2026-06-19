@@ -259,9 +259,9 @@ function productCard(p) {
       <div class="pc-cat">${p.category}</div>
       <div class="pc-name">${p.name}</div>
       <div class="pc-rating">
-        ${p.rating > 0
-          ? `<i class="fa-solid fa-star star"></i><b>${p.rating}</b>`
-          : `<span class="pc-new-badge">NEW</span>`}
+        ${p.review_count > 0
+          ? `<i class="fa-solid fa-star star"></i><b>${p.review_avg}</b><span class="pc-rev-count">(${p.review_count})</span>`
+          : (p.sold > 50 ? `<i class="fa-solid fa-fire star"></i><b>Hot</b>` : `<span class="pc-new-badge">NEW</span>`)}
         ${p.sold > 0 ? `<span class="pc-sold"><span class="dot">·</span> ${p.sold} sold</span>` : ''}
       </div>
       <div class="pc-price">${fmtIDR(p.price)}${p.original_price ? `<span class="pc-old">${fmtIDR(p.original_price)}</span>` : ''}</div>
