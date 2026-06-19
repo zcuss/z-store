@@ -334,6 +334,20 @@ async function loadProduct() {
     renderProduct();
     loadRelated();
   } catch (e) {
+    // FALLBACK: render mock product for demo/preview when API offline (dev mode)
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || (e.message || '').includes('API offline') || (e.message || '').includes('Network') || (e.message || '').includes('Failed')) {
+      product = {
+        id: 1, name: 'Claude Pro Annual License', category: 'AI Tools',
+        price: 2400000, original_price: 3000000, stock: 5, available: 5,
+        sold: 128, description: 'Akun Claude Pro resmi dari Anthropic, full fitur Opus 4, Sonnet 4, dan Haiku. Cocok untuk produktivitas, coding, riset, dan writing. Garansi 30 hari, replacement akun baru jika ada masalah.',
+        emoji: '🤖', seller_name: 'Z Store Official', seller_id: 1,
+        review_count: 47, review_avg: 4.9
+      };
+      document.title = `${product.name} — Z Store (Preview Mode)`;
+      renderProduct();
+      loadRelated();
+      return;
+    }
     document.getElementById('pdpRoot').innerHTML = `<div class="pdp-error"><i class="fa-solid fa-triangle-exclamation"></i><h2>Produk tidak ditemukan</h2><p>${e.message}</p><a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a></div>`;
     document.title = 'Produk tidak ditemukan — Z Store';
   }

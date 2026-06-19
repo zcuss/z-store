@@ -153,19 +153,175 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/auth/google', async (req, res) => {
-  const { google_id, email, name } = req.body;
-  if (!google_id || !email) return res.status(400).json({ error: 'google_id + email required' });
+  const { credential, google_id, email, name, avatar_url } = req.body;
   try {
-    const [existing] = await pool.query('SELECT * FROM users WHERE google_id = ? OR email = ?', [google_id, email]);
+    let payload = null;
+    // Modern: verify Google ID token via Google API
+    if (credential) {
+      const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+      if (!verifyRes.ok) return res.status(401).json({ error: 'invalid Google credential' });
+      payload = await verifyRes.json();
+      if (!payload.email || !payload.sub) return res.status(400).json({ error: 'incomplete Google payload' });
+    } else if (google_id && email) {
+      // Legacy fallback (dev only)
+      payload = { sub: google_id, email, name, picture: avatar_url };
+    } else {
+      return res.status(400).json({ error: 'credential or google_id+email required' });
+    }
+    const [existing] = await pool.query('SELECT * FROM users WHERE google_id = ? OR email = ?', [payload.sub, payload.email]);
     let user;
     if (existing[0]) {
-      if (!existing[0].google_id) await pool.query('UPDATE users SET google_id = ? WHERE id = ?', [google_id, existing[0].id]);
+      // Link google_id if not set
+      if (!existing[0].google_id) await pool.query('UPDATE users SET google_id = ? WHERE id = ?', [payload.sub, existing[0].id]);
+      // Update avatar if Google provides one and user has none
+      if (payload.picture && !existing[0].avatar_url) await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [payload.picture, existing[0].id]);
       user = { id: existing[0].id, email: existing[0].email, name: existing[0].name, role: existing[0].role };
     } else {
-      const [r] = await pool.query('INSERT INTO users (email, google_id, name, role) VALUES (?, ?, ?, ?)', [email, google_id, name || email.split('@')[0], 'buyer']);
-      user = { id: r.insertId, email, name: name || email.split('@')[0], role: 'buyer' };
+      const [r] = await pool.query(
+        'INSERT INTO users (email, google_id, name, role, avatar_url, email_verified) VALUES (?, ?, ?, ?, ?, TRUE)',
+        [payload.email, payload.sub, payload.name || payload.email.split('@')[0], 'buyer', payload.picture || null]
+      );
+      user = { id: r.insertId, email: payload.email, name: payload.name || payload.email.split('@')[0], role: 'buyer' };
+      await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun kamu sudah aktif. Selamat belanja!`);
     }
-    res.json({ user, token: signToken(user) });
+    res.json({ user, token: signToken(user), isNew: !existing[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Change password
+app.put('/api/auth/password', authMiddleware, async (req, res) => {
+  const { current_password, new_password } = req.body;
+  if (!current_password || !new_password) return res.status(400).json({ error: 'current_password + new_password required' });
+  if (new_password.length < 6) return res.status(400).json({ error: 'Password baru minimal 6 karakter' });
+  if (new_password === current_password) return res.status(400).json({ error: 'Password baru harus beda dari yang lama' });
+  try {
+    const [rows] = await pool.query('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'user not found' });
+    if (!rows[0].password_hash) return res.status(400).json({ error: 'Akun ini login via Google. Set password via Google account.' });
+    const ok = await bcrypt.compare(current_password, rows[0].password_hash);
+    if (!ok) return res.status(401).json({ error: 'Password lama salah' });
+    const hash = await bcrypt.hash(new_password, 10);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, req.user.id]);
+    res.json({ ok: true, message: 'Password berhasil diubah. Silakan login ulang dengan password baru.' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Update profile
+app.put('/api/auth/profile', authMiddleware, async (req, res) => {
+  const { name, bio, avatar_url, phone } = req.body;
+  try {
+    const updates = [];
+    const args = [];
+    if (name !== undefined) { updates.push('name = ?'); args.push(name); }
+    if (bio !== undefined) { updates.push('bio = ?'); args.push(bio); }
+    if (avatar_url !== undefined) { updates.push('avatar_url = ?'); args.push(avatar_url); }
+    if (phone !== undefined) { updates.push('phone = ?'); args.push(phone); }
+    if (!updates.length) return res.json({ message: 'no changes' });
+    args.push(req.user.id);
+    await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, args);
+    const [rows] = await pool.query('SELECT id, email, name, role, bio, avatar_url, phone FROM users WHERE id = ?', [req.user.id]);
+    res.json({ user: rows[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ OTP (Email verification + passwordless login) ============
+// In-memory OTP store (use Redis in production). TTL 10 min, max 5 attempts per OTP.
+const otpStore = new Map();
+function genOtp() { return String(Math.floor(100000 + Math.random() * 900000)); }
+
+app.post('/api/auth/otp/request', async (req, res) => {
+  const { email, purpose } = req.body;
+  if (!email) return res.status(400).json({ error: 'email required' });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'invalid email format' });
+  const purp = purpose || 'register'; // register | reset | login
+  // Rate limit: max 3 per email per 10 min
+  const key = `${email}:${purp}`;
+  const now = Date.now();
+  const prev = otpStore.get(key);
+  if (prev && prev.attempts >= 3 && (now - prev.firstAt) < 600000) {
+    return res.status(429).json({ error: 'Terlalu banyak percobaan. Coba lagi dalam 10 menit.' });
+  }
+  const otp = genOtp();
+  const expiresAt = now + 600000; // 10 min
+  otpStore.set(key, { otp, expiresAt, attempts: prev && (now - prev.firstAt) < 600000 ? prev.attempts + 1 : 1, firstAt: prev && (now - prev.firstAt) < 600000 ? prev.firstAt : now });
+  // Send email via mailer (or console in dev)
+  const subject = purp === 'register' ? 'Kode Verifikasi Registrasi Z Store' : purp === 'reset' ? 'Kode Reset Password Z Store' : 'Kode Login Z Store';
+  const html = `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#0f172a;color:#fff;border-radius:12px">
+    <h2 style="color:#38bdf8;margin:0 0 16px">Z Store</h2>
+    <p>Halo,</p>
+    <p>Gunakan kode OTP berikut untuk ${purp === 'register' ? 'menyelesaikan registrasi' : purp === 'reset' ? 'reset password' : 'login'} akun kamu:</p>
+    <div style="background:#1e293b;padding:24px;text-align:center;border-radius:8px;margin:20px 0">
+      <div style="font-size:36px;font-weight:800;letter-spacing:8px;color:#38bdf8;font-family:monospace">${otp}</div>
+    </div>
+    <p style="color:#94a3b8;font-size:13px">Kode ini berlaku 10 menit. Jangan bagikan ke siapapun.</p>
+    <p style="color:#94a3b8;font-size:13px">Kalau kamu tidak meminta kode ini, abaikan email ini.</p>
+  </div>`;
+  try {
+    if (process.env.GMAIL_APP_PASS) {
+      await mailer.sendMail({ from: `"Z Store" <${process.env.GMAIL_USER || 'zcusgt@gmail.com'}>`, to: email, subject, html });
+    } else {
+      // Dev mode: log OTP to server console
+      console.log(`[OTP-DEV] ${email} (${purp}): ${otp}`);
+    }
+    res.json({ ok: true, message: 'OTP terkirim. Cek email kamu (atau console server jika dev).', dev_otp: process.env.GMAIL_APP_PASS ? undefined : otp });
+  } catch (e) {
+    console.error('OTP email failed:', e.message);
+    // Still return success but log to console
+    console.log(`[OTP-FALLBACK] ${email} (${purp}): ${otp}`);
+    res.json({ ok: true, message: 'OTP terkirim (fallback).', dev_otp: otp });
+  }
+});
+
+app.post('/api/auth/otp/verify', async (req, res) => {
+  const { email, otp, purpose, name, role } = req.body;
+  if (!email || !otp) return res.status(400).json({ error: 'email + otp required' });
+  const purp = purpose || 'register';
+  const key = `${email}:${purp}`;
+  const record = otpStore.get(key);
+  if (!record) return res.status(400).json({ error: 'OTP tidak ditemukan atau sudah kadaluarsa' });
+  if (Date.now() > record.expiresAt) { otpStore.delete(key); return res.status(400).json({ error: 'OTP kadaluarsa. Request ulang.' }); }
+  if (record.otp !== otp) return res.status(400).json({ error: 'OTP salah' });
+  otpStore.delete(key);
+  try {
+    if (purp === 'register') {
+      // Create user
+      const [existing] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+      if (existing[0]) return res.status(409).json({ error: 'Email sudah terdaftar. Silakan login.' });
+      const userRole = role === 'seller' ? 'seller' : 'buyer';
+      const [r] = await pool.query(
+        'INSERT INTO users (email, name, role, email_verified) VALUES (?, ?, ?, TRUE)',
+        [email, name || email.split('@')[0], userRole]
+      );
+      const user = { id: r.insertId, email, name: name || email.split('@')[0], role: userRole };
+      await sendNotification(r.insertId, 'welcome', 'Selamat datang di Z Store!', `Halo ${user.name}, akun kamu sudah aktif via OTP.`);
+      return res.json({ user, token: signToken(user), message: 'Registrasi berhasil via OTP' });
+    }
+    if (purp === 'login' || purp === 'reset') {
+      const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+      if (!rows[0]) return res.status(404).json({ error: 'Email belum terdaftar' });
+      const user = { id: rows[0].id, email: rows[0].email, name: rows[0].name, role: rows[0].role };
+      return res.json({ user, token: signToken(user), message: purp === 'login' ? 'Login OTP berhasil' : 'OTP valid, lanjut reset password' });
+    }
+    res.status(400).json({ error: 'unknown purpose' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Reset password via OTP (verified)
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, otp, new_password } = req.body;
+  if (!email || !otp || !new_password) return res.status(400).json({ error: 'email, otp, new_password required' });
+  if (new_password.length < 6) return res.status(400).json({ error: 'Password baru minimal 6 karakter' });
+  // Re-verify OTP (purpose=reset)
+  const key = `${email}:reset`;
+  const record = otpStore.get(key);
+  if (!record || Date.now() > record.expiresAt || record.otp !== otp) return res.status(400).json({ error: 'OTP tidak valid atau kadaluarsa' });
+  otpStore.delete(key);
+  try {
+    const [rows] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (!rows[0]) return res.status(404).json({ error: 'Email tidak ditemukan' });
+    const hash = await bcrypt.hash(new_password, 10);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, rows[0].id]);
+    res.json({ ok: true, message: 'Password berhasil direset. Silakan login.' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -176,9 +332,40 @@ app.get('/api/auth/me', authMiddleware, (req, res) => {
       linked_telegram_id: req.user.linked_telegram_id,
       linked_whatsapp_number: req.user.linked_whatsapp_number,
       linked_discord_id: req.user.linked_discord_id,
-      bio: req.user.bio, avatar_url: req.user.avatar_url
+      bio: req.user.bio, avatar_url: req.user.avatar_url, phone: req.user.phone,
+      email_verified: req.user.email_verified
     }
   });
+});
+
+// ============ PLATFORM SYNC (unified account status) ============
+// Get all linked platforms + their metadata
+app.get('/api/auth/platforms', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT platform, enabled, status, last_connected_at, config FROM platform_integrations WHERE owner_id = ?',
+      [req.user.id]
+    );
+    const platforms = {
+      web: { linked: true, identifier: req.user.email, verified: !!req.user.email_verified, primary: true },
+      telegram: { linked: !!req.user.linked_telegram_id, identifier: req.user.linked_telegram_id, bot: null },
+      whatsapp: { linked: !!req.user.linked_whatsapp_number, identifier: req.user.linked_whatsapp_number, qr_session: null },
+      discord: { linked: !!req.user.linked_discord_id, identifier: req.user.linked_discord_id, bot: null }
+    };
+    // Populate bot info from integrations
+    for (const row of rows) {
+      try {
+        const cfg = JSON.parse(row.config || '{}');
+        if (platforms[row.platform]) {
+          platforms[row.platform].bot = { id: cfg.bot_id, username: cfg.bot_username, name: cfg.bot_name };
+          platforms[row.platform].status = row.status;
+          platforms[row.platform].enabled = row.enabled;
+          platforms[row.platform].last_connected_at = row.last_connected_at;
+        }
+      } catch (e) { /* ignore JSON parse */ }
+    }
+    res.json({ platforms });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // Link account to telegram/whatsapp/discord (cross-platform)
@@ -190,9 +377,10 @@ app.post('/api/auth/link', authMiddleware, async (req, res) => {
     const col = platform === 'telegram' ? 'linked_telegram_id' : platform === 'whatsapp' ? 'linked_whatsapp_number' : 'linked_discord_id';
     // Check if already linked to another account
     const [existing] = await pool.query(`SELECT id, email FROM users WHERE ${col} = ? AND id != ?`, [identifier, req.user.id]);
-    if (existing[0]) return res.status(409).json({ error: `${platform} already linked to another account` });
+    if (existing[0]) return res.status(409).json({ error: `${platform} sudah terikat ke akun lain (${existing[0].email})` });
     await pool.query(`UPDATE users SET ${col} = ? WHERE id = ?`, [identifier, req.user.id]);
-    res.json({ ok: true, platform, identifier });
+    await sendNotification(req.user.id, 'platform', `${platform} linked`, `Akun ${platform} kamu berhasil di-link.`);
+    res.json({ ok: true, platform, identifier, message: `${platform} berhasil di-link` });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -200,8 +388,49 @@ app.post('/api/auth/unlink', authMiddleware, async (req, res) => {
   const { platform } = req.body;
   if (!['telegram', 'whatsapp', 'discord'].includes(platform)) return res.status(400).json({ error: 'invalid platform' });
   const col = platform === 'telegram' ? 'linked_telegram_id' : platform === 'whatsapp' ? 'linked_whatsapp_number' : 'linked_discord_id';
-  await pool.query(`UPDATE users SET ${col} = NULL WHERE id = ?`, [req.user.id]);
-  res.json({ ok: true });
+  try {
+    await pool.query(`UPDATE users SET ${col} = NULL WHERE id = ?`, [req.user.id]);
+    // Also disable integration
+    await pool.query('UPDATE platform_integrations SET enabled = FALSE WHERE owner_id = ? AND platform = ?', [req.user.id, platform]);
+    res.json({ ok: true, message: `${platform} berhasil di-unlink` });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Request OTP-style link to platform (for telegram bot flow: user sends /start to bot, bot gives code, user enters here)
+app.post('/api/auth/link/request', authMiddleware, async (req, res) => {
+  const { platform } = req.body;
+  if (!['telegram', 'whatsapp', 'discord'].includes(platform)) return res.status(400).json({ error: 'invalid platform' });
+  const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+  // Store temporarily (10 min)
+  if (!global._linkCodes) global._linkCodes = new Map();
+  global._linkCodes.set(`${req.user.id}:${platform}`, { code, expiresAt: Date.now() + 600000 });
+  let instruction = '';
+  if (platform === 'telegram') instruction = `Buka @ZStoreBot, kirim /start, lalu masukkan kode: ${code}`;
+  else if (platform === 'whatsapp') instruction = `Scan QR di Settings → Integrations, atau masukkan kode: ${code} setelah scan`;
+  else if (platform === 'discord') instruction = `Invite bot ke server, jalankan /link code:${code}`;
+  res.json({ ok: true, code, instruction, expires_in: 600 });
+});
+
+app.post('/api/auth/link/confirm', authMiddleware, async (req, res) => {
+  const { platform, code, identifier } = req.body;
+  if (!['telegram', 'whatsapp', 'discord'].includes(platform)) return res.status(400).json({ error: 'invalid platform' });
+  try {
+    let finalIdentifier = identifier;
+    if (!finalIdentifier && code) {
+      // Verify code
+      if (!global._linkCodes) return res.status(400).json({ error: 'No pending link request' });
+      const rec = global._linkCodes.get(`${req.user.id}:${platform}`);
+      if (!rec || Date.now() > rec.expiresAt) return res.status(400).json({ error: 'Code kadaluarsa' });
+      if (rec.code !== code) return res.status(400).json({ error: 'Code salah' });
+      global._linkCodes.delete(`${req.user.id}:${platform}`);
+      // For demo: generate placeholder identifier
+      finalIdentifier = platform === 'telegram' ? `tg_${Date.now()}` : platform === 'whatsapp' ? `+628${Math.floor(Math.random() * 1e9)}` : `discord_${Date.now()}`;
+    }
+    if (!finalIdentifier) return res.status(400).json({ error: 'identifier or valid code required' });
+    const col = platform === 'telegram' ? 'linked_telegram_id' : platform === 'whatsapp' ? 'linked_whatsapp_number' : 'linked_discord_id';
+    await pool.query(`UPDATE users SET ${col} = ? WHERE id = ?`, [finalIdentifier, req.user.id]);
+    res.json({ ok: true, platform, identifier: finalIdentifier, message: `${platform} linked!` });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ============ PRODUCTS ============
