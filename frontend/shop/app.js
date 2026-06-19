@@ -1,5 +1,5 @@
 // Zcus Store v3 — Glassmorphism + FontAwesome + Extra Features
-const API = 'https://zcus.biz.id/shop-app/api';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : 'https://zcus.biz.id/shop-app/api';
 let products = [];
 let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
@@ -97,6 +97,8 @@ applyPromo = function() {
 document.addEventListener('DOMContentLoaded', () => {
   if (user && token) {
     document.getElementById('accountIcon').className = 'fa-solid fa-user-check';
+    const sl = document.getElementById('settingsLink');
+    if (sl) sl.style.display = 'flex';
     if (user.role === 'seller' || user.role === 'admin') {
       document.getElementById('sellerLink').style.display = 'flex';
     }

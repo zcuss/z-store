@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Pengaturan Akun — Z Store</title>
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.set-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:240px 1fr;gap:32px}
+@media(max-width:900px){.set-wrap{grid-template-columns:1fr;gap:16px;padding:16px}}
+.set-sidebar{position:sticky;top:96px;align-self:start;display:flex;flex-direction:column;gap:6px;height:fit-content}
+.set-nav{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;cursor:pointer;transition:all .2s;color:var(--text-dim);font-weight:600;font-size:14px;text-decoration:none}
+.set-nav:hover{color:var(--text);border-color:var(--glass-border-hover)}
+.set-nav.active{background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(56,189,248,.1));border-color:var(--accent);color:var(--accent)}
+.set-nav i{width:20px;text-align:center;font-size:14px}
+.set-nav .nav-badge{margin-left:auto;background:rgba(244,63,94,.2);color:#fb7185;font-size:10px;padding:2px 6px;border-radius:6px;font-weight:700}
+.set-section{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:24px;display:none}
+.set-section.active{display:block;animation:fadeIn .3s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.set-section h2{margin:0 0 6px;font-size:22px;display:flex;align-items:center;gap:10px}
+.set-section h2 i{color:var(--accent)}
+.set-section .set-sub{margin:0 0 24px;color:var(--text-dim);font-size:13px;line-height:1.6}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--glass-border);gap:16px;flex-wrap:wrap}
+.set-row:last-child{border-bottom:none}
+.set-row .set-info{flex:1;min-width:200px}
+.set-row .set-info b{display:block;color:var(--text);font-size:14px;margin-bottom:2px}
+.set-row .set-info small{color:var(--text-dim);font-size:12px;line-height:1.5}
+.set-row .set-action{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.set-row .status-pill{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.set-row .status-pill.linked{background:rgba(34,197,94,.15);color:#22c55e}
+.set-row .status-pill.unlinked{background:rgba(107,114,128,.15);color:#9ca3af}
+.set-row .status-pill.verified{background:rgba(14,165,233,.15);color:#38bdf8}
+.set-platform-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.set-platform-icon.telegram{background:linear-gradient(135deg,#0088cc,#229ed9);color:#fff}
+.set-platform-icon.whatsapp{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.set-platform-icon.discord{background:linear-gradient(135deg,#5865f2,#4752c4);color:#fff}
+.set-platform-icon.google{background:#fff;color:#4285f4;border:1px solid var(--glass-border)}
+.set-platform-icon.email{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}
+.set-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:600px){.set-form-grid{grid-template-columns:1fr}}
+.set-form-grid.full{grid-template-columns:1fr}
+.set-field{display:flex;flex-direction:column;gap:6px}
+.set-field label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+.set-field .form-input{padding:10px 14px;background:rgba(0,0,0,.25);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:14px;transition:all .2s;outline:none}
+.set-field .form-input:focus{border-color:var(--accent);background:rgba(0,0,0,.4);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.set-pwd-wrap{position:relative}
+.set-pwd-wrap .form-input{padding-right:44px}
+.set-pwd-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:6px;background:transparent;border:none;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.set-pwd-toggle:hover{background:var(--glass);color:var(--text)}
+.set-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:16px;flex-shrink:0;position:relative;cursor:pointer;overflow:hidden}
+.set-avatar img{width:100%;height:100%;object-fit:cover}
+.set-avatar-edit{position:absolute;bottom:0;right:0;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid var(--bg)}
+.set-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}
+.set-modal{background:var(--bg-elev);border:1px solid var(--glass-border);border-radius:18px;padding:28px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto}
+.set-modal h3{margin:0 0 8px}
+.set-modal .form-input{width:100%;padding:10px 14px;background:rgba(0,0,0,.25);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:10px;outline:none}
+.set-modal .form-input:focus{border-color:var(--accent)}
+.set-modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.set-link-code{font-family:monospace;font-size:32px;font-weight:800;letter-spacing:8px;color:var(--accent);text-align:center;padding:20px;background:rgba(0,0,0,.3);border-radius:12px;margin:16px 0}
+.set-instruction{background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:10px;padding:12px;font-size:13px;color:var(--text);margin:12px 0;line-height:1.6}
+.set-guard{padding:80px 24px;text-align:center;color:var(--text-dim)}
+.set-guard i{font-size:64px;color:#f43f5e;margin-bottom:16px;display:block}
+.set-profile-head{display:flex;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--glass-border)}
+.set-profile-name{font-size:18px;font-weight:700;color:var(--text);margin:0 0 4px}
+.set-profile-email{color:var(--text-dim);font-size:13px;margin:0}
+.set-pref-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--glass-border);gap:16px}
+.set-pref-row:last-child{border-bottom:none}
+.set-toggle{position:relative;width:48px;height:26px;background:rgba(255,255,255,.1);border-radius:999px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.set-toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all .2s}
+.set-toggle.on{background:var(--accent)}
+.set-toggle.on::after{left:25px}
+.set-danger-zone{padding:20px;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:12px;margin-top:20px}
+.set-danger-zone h4{color:#fb7185;margin:0 0 4px}
+.set-danger-zone p{color:var(--text-dim);font-size:12px;margin:0 0 12px;line-height:1.5}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">PENGATURAN</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="/shop/orders.html" class="hdr-btn" title="Pesanan"><i class="fa-solid fa-box"></i></a>
+    <a href="/shop/admin.html" class="hdr-btn" id="adminLink" style="display:none" title="Admin"><i class="fa-solid fa-gauge-high"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="hdr-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</header>
+
+<main id="main" class="set-wrap">
+  <div id="setGuard" class="set-guard" style="display:none">
+    <i class="fa-solid fa-lock"></i>
+    <h2>Login dulu</h2>
+    <p>Kamu perlu login untuk akses pengaturan akun.</p>
+    <a href="/shop/" class="btn btn-primary" style="margin-top:12px"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a>
+  </div>
+
+  <div id="setContent" style="display:none">
+    <aside class="set-sidebar">
+      <div class="set-nav active" data-tab="profile" onclick="switchTab('profile', this)"><i class="fa-solid fa-user"></i> Profil</div>
+      <div class="set-nav" data-tab="security" onclick="switchTab('security', this)"><i class="fa-solid fa-shield-halved"></i> Keamanan</div>
+      <div class="set-nav" data-tab="platforms" onclick="switchTab('platforms', this)">
+        <i class="fa-solid fa-link"></i> Platform Sync
+        <span class="nav-badge" id="platformBadge" style="display:none">0</span>
+      </div>
+      <div class="set-nav" data-tab="preferences" onclick="switchTab('preferences', this)"><i class="fa-solid fa-sliders"></i> Preferensi</div>
+      <div class="set-nav" data-tab="notifications" onclick="switchTab('notifications', this)"><i class="fa-solid fa-bell"></i> Notifikasi</div>
+      <div class="set-nav" data-tab="danger" onclick="switchTab('danger', this)"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</div>
+    </aside>
+
+    <!-- PROFILE -->
+    <section class="set-section active" id="sec-profile">
+      <h2><i class="fa-solid fa-user"></i> Profil Akun</h2>
+      <p class="set-sub">Kelola informasi profil kamu yang ditampilkan di Z Store.</p>
+      <div class="set-profile-head">
+        <div class="set-avatar" id="avatarPreview" onclick="document.getElementById('avatarInput').click()">
+          <span id="avatarInitial">U</span>
+          <div class="set-avatar-edit"><i class="fa-solid fa-camera"></i></div>
+        </div>
+        <div style="flex:1">
+          <h3 class="set-profile-name" id="profileName">Loading...</h3>
+          <p class="set-profile-email" id="profileEmail">loading@example.com</p>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <span class="status-pill verified" id="profileRole">buyer</span>
+            <span class="status-pill verified" id="profileVerify" style="display:none"><i class="fa-solid fa-circle-check"></i> Email Verified</span>
+          </div>
+        </div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
+      </div>
+      <div class="set-form-grid">
+        <div class="set-field">
+          <label>Nama Lengkap</label>
+          <input type="text" id="setName" class="form-input" placeholder="Nama kamu">
+        </div>
+        <div class="set-field">
+          <label>Email</label>
+          <input type="email" id="setEmail" class="form-input" disabled>
+        </div>
+        <div class="set-field">
+          <label>Nomor WhatsApp</label>
+          <input type="tel" id="setPhone" class="form-input" placeholder="+62 8xx xxxx xxxx">
+        </div>
+        <div class="set-field">
+          <label>Role</label>
+          <input type="text" id="setRole" class="form-input" disabled>
+        </div>
+      </div>
+      <div class="set-form-grid full">
+        <div class="set-field">
+          <label>Bio</label>
+          <textarea id="setBio" class="form-input" rows="3" placeholder="Cerita singkat tentang kamu..."></textarea>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
+    </section>
+
+    <!-- SECURITY -->
+    <section class="set-section" id="sec-security">
+      <h2><i class="fa-solid fa-shield-halved"></i> Keamanan Akun</h2>
+      <p class="set-sub">Ganti password, lihat session aktif, dan setup two-factor authentication.</p>
+
+      <div class="set-row">
+        <div class="set-info">
+          <b>Password</b>
+          <small>Update password kamu secara berkala. Minimal 6 karakter.</small>
+        </div>
+        <div class="set-action">
+          <span class="status-pill" id="pwdStatus">-</span>
+          <button class="btn btn-ghost btn-sm" onclick="openChangePassword()"><i class="fa-solid fa-key"></i> Ganti</button>
+        </div>
+      </div>
+      <div class="set-row">
+        <div class="set-info">
+          <b>Two-Factor Authentication (2FA)</b>
+          <small>Extra layer keamanan via OTP email. Coming soon untuk TOTP authenticator.</small>
+        </div>
+        <div class="set-action">
+          <span class="status-pill unlinked">Belum aktif</span>
+        </div>
+      </div>
+      <div class="set-row">
+        <div class="set-info">
+          <b>Session Aktif</b>
+          <small>Kamu login sebagai <span id="activeSession">-</span>. Logout dari device lain tersedia di bawah.</small>
+        </div>
+        <div class="set-action">
+          <button class="btn btn-ghost btn-sm" onclick="logoutAll()"><i class="fa-solid fa-right-from-bracket"></i> Logout Semua</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLATFORMS -->
+    <section class="set-section" id="sec-platforms">
+      <h2><i class="fa-solid fa-link"></i> Platform Sync</h2>
+      <p class="set-sub">Sambungkan akun Z Store kamu dengan Telegram, WhatsApp, dan Discord. Pesan & notifikasi akan dikirim ke semua platform yang kamu link.</p>
+
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px;width:100%">
+          <div class="set-platform-icon email"><i class="fa-solid fa-envelope"></i></div>
+          <div class="set-info">
+            <b>Email <span style="font-size:11px;color:#22c55e">(Primary)</span></b>
+            <small>Login utama, notifikasi order, OTP reset</small>
+          </div>
+          <div class="set-action" style="margin-left:auto">
+            <span class="status-pill linked" id="emailStatus">Linked</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;width:100%">
+          <div class="set-platform-icon google"><i class="fa-brands fa-google"></i></div>
+          <div class="set-info">
+            <b>Google OAuth</b>
+            <small>Login cepat dengan akun Google kamu</small>
+          </div>
+          <div class="set-action" style="margin-left:auto">
+            <span class="status-pill" id="googleStatus">-</span>
+            <button class="btn btn-ghost btn-sm" onclick="linkGoogle()"><i class="fa-solid fa-link"></i> Hubungkan</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin:24px 0 12px;font-size:14px;color:var(--text-dim)">Chat Platforms</h3>
+
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px;width:100%">
+          <div class="set-platform-icon telegram"><i class="fa-brands fa-telegram"></i></div>
+          <div class="set-info">
+            <b>Telegram</b>
+            <small>Notifikasi order & status real-time via bot</small>
+          </div>
+          <div class="set-action" style="margin-left:auto">
+            <span class="status-pill" id="telegramStatus">-</span>
+            <button class="btn btn-ghost btn-sm" onclick="linkPlatform('telegram')" id="telegramBtn"><i class="fa-solid fa-link"></i> Hubungkan</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;width:100%">
+          <div class="set-platform-icon whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
+          <div class="set-info">
+            <b>WhatsApp</b>
+            <small>Konfirmasi order, status delivery via WhatsApp</small>
+          </div>
+          <div class="set-action" style="margin-left:auto">
+            <span class="status-pill" id="whatsappStatus">-</span>
+            <button class="btn btn-ghost btn-sm" onclick="linkPlatform('whatsapp')" id="whatsappBtn"><i class="fa-solid fa-link"></i> Hubungkan</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;width:100%">
+          <div class="set-platform-icon discord"><i class="fa-brands fa-discord"></i></div>
+          <div class="set-info">
+            <b>Discord</b>
+            <small>Notifikasi server Discord kamu</small>
+          </div>
+          <div class="set-action" style="margin-left:auto">
+            <span class="status-pill" id="discordStatus">-</span>
+            <button class="btn btn-ghost btn-sm" onclick="linkPlatform('discord')" id="discordBtn"><i class="fa-solid fa-link"></i> Hubungkan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREFERENCES -->
+    <section class="set-section" id="sec-preferences">
+      <h2><i class="fa-solid fa-sliders"></i> Preferensi</h2>
+      <p class="set-sub">Personalisasi tampilan dan notifikasi.</p>
+
+      <div class="set-pref-row">
+        <div class="set-info">
+          <b>Theme</b>
+          <small>Mode terang atau gelap</small>
+        </div>
+        <div class="set-action" style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="setTheme('dark')" id="themeDarkBtn"><i class="fa-solid fa-moon"></i> Dark</button>
+          <button class="btn btn-ghost btn-sm" onclick="setTheme('light')" id="themeLightBtn"><i class="fa-solid fa-sun"></i> Light</button>
+        </div>
+      </div>
+      <div class="set-pref-row">
+        <div class="set-info">
+          <b>Notifikasi Email</b>
+          <small>Terima update promo, status order, dan newsletter</small>
+        </div>
+        <div class="set-toggle on" id="toggleEmail" onclick="togglePref('email', this)"></div>
+      </div>
+      <div class="set-pref-row">
+        <div class="set-info">
+          <b>Notifikasi WhatsApp</b>
+          <small>Status order via WhatsApp (perlu link WA dulu)</small>
+        </div>
+        <div class="set-toggle" id="toggleWA" onclick="togglePref('whatsapp', this)"></div>
+      </div>
+      <div class="set-pref-row">
+        <div class="set-info">
+          <b>Notifikasi Telegram</b>
+          <small>Status order via Telegram (perlu link dulu)</small>
+        </div>
+        <div class="set-toggle on" id="toggleTG" onclick="togglePref('telegram', this)"></div>
+      </div>
+      <div class="set-pref-row">
+        <div class="set-info">
+          <b>Bahasa</b>
+          <small>Bahasa antarmuka</small>
+        </div>
+        <div class="set-action">
+          <select id="prefLang" class="form-input" style="padding:6px 12px;background:rgba(0,0,0,.25);border:1px solid var(--glass-border);color:var(--text);border-radius:8px">
+            <option value="id">Bahasa Indonesia</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="set-section" id="sec-notifications">
+      <h2><i class="fa-solid fa-bell"></i> Riwayat Notifikasi</h2>
+      <p class="set-sub">Semua notifikasi yang masuk ke akun kamu.</p>
+      <div id="notifList"><div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div></div>
+    </section>
+
+    <!-- DANGER ZONE -->
+    <section class="set-section" id="sec-danger">
+      <h2><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h2>
+      <p class="set-sub">Tindakan destruktif. Tidak bisa dibatalkan.</p>
+      <div class="set-danger-zone">
+        <h4><i class="fa-solid fa-trash"></i> Hapus Akun Permanen</h4>
+        <p>Akun kamu akan dihapus permanen. Semua data (orders, products, balance) akan hilang dan tidak bisa dipulihkan.</p>
+        <button class="btn btn-danger" onclick="deleteAccount()"><i class="fa-solid fa-trash"></i> Hapus Akun Saya</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Modal: Change Password -->
+<div class="set-modal-overlay" id="modalChangePwd" style="display:none">
+  <div class="set-modal">
+    <h3><i class="fa-solid fa-key"></i> Ganti Password</h3>
+    <p style="color:var(--text-dim);font-size:13px;margin:0 0 12px">Masukkan password lama dan password baru kamu.</p>
+    <div class="set-pwd-wrap"><input type="password" id="oldPwd" class="form-input" placeholder="Password lama"><button type="button" class="set-pwd-toggle" onclick="togglePwd('oldPwd', this)"><i class="fa-solid fa-eye"></i></button></div>
+    <div class="set-pwd-wrap"><input type="password" id="newPwd1" class="form-input" placeholder="Password baru (min 6)"><button type="button" class="set-pwd-toggle" onclick="togglePwd('newPwd1', this)"><i class="fa-solid fa-eye"></i></button></div>
+    <div class="set-pwd-wrap"><input type="password" id="newPwd2" class="form-input" placeholder="Konfirmasi password baru"><button type="button" class="set-pwd-toggle" onclick="togglePwd('newPwd2', this)"><i class="fa-solid fa-eye"></i></button></div>
+    <div class="set-modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalChangePwd')">Batal</button>
+      <button class="btn btn-primary" onclick="changePassword()"><i class="fa-solid fa-check"></i> Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Link Platform -->
+<div class="set-modal-overlay" id="modalLinkPlatform" style="display:none">
+  <div class="set-modal">
+    <h3 id="linkModalTitle"><i class="fa-solid fa-link"></i> Hubungkan Platform</h3>
+    <p id="linkModalSub" style="color:var(--text-dim);font-size:13px;margin:0 0 12px"></p>
+    <div id="linkCodeBox" style="display:none">
+      <p style="font-size:12px;color:var(--text-dim);margin:0 0 8px">Kode link kamu (berlaku 10 menit):</p>
+      <div class="set-link-code" id="linkCode">-</div>
+      <div class="set-instruction" id="linkInstruction">-</div>
+    </div>
+    <div id="linkManualBox" style="display:none">
+      <p style="font-size:12px;color:var(--text-dim);margin:0 0 8px">Atau masukkan ID/nomor manual:</p>
+      <input type="text" id="linkManualId" class="form-input" placeholder="Telegram chat ID / WhatsApp number / Discord user ID">
+    </div>
+    <div class="set-modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalLinkPlatform')">Batal</button>
+      <button class="btn btn-primary" id="linkRequestBtn" onclick="requestLinkCode()"><i class="fa-solid fa-paper-plane"></i> Minta Kode</button>
+      <button class="btn btn-primary" id="linkConfirmBtn" style="display:none" onclick="confirmLinkCode()"><i class="fa-solid fa-check"></i> Verifikasi & Link</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let platforms = {};
+let linkPlatform = '';
+let prefs = JSON.parse(localStorage.getItem('zs_prefs') || '{"email":true,"whatsapp":false,"telegram":true}');
+
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtDate = d => new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); updateThemeBtns(); }
+function setTheme(t) { document.documentElement.dataset.theme = t; localStorage.setItem('zs_theme', t); updateThemeBtns(); }
+function updateThemeBtns() { const cur = document.documentElement.dataset.theme; document.getElementById('themeDarkBtn').classList.toggle('btn-primary', cur === 'dark'); document.getElementById('themeLightBtn').classList.toggle('btn-primary', cur === 'light'); }
+function logout() { localStorage.removeItem('zs_user'); localStorage.removeItem('zs_token'); location.href = '/shop/'; }
+function logoutAll() { if (confirm('Logout dari semua device?')) { logout(); } }
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function togglePwd(id, btn) { const inp = document.getElementById(id); if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>'; } else { inp.type = 'password'; btn.innerHTML = '<i class="fa-solid fa-eye"></i>'; } }
+function switchTab(name, btn) {
+  document.querySelectorAll('.set-nav').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.set-section').forEach(s => s.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else document.querySelector(`.set-nav[data-tab="${name}"]`)?.classList.add('active');
+  document.getElementById('sec-' + name).classList.add('active');
+  if (name === 'notifications') loadNotifications();
+  if (name === 'platforms') loadPlatforms();
+}
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
+}
+
+async function checkAuth() {
+  if (!token || !user) { document.getElementById('setGuard').style.display = 'block'; return; }
+  let r;
+  try { r = await api('/api/auth/me'); } catch (e) { r = { error: e.message }; }
+  // Dev mode: API offline → use mock data
+  if (r.error && (r.error.includes('API offline') || r.error.includes('Network') || r.error.includes('Failed') || r.error.includes('503'))) {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      user = user || { id: 1, email: 'demo@zstore.local', name: 'Demo User', role: 'buyer', email_verified: true, phone: '', bio: '' };
+      if (user.role === 'admin') { const al = document.getElementById('adminLink'); if (al) al.style.display = 'flex'; }
+      document.getElementById('setContent').style.display = 'grid';
+      loadProfile();
+      // Mock platforms + notifications
+      document.getElementById('emailStatus').textContent = 'Verified (dev)';
+      document.getElementById('emailStatus').className = 'status-pill verified';
+      document.getElementById('googleStatus').textContent = 'Belum (dev)';
+      document.getElementById('googleStatus').className = 'status-pill unlinked';
+      updPlat('telegram', { linked: true, bot: { username: 'ZcusStore_bot' } });
+      updPlat('whatsapp', { linked: false });
+      updPlat('discord', { linked: false });
+      document.getElementById('notifList').innerHTML = '<div class="empty-state" style="padding:40px;text-align:center;color:var(--text-dim)"><i class="fa-solid fa-bell-slash" style="font-size:32px;display:block;margin-bottom:8px;opacity:.5"></i>Dev mode: notifikasi offline</div>';
+      return;
+    }
+    document.getElementById('setGuard').style.display = 'block'; return;
+  }
+  if (r.error || !r.user) { document.getElementById('setGuard').style.display = 'block'; return; }
+  user = r.user; localStorage.setItem('zs_user', JSON.stringify(user));
+  if (user.role === 'admin') { const al = document.getElementById('adminLink'); if (al) al.style.display = 'flex'; }
+  document.getElementById('setContent').style.display = 'grid';
+  loadProfile();
+  loadPlatforms();
+  loadNotifications();
+}
+
+function loadProfile() {
+  document.getElementById('profileName').textContent = user.name || 'User';
+  document.getElementById('profileEmail').textContent = user.email;
+  document.getElementById('profileRole').textContent = user.role;
+  if (user.email_verified) document.getElementById('profileVerify').style.display = 'inline-flex';
+  document.getElementById('setName').value = user.name || '';
+  document.getElementById('setEmail').value = user.email || '';
+  document.getElementById('setPhone').value = user.phone || '';
+  document.getElementById('setRole').value = user.role || 'buyer';
+  document.getElementById('setBio').value = user.bio || '';
+  document.getElementById('avatarInitial').textContent = (user.name || user.email || 'U').charAt(0).toUpperCase();
+  if (user.avatar_url) {
+    document.getElementById('avatarPreview').innerHTML = `<img src="${user.avatar_url}"><div class="set-avatar-edit"><i class="fa-solid fa-camera"></i></div>`;
+  }
+  document.getElementById('activeSession').textContent = navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Browser ini';
+  // Pwd status
+  fetch(API + '/api/auth/platforms', { headers: { Authorization: 'Bearer ' + token } })
+    .then(r => r.json()).then(d => {
+      const ps = document.getElementById('pwdStatus');
+      if (d.platforms && d.platforms.web) {
+        ps.textContent = d.platforms.web.verified ? 'Aktif' : 'Belum verifikasi';
+        ps.className = 'status-pill ' + (d.platforms.web.verified ? 'linked' : 'unlinked');
+      }
+    });
+  updateThemeBtns();
+}
+
+async function saveProfile() {
+  const name = document.getElementById('setName').value.trim();
+  const phone = document.getElementById('setPhone').value.trim();
+  const bio = document.getElementById('setBio').value.trim();
+  if (!name) return toast('Nama wajib diisi', 'error');
+  const r = await api('/api/auth/profile', { method: 'PUT', body: JSON.stringify({ name, phone, bio }) });
+  if (r.error) return toast(r.error, 'error');
+  user = r.user; localStorage.setItem('zs_user', JSON.stringify(user));
+  toast('Profil berhasil disimpan', 'success');
+  loadProfile();
+}
+
+function uploadAvatar(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  // Convert to base64 (no upload backend, store local for demo)
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const avatar_url = reader.result;
+    document.getElementById('avatarPreview').innerHTML = `<img src="${avatar_url}"><div class="set-avatar-edit"><i class="fa-solid fa-camera"></i></div>`;
+    const r = await api('/api/auth/profile', { method: 'PUT', body: JSON.stringify({ avatar_url }) });
+    if (r.error) return toast(r.error, 'error');
+    toast('Avatar diperbarui', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function openChangePassword() {
+  document.getElementById('oldPwd').value = '';
+  document.getElementById('newPwd1').value = '';
+  document.getElementById('newPwd2').value = '';
+  openModal('modalChangePwd');
+}
+
+async function changePassword() {
+  const old_pwd = document.getElementById('oldPwd').value;
+  const new_pwd = document.getElementById('newPwd1').value;
+  const confirm = document.getElementById('newPwd2').value;
+  if (!old_pwd || !new_pwd) return toast('Semua field wajib diisi', 'error');
+  if (new_pwd.length < 6) return toast('Password baru minimal 6 karakter', 'error');
+  if (new_pwd !== confirm) return toast('Konfirmasi password tidak cocok', 'error');
+  const r = await api('/api/auth/password', { method: 'PUT', body: JSON.stringify({ current_password: old_pwd, new_password: new_pwd }) });
+  if (r.error) return toast(r.error, 'error');
+  toast('Password berhasil diubah. Silakan login ulang.', 'success');
+  closeModal('modalChangePwd');
+  setTimeout(() => { localStorage.clear(); location.href = '/shop/'; }, 1500);
+}
+
+async function loadPlatforms() {
+  const r = await api('/api/auth/platforms');
+  if (r.error) return;
+  platforms = r.platforms || {};
+  // Email
+  const emailStatus = document.getElementById('emailStatus');
+  emailStatus.textContent = platforms.web.verified ? 'Verified' : 'Linked';
+  emailStatus.className = 'status-pill ' + (platforms.web.verified ? 'verified' : 'linked');
+  // Google
+  const gs = document.getElementById('googleStatus');
+  const gb = document.querySelector('button[onclick="linkGoogle()"]');
+  if (user.google_id) { gs.textContent = 'Linked'; gs.className = 'status-pill linked'; if (gb) gb.innerHTML = '<i class="fa-solid fa-unlink"></i> Putuskan'; }
+  else { gs.textContent = 'Belum'; gs.className = 'status-pill unlinked'; if (gb) gb.innerHTML = '<i class="fa-solid fa-link"></i> Hubungkan'; }
+  // Telegram
+  updPlat('telegram', platforms.telegram);
+  updPlat('whatsapp', platforms.whatsapp);
+  updPlat('discord', platforms.discord);
+  // Badge
+  const count = (platforms.telegram.linked?1:0) + (platforms.whatsapp.linked?1:0) + (platforms.discord.linked?1:0) + (user.google_id?1:0);
+  const badge = document.getElementById('platformBadge');
+  if (count > 0) { badge.style.display = 'inline-block'; badge.textContent = count; }
+}
+
+function updPlat(name, p) {
+  const s = document.getElementById(name + 'Status');
+  const b = document.getElementById(name + 'Btn');
+  if (!s) return;
+  if (p.linked) {
+    s.textContent = 'Linked' + (p.bot?.username ? ' · @' + p.bot.username : '');
+    s.className = 'status-pill linked';
+    if (b) b.innerHTML = '<i class="fa-solid fa-unlink"></i> Putuskan';
+  } else {
+    s.textContent = 'Belum';
+    s.className = 'status-pill unlinked';
+    if (b) b.innerHTML = '<i class="fa-solid fa-link"></i> Hubungkan';
+  }
+}
+
+async function linkPlatform(name) {
+  linkPlatform = name;
+  // Check if already linked → unlink instead
+  if (platforms[name]?.linked) {
+    if (!confirm(`Putuskan ${name} dari akun kamu?`)) return;
+    const r = await api('/api/auth/unlink', { method: 'POST', body: JSON.stringify({ platform: name }) });
+    if (r.error) return toast(r.error, 'error');
+    toast(`${name} berhasil di-unlink`, 'success');
+    return loadPlatforms();
+  }
+  // Open modal
+  document.getElementById('linkModalTitle').innerHTML = `<i class="fa-brands fa-${name === 'telegram' ? 'telegram' : name === 'whatsapp' ? 'whatsapp' : 'discord'}"></i> Hubungkan ${name.charAt(0).toUpperCase() + name.slice(1)}`;
+  const sub = {
+    telegram: 'Dapatkan kode link, lalu kirim ke @ZStoreBot di Telegram untuk verifikasi.',
+    whatsapp: 'Scan QR code atau masukkan nomor WhatsApp kamu untuk verifikasi.',
+    discord: 'Dapatkan kode link, lalu jalankan /link di Discord bot.'
+  };
+  document.getElementById('linkModalSub').textContent = sub[name];
+  document.getElementById('linkCodeBox').style.display = 'none';
+  document.getElementById('linkManualBox').style.display = 'block';
+  document.getElementById('linkManualId').value = '';
+  document.getElementById('linkManualId').placeholder = name === 'telegram' ? 'Telegram chat ID (angka)' : name === 'whatsapp' ? '+62 8xx xxxx xxxx' : 'Discord user ID';
+  document.getElementById('linkRequestBtn').style.display = 'inline-flex';
+  document.getElementById('linkConfirmBtn').style.display = 'none';
+  openModal('modalLinkPlatform');
+}
+
+async function requestLinkCode() {
+  const r = await api('/api/auth/link/request', { method: 'POST', body: JSON.stringify({ platform: linkPlatform }) });
+  if (r.error) return toast(r.error, 'error');
+  document.getElementById('linkCode').textContent = r.code;
+  document.getElementById('linkInstruction').innerHTML = `<i class="fa-solid fa-circle-info"></i> ${r.instruction}`;
+  document.getElementById('linkCodeBox').style.display = 'block';
+  document.getElementById('linkRequestBtn').style.display = 'none';
+  document.getElementById('linkConfirmBtn').style.display = 'inline-flex';
+  toast('Kode link dibuat. Cek console server (dev) atau inbox bot (prod).', 'info');
+}
+
+async function confirmLinkCode() {
+  const code = document.getElementById('linkCode').textContent;
+  const identifier = document.getElementById('linkManualId').value.trim();
+  const r = await api('/api/auth/link/confirm', { method: 'POST', body: JSON.stringify({ platform: linkPlatform, code, identifier: identifier || undefined }) });
+  if (r.error) return toast(r.error, 'error');
+  toast(`${linkPlatform} berhasil di-link!`, 'success');
+  closeModal('modalLinkPlatform');
+  loadPlatforms();
+}
+
+async function linkGoogle() {
+  if (user.google_id) {
+    // Cannot unlink google via API yet — just inform
+    return toast('Google account sudah ter-link. Hubungi admin untuk unlink.', 'info');
+  }
+  // Simulate linking
+  const email = prompt('Email Google kamu:');
+  if (!email) return;
+  const r = await api('/api/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'sim_' + Date.now(), email, name: email.split('@')[0] }) });
+  if (r.error) return toast(r.error, 'error');
+  toast('Google account ter-link!', 'success');
+  user = r.user; localStorage.setItem('zs_user', JSON.stringify(user));
+  loadPlatforms();
+}
+
+function togglePref(key, el) {
+  prefs[key] = !prefs[key];
+  el.classList.toggle('on', prefs[key]);
+  localStorage.setItem('zs_prefs', JSON.stringify(prefs));
+  toast(`${key} notifications ${prefs[key] ? 'ON' : 'OFF'}`, 'info');
+}
+
+function applyPrefs() {
+  ['email','whatsapp','telegram'].forEach(k => {
+    const el = document.getElementById('toggle' + (k === 'email' ? 'Email' : k === 'whatsapp' ? 'WA' : 'TG'));
+    if (el) el.classList.toggle('on', !!prefs[k]);
+  });
+}
+
+async function loadNotifications() {
+  const list = document.getElementById('notifList');
+  list.innerHTML = '<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+  const r = await api('/api/notifications');
+  if (r.error) { list.innerHTML = `<div class="empty">${r.error}</div>`; return; }
+  const items = r.notifications || [];
+  if (!items.length) { list.innerHTML = '<div class="empty-state" style="padding:40px;text-align:center;color:var(--text-dim)"><i class="fa-solid fa-bell-slash" style="font-size:32px;display:block;margin-bottom:8px;opacity:.5"></i>Belum ada notifikasi</div>'; return; }
+  list.innerHTML = items.map(n => `
+    <div class="set-row" style="${n.read_at ? 'opacity:.6' : ''}">
+      <div style="display:flex;align-items:center;gap:12px;flex:1">
+        <i class="fa-solid ${n.type==='order'?'fa-box':n.type==='escrow'?'fa-hand-holding-dollar':n.type==='withdraw'?'fa-money-bill-transfer':n.type==='platform'?'fa-link':'fa-bell'}" style="color:var(--accent);font-size:18px;width:24px;text-align:center"></i>
+        <div class="set-info">
+          <b>${n.title}</b>
+          <small>${n.body}</small>
+          <small style="display:block;margin-top:2px">${fmtDate(n.created_at)}</small>
+        </div>
+      </div>
+      ${!n.read_at ? `<button class="btn btn-ghost btn-sm" onclick="markRead(${n.id})">Tandai dibaca</button>` : '<i class="fa-solid fa-circle-check" style="color:#22c55e"></i>'}
+    </div>
+  `).join('');
+}
+
+async function markRead(id) {
+  await api('/api/notifications/' + id + '/read', { method: 'POST' });
+  loadNotifications();
+}
+
+function deleteAccount() {
+  if (!confirm('Yakin hapus akun permanen? Semua data akan hilang.')) return;
+  if (!confirm('YAKIN? Tidak bisa dibatalkan.')) return;
+  toast('Fitur hapus akun belum tersedia di demo. Hubungi admin via WhatsApp.', 'info');
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+applyPrefs();
+checkAuth();
+</script>
+</body>
+</html>
