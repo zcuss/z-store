@@ -525,31 +525,90 @@ function resetFilter() {
   toast('Filter reset', 'info');
 }
 
+// ===== SEARCH V2 =====
+let recentSearches = JSON.parse(localStorage.getItem('zs_recent_searches') || '[]');
+let trendingSearches = ['Claude Pro', 'Netflix Premium', 'ChatGPT Plus', 'Capcut Pro', 'Hosting cPanel', 'Voucher Spotify'];
+let searchDebounce = null;
+
 function searchProducts() {
   const q = document.getElementById('searchInput').value.trim();
   currentFilter.search = q;
   document.getElementById('searchClear').classList.toggle('show', !!q);
+  clearTimeout(searchDebounce);
   if (q.length < 2) {
-    document.getElementById('searchDropdown').classList.remove('show');
+    showSearchSuggestions();
   } else {
-    const matches = products.filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.category.toLowerCase().includes(q.toLowerCase())).slice(0, 6);
-    const dd = document.getElementById('searchDropdown');
-    if (matches.length) {
-      dd.innerHTML = matches.map(p => `
-        <div class="sd-item" onclick='viewProduct(${p.id})'>
-          <div class="sd-ico"><i class="fa-solid ${getCatIcon(p.category)}"></i></div>
-          <div class="sd-name">${p.name}</div>
-          <div class="sd-price">${fmtIDR(p.price)}</div>
-        </div>
-      `).join('');
-      dd.classList.add('show');
-    } else {
-      dd.innerHTML = '<div class="sd-item" style="cursor:default">Tidak ada hasil</div>';
-      dd.classList.add('show');
-    }
+    searchDebounce = setTimeout(() => runSearch(q), 200);
   }
   applyFilterLocal();
 }
+
+function showSearchSuggestions() {
+  const dd = document.getElementById('searchDropdown');
+  const recentHtml = recentSearches.length ? `
+    <div class="sd-section">
+      <div class="sd-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Pencarian Terakhir <button onclick="clearRecentSearches(event)" class="sd-clear">Hapus</button></div>
+      ${recentSearches.slice(0, 5).map(q => `<div class="sd-item sd-suggest" onclick="document.getElementById('searchInput').value='${q.replace(/'/g, "\\'")}';searchProducts()"><i class="fa-solid fa-clock-rotate-left"></i><div class="sd-name">${q}</div></div>`).join('')}
+    </div>` : '';
+  const trendingHtml = `
+    <div class="sd-section">
+      <div class="sd-section-title"><i class="fa-solid fa-arrow-trend-up"></i> Trending</div>
+      ${trendingSearches.map(q => `<div class="sd-item sd-suggest" onclick="document.getElementById('searchInput').value='${q}';searchProducts()"><i class="fa-solid fa-magnifying-glass"></i><div class="sd-name">${q}</div></div>`).join('')}
+    </div>`;
+  const catsHtml = `
+    <div class="sd-section">
+      <div class="sd-section-title"><i class="fa-solid fa-layer-group"></i> Cari per Kategori</div>
+      <div class="sd-cats">${['AI Tools','Voucher','Digital Goods','Merchandise','Software','Hosting','Game'].map(c => `<div class="sd-cat-chip" onclick="filterCat('${c}', document.querySelector('[data-cat=&quot;${c}&quot;]')); document.getElementById('searchInput').blur(); document.getElementById('searchDropdown').classList.remove('show')">${c}</div>`).join('')}</div>
+    </div>`;
+  dd.innerHTML = recentHtml + trendingHtml + catsHtml;
+  dd.classList.add('show');
+}
+
+function runSearch(q) {
+  const matches = products.filter(p =>
+    p.name.toLowerCase().includes(q.toLowerCase()) ||
+    (p.category || '').toLowerCase().includes(q.toLowerCase()) ||
+    (p.description || '').toLowerCase().includes(q.toLowerCase())
+  ).slice(0, 8);
+  const dd = document.getElementById('searchDropdown');
+  if (matches.length) {
+    dd.innerHTML = `<div class="sd-section"><div class="sd-section-title"><i class="fa-solid fa-magnifying-glass"></i> ${matches.length} hasil untuk "${q}"</div>${matches.map(p => `<div class="sd-item" onclick='saveSearch("${q}"); viewProduct(${p.id})'>
+        <div class="sd-ico"><i class="fa-solid ${getCatIcon(p.category)}"></i></div>
+        <div class="sd-info"><div class="sd-name">${highlightMatch(p.name, q)}</div><div class="sd-cat">${p.category}${p.review_count ? ` · ⭐ ${p.review_avg} (${p.review_count})` : ''}</div></div>
+        <div class="sd-price">${fmtIDR(p.price)}</div>
+      </div>`).join('')}</div>
+      <div class="sd-section"><button class="sd-view-all" onclick='saveSearch("${q}"); currentFilter.search="${q.replace(/'/g, "\\'")}"; applyFilterLocal(); document.getElementById(\"searchDropdown\").classList.remove(\"show\")'><i class="fa-solid fa-th"></i> Lihat semua hasil di grid</button></div>`;
+    dd.classList.add('show');
+  } else {
+    dd.innerHTML = `<div class="sd-empty">
+      <i class="fa-solid fa-circle-xmark"></i>
+      <div><b>Tidak ada hasil untuk "${q}"</b><small>Coba kata kunci lain atau jelajahi kategori di bawah</small></div>
+      ${trendingSearches.slice(0, 3).map(q => `<button class="sd-cat-chip" onclick="document.getElementById('searchInput').value='${q}';runSearch('${q}')">${q}</button>`).join('')}
+    </div>`;
+    dd.classList.add('show');
+  }
+}
+
+function highlightMatch(text, q) {
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i === -1) return text;
+  return text.slice(0, i) + '<mark>' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
+}
+
+function saveSearch(q) {
+  if (!q || q.length < 2) return;
+  recentSearches = [q, ...recentSearches.filter(x => x !== q)].slice(0, 10);
+  localStorage.setItem('zs_recent_searches', JSON.stringify(recentSearches));
+}
+
+function clearRecentSearches(e) {
+  e.stopPropagation();
+  recentSearches = [];
+  localStorage.removeItem('zs_recent_searches');
+  showSearchSuggestions();
+  toast('Pencarian terakhir dihapus', 'info');
+}
+
 function clearSearch() {
   document.getElementById('searchInput').value = '';
   currentFilter.search = '';
@@ -557,6 +616,25 @@ function clearSearch() {
   document.getElementById('searchDropdown').classList.remove('show');
   applyFilterLocal();
 }
+
+// Search input focus → show suggestions
+document.addEventListener('focusin', e => {
+  if (e.target.id === 'searchInput' && !e.target.value) showSearchSuggestions();
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hdr-search') && !e.target.closest('#searchDropdown')) {
+    document.getElementById('searchDropdown')?.classList.remove('show');
+  }
+});
+// Enter key → save & navigate
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'searchInput' && e.key === 'Enter') {
+    saveSearch(e.target.value);
+    currentFilter.search = e.target.value;
+    applyFilterLocal();
+    document.getElementById('searchDropdown').classList.remove('show');
+  }
+});
 
 function setView(v) {
   currentView = v;
