@@ -10,32 +10,42 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const midtransClient = require('midtrans-client');
 const crypto = require('crypto');
+const sec = require('./security');
 
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'zcus-shop-dev-secret-change-me';
+const JWT_S3CR3T = process.env.JWT_S3CR3T || (() => { console.error('[FATAL] JWT_S3CR3T env not set'); process.exit(1); })();
+const JWT_SECRET = JWT_S3CR3T;
 const MOUNT_PREFIX = process.env.MOUNT_PREFIX || '/shop-app';
 
 const app = express();
-app.use(express.json({ limit: '2mb', strict: false }));
-app.use(express.urlencoded({ extended: true }));
+
+// ============ SECURITY MIDDLEWARE (must run FIRST) ============
+// Global IP rate limit (defense-in-depth anti-DDoS)
+app.use(sec.globalRateLimit(300, 50));
+// Strict CORS (whitelist origins)
+app.use(sec.corsStrict);
+// Security headers (CSP, HSTS, X-Frame-Options, etc.)
+app.use(sec.securityHeaders);
+// Body parser limits (anti-DoS via huge payloads)
+app.use(express.json({ limit: '512kb', strict: true }));
+app.use(express.urlencoded({ extended: false, limit: '512kb' }));
+// Request timeout (anti slow-loris)
+app.use(sec.requestGuard(30_000));
+// Injection guard (anti-SQLi/XSS/RCE in query/body/params)
+app.use(sec.injectionGuard);
 
 // Global error handler to prevent server crash on bad requests
 app.use((err, req, res, next) => {
   if (err && err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'invalid JSON' });
   }
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'payload too large' });
+  }
   if (err) {
-    console.error('Express error:', err.message);
+    sec.logSecurityEvent('express_error', req.ip, { msg: err.message });
     return res.status(500).json({ error: 'server error' });
   }
-  next();
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
@@ -121,54 +131,76 @@ app.get('/api', (req, res) => {
 
 // ============ AUTH ============
 app.post('/api/auth/register', rateLimit('register', 5, 60 * 60 * 1000), async (req, res) => {
-  const { email, password, name, role } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'email + password required' });
+  const { email, password, name, role } = req.body || {};
+  if (!sec.validateEmail(email)) return res.status(400).json({ error: 'invalid email format' });
+  if (!sec.validatePassword(password)) return res.status(400).json({ error: 'password must be 8+ chars, include letter & number' });
+  if (name !== undefined && (!sec.validateString(name, 100) || /[<>'"&]/.test(name))) {
+    return res.status(400).json({ error: 'invalid name (max 100 chars, no HTML)' });
+  }
+  if (role !== undefined && !sec.validateEnum(role, ['buyer', 'seller'])) {
+    return res.status(400).json({ error: 'invalid role' });
+  }
+  const cleanEmail = sec.sanitizeText(email).toLowerCase();
+  const cleanName = name ? sec.sanitizeText(name) : cleanEmail.split('@')[0];
   try {
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 12); // higher rounds = harder to brute force
     const userRole = role === 'seller' ? 'seller' : 'buyer';
     const [r] = await pool.query(
       'INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, ?)',
-      [email, hash, name || email.split('@')[0], userRole]
+      [cleanEmail, hash, cleanName, userRole]
     );
-    const user = { id: r.insertId, email, name: name || email.split('@')[0], role: userRole };
+    const user = { id: r.insertId, email: cleanEmail, name: cleanName, role: userRole };
     res.json({ user, token: signToken(user) });
   } catch (e) {
     if (e.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'email already registered' });
-    res.status(500).json({ error: e.message });
+    sec.logSecurityEvent('register_error', req.ip, { code: e.code });
+    return res.status(500).json(sec.safeError(e, process.env.NODE_ENV === 'development'));
   }
 });
 
 app.post('/api/auth/login', rateLimit('login', 10, 15 * 60 * 1000), async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'email + password required' });
-  if (!validateEmail(email)) return res.status(400).json({ error: 'invalid email format' });
+  const { email, password } = req.body || {};
+  if (!sec.validateEmail(email)) return res.status(400).json({ error: 'invalid email format' });
+  if (typeof password !== 'string' || password.length === 0 || password.length > 128) {
+    return res.status(400).json({ error: 'invalid credentials' });
+  }
+  const cleanEmail = sec.sanitizeText(email).toLowerCase();
   // Check account lockout
-  const lockedUntil = checkLocked(email);
+  const lockedUntil = checkLocked(cleanEmail);
   if (lockedUntil) {
     const remainMin = Math.ceil((lockedUntil - Date.now()) / 60000);
     return res.status(429).json({ error: `Akun terkunci. Coba lagi dalam ${remainMin} menit.`, locked_until: new Date(lockedUntil).toISOString() });
   }
   try {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (!rows[0]) return res.status(401).json({ error: 'invalid credentials' });
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [cleanEmail]);
+    if (!rows[0]) {
+      // Constant-time response to prevent user enumeration
+      await bcrypt.compare(password, '$2a$12$dummyhashforcomparetimingattack0000000000000000000000000000000');
+      recordFailedLogin(cleanEmail);
+      return res.status(401).json({ error: 'invalid credentials' });
+    }
     if (!rows[0].password_hash) return res.status(401).json({ error: 'login with Google instead' });
     const ok = await bcrypt.compare(password, rows[0].password_hash);
     if (!ok) {
-      recordFailedLogin(email);
-      const entry = loginAttempts.get(email.toLowerCase().trim());
+      recordFailedLogin(cleanEmail);
+      const entry = loginAttempts.get(cleanEmail);
       const remain = entry && entry.lockedUntil > Date.now();
       auditLog(rows[0].id, 'login_failed', { ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress });
+      sec.logSecurityEvent('login_failed', req.ip, { user_id: rows[0].id });
       return res.status(401).json({
         error: remain ? 'Akun terkunci setelah terlalu banyak percobaan gagal. Coba lagi 15 menit.' : 'invalid credentials',
         attempts_left: entry ? Math.max(0, MAX_LOGIN_ATTEMPTS - entry.count) : MAX_LOGIN_ATTEMPTS - 1,
         locked: !!remain
       });
     }
-    resetLoginAttempts(email);
+    resetLoginAttempts(cleanEmail);
     auditLog(rows[0].id, 'login_success', { ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress });
     const user = { id: rows[0].id, email: rows[0].email, name: rows[0].name, role: rows[0].role };
     res.json({ user, token: signToken(user) });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    sec.logSecurityEvent('login_error', req.ip, { code: e.code });
+    return res.status(500).json(sec.safeError(e, process.env.NODE_ENV === 'development'));
+  }
 });
 
 app.post('/api/auth/google', async (req, res) => {
@@ -733,33 +765,72 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 app.post('/api/products', authMiddleware, requireRole('seller', 'admin'), async (req, res) => {
-  const { name, description, category, price, original_price, emoji, type, stock } = req.body;
-  if (!name || !category || !price) return res.status(400).json({ error: 'name, category, price required' });
+  const { name, description, category, price, original_price, emoji, type, stock } = req.body || {};
+  if (!sec.validateString(name, 200) || /[<>'"&]/.test(name)) return res.status(400).json({ error: 'invalid name (max 200, no HTML)' });
+  if (!sec.validateString(category, 50)) return res.status(400).json({ error: 'invalid category' });
+  if (description && !sec.validateString(description, 2000)) return res.status(400).json({ error: 'description too long (max 2000)' });
+  if (typeof price !== 'number' || price <= 0 || price > 100_000_000 || !Number.isFinite(price)) return res.status(400).json({ error: 'invalid price (1-100M)' });
+  if (original_price !== undefined && original_price !== null && (typeof original_price !== 'number' || original_price < 0)) return res.status(400).json({ error: 'invalid original_price' });
+  if (emoji && (typeof emoji !== 'string' || emoji.length > 8 || /[<>]/.test(emoji))) return res.status(400).json({ error: 'invalid emoji' });
+  if (type && !sec.validateEnum(type, ['digital', 'physical', 'service', 'voucher'])) return res.status(400).json({ error: 'invalid type' });
+  if (stock !== undefined && (!Number.isInteger(stock) || stock < 0 || stock > 1_000_000)) return res.status(400).json({ error: 'invalid stock (0-1M)' });
+  const cleanName = sec.sanitizeText(name);
+  const cleanDesc = description ? sec.sanitizeText(description) : '';
+  const cleanCat = sec.sanitizeText(category).toLowerCase();
   try {
     const [r] = await pool.query(
       'INSERT INTO products (seller_id, name, description, category, price, original_price, emoji, type, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [req.user.id, name, description || '', category, price, original_price || null, emoji || '📦', type || 'digital', stock || 0]
+      [req.user.id, cleanName, cleanDesc, cleanCat, price, original_price || null, emoji || '📦', type || 'digital', stock || 0]
     );
     res.json({ id: r.insertId, message: 'product created' });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    sec.logSecurityEvent('product_create_error', req.ip, { code: e.code });
+    return res.status(500).json(sec.safeError(e, process.env.NODE_ENV === 'development'));
+  }
 });
 
 app.put('/api/products/:id', authMiddleware, requireRole('seller', 'admin'), async (req, res) => {
+  if (!sec.validateId(Number(req.params.id))) return res.status(400).json({ error: 'invalid id' });
   try {
     const [p] = await pool.query('SELECT seller_id FROM products WHERE id = ?', [req.params.id]);
     if (!p[0]) return res.status(404).json({ error: 'not found' });
     if (p[0].seller_id !== req.user.id && req.user.role !== 'admin') return res.status(403).json({ error: 'not your product' });
-    const fields = ['name','description','category','price','original_price','emoji','type','stock','status'];
+    const fieldDefs = {
+      name: { max: 200, sanitize: true, noHtml: true },
+      description: { max: 2000, sanitize: true },
+      category: { max: 50, sanitize: true },
+      price: { type: 'number', min: 1, max: 100_000_000 },
+      original_price: { type: 'number', min: 0, max: 100_000_000, allowNull: true },
+      emoji: { max: 8, noHtml: true },
+      type: { enum: ['digital', 'physical', 'service', 'voucher'] },
+      stock: { type: 'integer', min: 0, max: 1_000_000 },
+      status: { enum: ['active', 'archived', 'draft'] },
+    };
     const updates = [];
     const args = [];
-    for (const f of fields) {
-      if (req.body[f] !== undefined) { updates.push(`${f} = ?`); args.push(req.body[f]); }
+    for (const [f, def] of Object.entries(fieldDefs)) {
+      if (req.body[f] === undefined) continue;
+      const v = req.body[f];
+      if (def.enum && !def.enum.includes(v)) return res.status(400).json({ error: `invalid ${f}` });
+      if (def.type === 'number' && (typeof v !== 'number' || !Number.isFinite(v))) return res.status(400).json({ error: `invalid ${f}` });
+      if (def.type === 'integer' && (!Number.isInteger(v))) return res.status(400).json({ error: `invalid ${f}` });
+      if (def.max !== undefined && typeof v === 'string' && v.length > def.max) return res.status(400).json({ error: `${f} too long` });
+      if (def.noHtml && typeof v === 'string' && /[<>'"&]/.test(v)) return res.status(400).json({ error: `${f} contains HTML` });
+      let clean = v;
+      if (def.sanitize && typeof v === 'string') clean = sec.sanitizeText(v);
+      if (def.type === 'integer') clean = Math.max(def.min || 0, Math.min(def.max || Infinity, v));
+      if (def.type === 'number' && v !== null) clean = Math.max(def.min || 0, Math.min(def.max || Infinity, v));
+      updates.push(`${f} = ?`);
+      args.push(clean);
     }
     if (!updates.length) return res.json({ message: 'no changes' });
     args.push(req.params.id);
     await pool.query(`UPDATE products SET ${updates.join(', ')} WHERE id = ?`, args);
     res.json({ message: 'updated' });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    sec.logSecurityEvent('product_update_error', req.ip, { code: e.code });
+    return res.status(500).json(sec.safeError(e, process.env.NODE_ENV === 'development'));
+  }
 });
 
 app.delete('/api/products/:id', authMiddleware, requireRole('seller', 'admin'), async (req, res) => {
@@ -903,9 +974,18 @@ app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
 
 // ============ ORDERS ============
 app.post('/api/orders/checkout', authMiddlewareWithBlacklist, rateLimit('checkout', 10, 60 * 60 * 1000), async (req, res) => {
-  const { items, buyer_email, buyer_phone, source } = req.body;
+  const { items, buyer_email, buyer_phone, source } = req.body || {};
   if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'items required' });
-  if (!buyer_email) return res.status(400).json({ error: 'buyer_email required' });
+  if (items.length > 50) return res.status(400).json({ error: 'too many items (max 50)' });
+  if (!sec.validateEmail(buyer_email)) return res.status(400).json({ error: 'invalid buyer_email' });
+  if (buyer_phone && !sec.validatePhone(buyer_phone)) return res.status(400).json({ error: 'invalid buyer_phone' });
+  if (source && !sec.validateString(source, 50)) return res.status(400).json({ error: 'invalid source' });
+  // Validate each item
+  for (const it of items) {
+    if (!it || typeof it !== 'object') return res.status(400).json({ error: 'invalid item' });
+    if (!sec.validateId(it.product_id)) return res.status(400).json({ error: 'invalid product_id' });
+    if (!Number.isInteger(it.qty) || it.qty < 1 || it.qty > 100) return res.status(400).json({ error: 'invalid qty (1-100)' });
+  }
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -919,8 +999,11 @@ app.post('/api/orders/checkout', authMiddlewareWithBlacklist, rateLimit('checkou
       if (p.stock < it.qty) throw new Error(`product ${it.product_id} insufficient stock`);
       total += p.price * it.qty;
     }
+    // Cap total to prevent integer overflow / abuse
+    if (total > 100_000_000) throw new Error('total exceeds limit');
+    const cleanEmail = sec.sanitizeText(buyer_email).toLowerCase();
     const midtransOrderId = `ZCUS-${Date.now()}-${req.user.id}`;
-    const [orderRes] = await conn.query('INSERT INTO orders (buyer_id, total, status, midtrans_order_id, buyer_email, buyer_phone) VALUES (?, ?, ?, ?, ?, ?)', [req.user.id, total, 'pending', midtransOrderId, buyer_email, buyer_phone || null]);
+    const [orderRes] = await conn.query('INSERT INTO orders (buyer_id, total, status, midtrans_order_id, buyer_email, buyer_phone) VALUES (?, ?, ?, ?, ?, ?)', [req.user.id, total, 'pending', midtransOrderId, cleanEmail, buyer_phone || null]);
     const orderId = orderRes.insertId;
     const orderItems = items.map(it => [orderId, it.product_id, it.qty, prodMap.get(it.product_id).price]);
     await conn.query('INSERT INTO order_items (order_id, product_id, qty, price) VALUES ?', [orderItems]);
@@ -931,13 +1014,17 @@ app.post('/api/orders/checkout', authMiddlewareWithBlacklist, rateLimit('checkou
 
     const snapRes = await snap.createTransaction({
       transaction_details: { order_id: midtransOrderId, gross_amount: total },
-      customer_details: { email: buyer_email, first_name: req.user.name || 'Buyer' },
-      item_details: items.map(it => ({ id: String(it.product_id), price: prodMap.get(it.product_id).price, quantity: it.qty, name: prodMap.get(it.product_id).name?.slice(0, 50) || 'Product' })),
+      customer_details: { email: cleanEmail, first_name: (req.user.name || 'Buyer').slice(0, 50) },
+      item_details: items.map(it => ({ id: String(it.product_id), price: prodMap.get(it.product_id).price, quantity: it.qty, name: (prodMap.get(it.product_id).name || 'Product').slice(0, 50) })),
       enabled_payments: ['credit_card','bca_va','bni_va','bri_va','gopay','shopeepay','qris','other_va','indomaret','alfamart']
     });
     await pool.query('UPDATE orders SET midtrans_token = ? WHERE id = ?', [snapRes.token, orderId]);
     res.json({ order_id: orderId, midtrans_order_id: midtransOrderId, snap_token: snapRes.token, total });
-  } catch (e) { await conn.rollback(); res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    await conn.rollback();
+    sec.logSecurityEvent('checkout_error', req.ip, { code: e.code, msg: e.message?.slice(0, 100) });
+    return res.status(500).json(sec.safeError(e, process.env.NODE_ENV === 'development'));
+  }
   finally { conn.release(); }
 });
 app.post('/api/orders/notification', async (req, res) => {
@@ -1565,23 +1652,7 @@ app.get('/api/wishlist/share/:code', async (req, res) => {
 // ============ WELCOME NOTIFICATION ON NEW USER ============
 // (already in /api/auth/google and /api/auth/otp/verify register)
 
-// ============ SECURITY MIDDLEWARE ============
-
-// 1. Security headers (helmet-like)
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://app.midtrans.com https://*.midtrans.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https:; frame-src https://app.midtrans.com https://*.midtrans.com");
-  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-  }
-  next();
-});
-
-// 2. Rate limiter (in-memory, per-IP per-endpoint)
+// ============ RATE LIMITER (legacy per-endpoint, augmented by sec.globalRateLimit) ============
 const rateStore = new Map(); // key → { count, resetAt }
 function rateLimit(key, maxRequests, windowMs) {
   return (req, res, next) => {
@@ -1680,12 +1751,12 @@ function blacklistToken(token) {
     arr.forEach(t => tokenBlacklist.add(t));
   }
 }
-const authMiddlewareWithBlacklist = (req, res, next) => authMiddleware(req, res, () => {
+function authMiddlewareWithBlacklist(req, res, next) {
   if (tokenBlacklist.has(req.token || (req.headers.authorization || '').slice(7))) {
     return res.status(401).json({ error: 'token revoked' });
   }
-  next();
-});
+  return authMiddleware(req, res, next);
+}
 
 // 7. Request ID for tracing
 app.use((req, res, next) => {

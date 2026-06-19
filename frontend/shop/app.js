@@ -1,13 +1,17 @@
 // Zcus Store v3 — Glassmorphism + FontAwesome + Extra Features
+// Top-level vars use `window.X` to coexist with other inline scripts on subpages
+// (orders.html, settings.html, etc. each declare their own `let user/token`).
+// Without this isolation, both `let user` declarations collide → SyntaxError
+// halts entire app.js, breaking cart/wishlist/theme on every page.
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : 'https://zcus.biz.id/shop-app/api';
-let products = [];
-let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
-let wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
-let recentlyViewed = JSON.parse(localStorage.getItem('zcus_recent') || '[]');
-let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
-let token = localStorage.getItem('zcus_token') || null;
-let currentFilter = { cat: '', search: '', sort: 'newest', min: '', max: '', promo: null };
-let currentView = 'grid';
+window.products = window.products || [];
+window.cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
+window.wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
+window.recentlyViewed = JSON.parse(localStorage.getItem('zcus_recent') || '[]');
+window.user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+window.token = localStorage.getItem('zcus_token') || null;
+window.currentFilter = { cat: '', search: '', sort: 'newest', min: '', max: '', promo: null };
+window.currentView = 'grid';
 
 // Mock reviews data (since DB doesn't have review system yet)
 const MOCK_REVIEWS = {
@@ -95,26 +99,28 @@ applyPromo = function() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // null-safe DOM lookups — pages may not have all elements
+  const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
+  const $$ = sel => { try { return document.querySelector(sel); } catch (e) { return null; } };
+
   if (user && token) {
-    document.getElementById('accountIcon').className = 'fa-solid fa-user-check';
-    const sl = document.getElementById('settingsLink');
-    if (sl) sl.style.display = 'flex';
+    const ai = $('accountIcon'); if (ai) ai.className = 'fa-solid fa-user-check';
+    const sl = $('settingsLink'); if (sl) sl.style.display = 'flex';
     if (user.role === 'seller' || user.role === 'admin') {
-      document.getElementById('sellerLink').style.display = 'flex';
+      const sellerLink = $('sellerLink'); if (sellerLink) sellerLink.style.display = 'flex';
     }
     if (user.role === 'admin') {
-      const al = document.getElementById('adminLink');
-      if (al) al.style.display = 'flex';
+      const al = $('adminLink'); if (al) al.style.display = 'flex';
     }
   }
-  loadProducts();
-  updateCartUI();
-  updateWishlistUI();
-  renderRecentlyViewed();
-  renderRecommended();
-  initTheme();
-  startFlashCountdown();
-  pollNotificationBadge();
+  if ($$('.products-grid, #productsGrid, #productsList')) loadProducts();
+  if ($('cartCount')) updateCartUI();
+  if ($('wishCount')) updateWishlistUI();
+  if ($('recentSection')) renderRecentlyViewed();
+  if ($('recommendedSection')) renderRecommended();
+  if ($('themeIcon')) initTheme();
+  if ($('flashCountdown')) startFlashCountdown();
+  if ($('notifBadge')) pollNotificationBadge();
 });
 
 async function pollNotificationBadge() {
@@ -134,15 +140,17 @@ async function pollNotificationBadge() {
 function initTheme() {
   const saved = localStorage.getItem('zcus_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
-  document.getElementById('themeIcon').className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  const ti = document.getElementById('themeIcon');
+  if (ti) ti.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
 }
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
   const next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('zcus_theme', next);
-  document.getElementById('themeIcon').className = next === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-  toast('Theme: ' + next, 'info');
+  const ti = document.getElementById('themeIcon');
+  if (ti) ti.className = next === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  if (typeof toast === 'function') toast('Theme: ' + next, 'info');
 }
 
 function startFlashCountdown() {
