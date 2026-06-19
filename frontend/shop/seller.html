@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Dashboard — Zcus Store</title>
+<link rel="icon" type="image/svg+xml" href="/shop/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/shop/styles.css?v=10">
+</head>
+<body class="dash-body">
+
+<div class="bg-mesh"></div>
+<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+<!-- SIDEBAR -->
+<aside class="dash-sidebar glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Zcus<span>Store</span></div>
+      <div class="brand-tag">SELLER PANEL</div>
+    </div>
+  </a>
+
+  <nav class="dash-nav">
+    <a href="#" class="dash-nav-item active" data-tab="overview" onclick="switchTab('overview', this);return false">
+      <i class="fa-solid fa-gauge-high"></i> Overview
+    </a>
+    <a href="#" class="dash-nav-item" data-tab="products" onclick="switchTab('products', this);return false">
+      <i class="fa-solid fa-boxes-stacked"></i> Products
+      <span class="dash-badge" id="navProductCount">0</span>
+    </a>
+    <a href="#" class="dash-nav-item" data-tab="orders" onclick="switchTab('orders', this);return false">
+      <i class="fa-solid fa-receipt"></i> Orders
+    </a>
+    <a href="#" class="dash-nav-item" data-tab="integrations" onclick="switchTab('integrations', this);return false">
+      <i class="fa-solid fa-plug"></i> Integrations
+      <span class="dash-badge" id="navIntegrations">0</span>
+    </a>
+    <a href="#" class="dash-nav-item" data-tab="settings" onclick="switchTab('settings', this);return false">
+      <i class="fa-solid fa-gear"></i> Settings
+    </a>
+  </nav>
+
+  <div class="dash-sidebar-foot">
+    <a href="/shop/" class="btn btn-ghost btn-sm full"><i class="fa-solid fa-arrow-left"></i> Back to Store</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="dash-main">
+  <header class="dash-header glass">
+    <div>
+      <h1 class="dash-title">Seller Dashboard</h1>
+      <div class="dash-sub">Kelola produk, pesanan, dan integrasi platform</div>
+    </div>
+    <div class="dash-user">
+      <div class="dash-notif" onclick="toggleNotif()">
+        <i class="fa-solid fa-bell"></i>
+        <span class="dash-notif-dot" id="notifDot" style="display:none"></span>
+      </div>
+      <div class="dash-account" id="dashAccount">
+        <i class="fa-solid fa-user"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- Overview Tab -->
+  <section class="dash-content" id="tab-overview">
+    <div class="dash-stats" id="dashStats">
+      <div class="dash-stat glass"><div class="ds-icon"><i class="fa-solid fa-boxes-stacked"></i></div><div><b id="statActive">0</b><span>Active Products</span></div></div>
+      <div class="dash-stat glass"><div class="ds-icon"><i class="fa-solid fa-cart-shopping"></i></div><div><b id="statSold">0</b><span>Total Sold</span></div></div>
+      <div class="dash-stat glass"><div class="ds-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div><div><b id="statRevenue">Rp 0</b><span>Revenue</span></div></div>
+      <div class="dash-stat glass"><div class="ds-icon"><i class="fa-solid fa-receipt"></i></div><div><b id="statOrders30d">0</b><span>Orders (30d)</span></div></div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-panel glass">
+        <div class="dash-panel-head">
+          <h3><i class="fa-solid fa-trophy"></i> Top Products</h3>
+        </div>
+        <div id="topProducts" class="dash-list"><div class="loading">Loading…</div></div>
+      </div>
+
+      <div class="dash-panel glass">
+        <div class="dash-panel-head">
+          <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Orders</h3>
+        </div>
+        <div id="recentOrders" class="dash-list"><div class="loading">Loading…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Tab -->
+  <section class="dash-content" id="tab-products" style="display:none">
+    <div class="dash-panel glass">
+      <div class="dash-panel-head">
+        <h3><i class="fa-solid fa-boxes-stacked"></i> Your Products</h3>
+        <button class="btn btn-primary btn-sm" onclick="showAddProduct()"><i class="fa-solid fa-plus"></i> Add Product</button>
+      </div>
+      <div id="sellerProducts" class="prod-list"><div class="loading">Loading…</div></div>
+    </div>
+  </section>
+
+  <!-- Orders Tab -->
+  <section class="dash-content" id="tab-orders" style="display:none">
+    <div class="dash-panel glass">
+      <div class="dash-panel-head">
+        <h3><i class="fa-solid fa-receipt"></i> Customer Orders</h3>
+      </div>
+      <div id="sellerOrders" class="dash-list"><div class="loading">Loading…</div></div>
+    </div>
+  </section>
+
+  <!-- Integrations Tab -->
+  <section class="dash-content" id="tab-integrations" style="display:none">
+    <div class="dash-panel glass">
+      <div class="dash-panel-head">
+        <h3><i class="fa-solid fa-plug"></i> Platform Integrations</h3>
+        <span class="dash-sub">Hubungkan toko kamu ke Telegram, WhatsApp, Discord</span>
+      </div>
+
+      <div class="integ-grid">
+        <!-- Telegram -->
+        <div class="integ-card glass">
+          <div class="integ-head">
+            <div class="integ-icon telegram"><i class="fa-brands fa-telegram"></i></div>
+            <div>
+              <h4>Telegram Bot</h4>
+              <span class="integ-status" id="tgStatus"><i class="fa-solid fa-circle"></i> Not connected</span>
+            </div>
+          </div>
+          <p>Bot untuk terima order, kirim produk, dan notifikasi via Telegram.</p>
+          <input type="text" id="tgToken" class="form-input" placeholder="Bot token dari @BotFather">
+          <button class="btn btn-primary full" onclick="connectTelegram()"><i class="fa-brands fa-telegram"></i> Connect Bot</button>
+        </div>
+
+        <!-- WhatsApp -->
+        <div class="integ-card glass">
+          <div class="integ-head">
+            <div class="integ-icon whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
+            <div>
+              <h4>WhatsApp Gateway</h4>
+              <span class="integ-status" id="waStatus"><i class="fa-solid fa-circle"></i> Not connected</span>
+            </div>
+          </div>
+          <p>Scan QR untuk connect WhatsApp. Terima order & kirim produk via chat.</p>
+          <div id="waQrArea" style="display:none;text-align:center;padding:16px;background:#fff;border-radius:8px;margin:8px 0">
+            <img id="waQrImg" src="" alt="QR Code" style="max-width:240px">
+            <div id="waQrStatus" style="color:#222;font-size:12px;margin-top:8px">Waiting for scan...</div>
+          </div>
+          <button class="btn btn-success full" onclick="connectWhatsapp()" id="waBtn"><i class="fa-brands fa-whatsapp"></i> Generate QR</button>
+        </div>
+
+        <!-- Discord -->
+        <div class="integ-card glass">
+          <div class="integ-head">
+            <div class="integ-icon discord"><i class="fa-brands fa-discord"></i></div>
+            <div>
+              <h4>Discord Bot</h4>
+              <span class="integ-status" id="dcStatus"><i class="fa-solid fa-circle"></i> Not connected</span>
+            </div>
+          </div>
+          <p>Bot Discord untuk slash commands, embed produk, dan terima order.</p>
+          <input type="text" id="dcToken" class="form-input" placeholder="Bot token dari Discord Developer Portal">
+          <button class="btn btn-discord full" onclick="connectDiscord()"><i class="fa-brands fa-discord"></i> Connect Bot</button>
+        </div>
+      </div>
+
+      <div class="integ-help glass">
+        <h4><i class="fa-solid fa-circle-info"></i> Cara Setup Bot</h4>
+        <ol>
+          <li><b>Telegram:</b> Chat @BotFather di Telegram, kirim /newbot, copy token, paste di sini.</li>
+          <li><b>WhatsApp:</b> Klik Generate QR, scan dengan WhatsApp di hp (Linked Devices).</li>
+          <li><b>Discord:</b> Buka Discord Developer Portal, buat application + bot, copy token.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Settings Tab -->
+  <section class="dash-content" id="tab-settings" style="display:none">
+    <div class="dash-panel glass">
+      <div class="dash-panel-head">
+        <h3><i class="fa-solid fa-gear"></i> Account Settings</h3>
+      </div>
+      <div class="settings-form">
+        <label>Nama Toko</label>
+        <input type="text" class="form-input" id="setName" placeholder="Nama toko kamu">
+        <label>Bio</label>
+        <textarea class="form-input" id="setBio" rows="3" placeholder="Deskripsi singkat toko"></textarea>
+        <label>Avatar URL</label>
+        <input type="text" class="form-input" id="setAvatar" placeholder="https://...">
+        <button class="btn btn-primary" onclick="saveSettings()"><i class="fa-solid fa-save"></i> Save</button>
+      </div>
+
+      <h4 style="margin-top:24px;color:var(--text)"><i class="fa-solid fa-link"></i> Linked Accounts</h4>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:12px">Login di web, Telegram, WhatsApp, Discord dengan akun yang sama.</p>
+      <div class="linked-list">
+        <div class="linked-item glass">
+          <i class="fa-brands fa-telegram"></i>
+          <div><b>Telegram</b><span id="linkTelegram">Not linked</span></div>
+          <button class="btn btn-ghost btn-sm" onclick="linkAccount('telegram')">Link</button>
+        </div>
+        <div class="linked-item glass">
+          <i class="fa-brands fa-whatsapp"></i>
+          <div><b>WhatsApp</b><span id="linkWhatsapp">Not linked</span></div>
+          <button class="btn btn-ghost btn-sm" onclick="linkAccount('whatsapp')">Link</button>
+        </div>
+        <div class="linked-item glass">
+          <i class="fa-brands fa-discord"></i>
+          <div><b>Discord</b><span id="linkDiscord">Not linked</span></div>
+          <button class="btn btn-ghost btn-sm" onclick="linkAccount('discord')">Link</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Add Product Modal -->
+<div class="modal" id="addProductModal">
+  <div class="modal-content glass">
+    <button class="modal-close" onclick="hideModal('addProduct')"><i class="fa-solid fa-xmark"></i></button>
+    <h2><i class="fa-solid fa-plus"></i> Add Product</h2>
+    <div class="settings-form">
+      <label>Nama Produk *</label>
+      <input type="text" class="form-input" id="npName" placeholder="Contoh: Claude Pro 1 Year">
+      <label>Kategori *</label>
+      <select class="form-input" id="npCategory">
+        <option value="AI Tools">AI Tools</option>
+        <option value="Merchandise">Merchandise</option>
+        <option value="Digital Goods">Digital Goods</option>
+        <option value="Voucher">Voucher</option>
+        <option value="Jasa">Jasa</option>
+        <option value="Elektronik">Elektronik</option>
+      </select>
+      <label>Harga (Rp) *</label>
+      <input type="number" class="form-input" id="npPrice" placeholder="2400000">
+      <label>Harga Coret (opsional)</label>
+      <input type="number" class="form-input" id="npOriginalPrice" placeholder="3000000">
+      <label>Icon (emoji)</label>
+      <input type="text" class="form-input" id="npEmoji" placeholder="🤖" maxlength="2" value="📦">
+      <label>Deskripsi</label>
+      <textarea class="form-input" id="npDesc" rows="3" placeholder="Deskripsi produk..."></textarea>
+      <button class="btn btn-primary full" onclick="createProduct()"><i class="fa-solid fa-save"></i> Create Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications dropdown -->
+<div class="notif-dropdown glass" id="notifDropdown">
+  <div class="notif-head">
+    <b>Notifications</b>
+    <button onclick="markAllRead()">Mark all read</button>
+  </div>
+  <div id="notifList"><div class="loading">Loading…</div></div>
+</div>
+
+<script>
+const API = 'https://zcus.biz.id/shop-app/api';
+let token = localStorage.getItem('zcus_token') || null;
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let currentTab = 'overview';
+let sellerProducts = [];
+let sellerOrders = [];
+
+if (!token || !user) {
+  // Not logged in - redirect
+  if (!token) {
+    location.href = '/shop/?login=1';
+  }
+}
+
+if (token && (user?.role !== 'seller' && user?.role !== 'admin')) {
+  alert('Akses ditolak. Halaman ini hanya untuk Seller/Admin.');
+  location.href = '/shop/';
+}
+
+function api(path, opts = {}) {
+  return fetch(API + path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, ...(opts.headers||{}) }
+  }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)));
+}
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.dash-nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.dash-content').forEach(s => s.style.display = 'none');
+  document.getElementById('tab-' + tab).style.display = 'block';
+  if (tab === 'overview') loadDashboard();
+  if (tab === 'products') loadSellerProducts();
+  if (tab === 'orders') loadSellerOrders();
+  if (tab === 'integrations') loadIntegrations();
+  if (tab === 'settings') loadSettings();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('dashAccount').onclick = () => {
+    if (user) {
+      const initials = user.name?.charAt(0).toUpperCase() || 'U';
+      const go = confirm('Account: ' + user.email + '\\n\\nOK = Logout');
+      if (go) { localStorage.clear(); location.href = '/shop/'; }
+    }
+  };
+  loadDashboard();
+  loadNotifications();
+  setInterval(loadNotifications, 30000);
+});
+
+async function loadDashboard() {
+  try {
+    const d = await api('/seller/dashboard');
+    document.getElementById('statActive').textContent = d.stats.products_count;
+    document.getElementById('statSold').textContent = d.stats.total_sold;
+    document.getElementById('statRevenue').textContent = 'Rp ' + Number(d.stats.revenue).toLocaleString('id-ID');
+    document.getElementById('statOrders30d').textContent = d.stats.orders_30d;
+    document.getElementById('navProductCount').textContent = d.stats.products_count;
+
+    document.getElementById('topProducts').innerHTML = d.topProducts.length ? d.topProducts.map(p => `
+      <div class="dl-item">
+        <div class="dl-info"><b>${p.name}</b><small>${p.sold} sold</small></div>
+        <div class="dl-meta">Rp ${Number(p.price).toLocaleString('id-ID')}</div>
+      </div>
+    `).join('') : '<div class="empty">Belum ada produk</div>';
+
+    document.getElementById('recentOrders').innerHTML = d.recentOrders.length ? d.recentOrders.map(o => `
+      <div class="dl-item">
+        <div class="dl-info"><b>#${o.id} - ${o.product_name}</b><small>${new Date(o.created_at).toLocaleString('id-ID')}</small></div>
+        <div class="dl-meta"><span class="oc-status oc-${o.status}">${o.status}</span><br>Rp ${Number(o.total).toLocaleString('id-ID')}</div>
+      </div>
+    `).join('') : '<div class="empty">Belum ada order</div>';
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+async function loadSellerProducts() {
+  try {
+    sellerProducts = await api('/seller/products');
+    const list = document.getElementById('sellerProducts');
+    list.innerHTML = sellerProducts.length ? sellerProducts.map(p => `
+      <div class="pl-item glass">
+        <div class="pl-img"><i class="fa-solid ${p.type === 'digital' ? 'fa-floppy-disk' : 'fa-box'}"></i></div>
+        <div class="pl-info">
+          <b>${p.name}</b>
+          <span>${p.category} · Stock: ${p.stock} · Sold: ${p.sold || 0}</span>
+        </div>
+        <div class="pl-price">Rp ${Number(p.price).toLocaleString('id-ID')}</div>
+        <div class="pl-actions">
+          <span class="oc-status oc-${p.status === 'active' ? 'paid' : 'cancelled'}">${p.status}</span>
+          <button class="btn btn-ghost btn-sm" onclick="addInventory(${p.id}, '${p.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-key"></i> Stock</button>
+          <button class="btn btn-ghost btn-sm" onclick="archiveProduct(${p.id})"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state"><div class="empty-ico"><i class="fa-solid fa-box-open"></i></div><h3>Belum ada produk</h3><button class="btn btn-primary" onclick="showAddProduct()">+ Add Product</button></div>';
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+async function loadSellerOrders() {
+  try {
+    const products = await api('/seller/products');
+    if (!products.length) { document.getElementById('sellerOrders').innerHTML = '<div class="empty">Belum ada produk</div>'; return; }
+    const ids = products.map(p => p.id);
+    // Fetch orders via product views... or query directly
+    // For demo, show all orders
+    const res = await api('/orders/me'); // doesn't filter, but works for demo
+    document.getElementById('sellerOrders').innerHTML = '<div class="empty">Implementasi lengkap menyusul. Tunggu update berikutnya.</div>';
+  } catch (e) { document.getElementById('sellerOrders').innerHTML = '<div class="empty">Loading belum tersedia</div>'; }
+}
+
+async function loadIntegrations() {
+  try {
+    const ints = await api('/integrations');
+    document.getElementById('navIntegrations').textContent = ints.length;
+    ints.forEach(i => {
+      if (i.platform === 'telegram') document.getElementById('tgStatus').innerHTML = '<i class="fa-solid fa-circle" style="color:#10b981"></i> Connected as @' + (JSON.parse(i.config).bot_username || 'bot');
+      if (i.platform === 'discord') document.getElementById('dcStatus').innerHTML = '<i class="fa-solid fa-circle" style="color:#10b981"></i> Connected';
+    });
+  } catch (e) {}
+}
+
+async function loadSettings() {
+  try {
+    const me = await api('/auth/me');
+    user = me.user;
+    document.getElementById('setName').value = user.name || '';
+    document.getElementById('setBio').value = user.bio || '';
+    document.getElementById('setAvatar').value = user.avatar_url || '';
+    document.getElementById('linkTelegram').textContent = user.linked_telegram_id || 'Not linked';
+    document.getElementById('linkWhatsapp').textContent = user.linked_whatsapp_number || 'Not linked';
+    document.getElementById('linkDiscord').textContent = user.linked_discord_id || 'Not linked';
+  } catch (e) {}
+}
+
+async function loadNotifications() {
+  try {
+    const d = await api('/notifications');
+    if (d.unread > 0) document.getElementById('notifDot').style.display = 'block';
+    else document.getElementById('notifDot').style.display = 'none';
+    const list = document.getElementById('notifList');
+    list.innerHTML = d.notifications.length ? d.notifications.map(n => `
+      <div class="notif-item ${n.read_at ? '' : 'unread'}">
+        <b>${n.title}</b>
+        <small>${n.body || ''}</small>
+        <small style="opacity:.6">${new Date(n.created_at).toLocaleString('id-ID')}</small>
+      </div>
+    `).join('') : '<div class="empty">Tidak ada notifikasi</div>';
+  } catch (e) {}
+}
+
+function toggleNotif() {
+  const dd = document.getElementById('notifDropdown');
+  dd.classList.toggle('open');
+}
+
+async function markAllRead() {
+  try {
+    await api('/notifications/read-all', { method: 'POST' });
+    document.getElementById('notifDot').style.display = 'none';
+    loadNotifications();
+  } catch (e) {}
+}
+
+// === Product CRUD ===
+function showAddProduct() { showModal('addProduct'); }
+function hideModal(name) { document.getElementById(name + 'Modal').classList.remove('open'); }
+function showModal(name) { document.getElementById(name + 'Modal').classList.add('open'); }
+
+async function createProduct() {
+  const data = {
+    name: document.getElementById('npName').value,
+    category: document.getElementById('npCategory').value,
+    price: Number(document.getElementById('npPrice').value),
+    original_price: Number(document.getElementById('npOriginalPrice').value) || null,
+    emoji: document.getElementById('npEmoji').value || '📦',
+    description: document.getElementById('npDesc').value
+  };
+  if (!data.name || !data.price) return toast('Name + price required', 'error');
+  try {
+    const r = await api('/products', { method: 'POST', body: JSON.stringify(data) });
+    toast('Product created!', 'success');
+    hideModal('addProduct');
+    loadSellerProducts();
+    // Show inventory prompt
+    setTimeout(() => {
+      if (confirm('Tambah inventory/stock untuk produk ini?')) addInventory(r.id, data.name);
+    }, 500);
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+async function archiveProduct(id) {
+  if (!confirm('Archive produk ini?')) return;
+  try {
+    await api('/products/' + id, { method: 'DELETE' });
+    toast('Archived', 'success');
+    loadSellerProducts();
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+function addInventory(id, name) {
+  const tutorial = prompt('Tutorial untuk ' + name + ' (bisa multi-line):') || 'Cara pakai:\\n1. Login\\n2. Gunakan sesuai kebutuhan';
+  const mail = prompt('Email/username (1 item, atau kosongkan):') || '';
+  const pass = prompt('Password:') || '';
+  if (!confirm('Tambah 1 item stock untuk ' + name + '?')) return;
+  api('/products/' + id + '/inventory', {
+    method: 'POST',
+    body: JSON.stringify({ items: [{ mail, pass, tutorial }] })
+  }).then(r => {
+    toast('Stock added: ' + r.added + ' item(s)', 'success');
+    loadSellerProducts();
+  }).catch(e => toast(e.error || e.message, 'error'));
+}
+
+// === Integrations ===
+async function connectTelegram() {
+  const bot_token = document.getElementById('tgToken').value.trim();
+  if (!bot_token) return toast('Bot token wajib diisi', 'error');
+  try {
+    const r = await api('/integrations/telegram', { method: 'POST', body: JSON.stringify({ bot_token }) });
+    toast('Telegram bot connected: @' + r.bot.username, 'success');
+    document.getElementById('tgToken').value = '';
+    loadIntegrations();
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+async function connectDiscord() {
+  const bot_token = document.getElementById('dcToken').value.trim();
+  if (!bot_token) return toast('Bot token wajib diisi', 'error');
+  try {
+    const r = await api('/integrations/discord', { method: 'POST', body: JSON.stringify({ bot_token }) });
+    toast('Discord bot connected: ' + r.bot.username, 'success');
+    document.getElementById('dcToken').value = '';
+    loadIntegrations();
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+let waPollInterval;
+async function connectWhatsapp() {
+  const btn = document.getElementById('waBtn');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+  try {
+    const r = await api('/integrations/whatsapp/qr', { method: 'POST' });
+    document.getElementById('waQrArea').style.display = 'block';
+    document.getElementById('waQrImg').src = r.qr_url;
+    document.getElementById('waQrStatus').textContent = 'Scan QR dengan WhatsApp di hp kamu';
+    btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Refresh QR';
+    // Poll status
+    waPollInterval && clearInterval(waPollInterval);
+    waPollInterval = setInterval(async () => {
+      try {
+        const s = await api('/integrations/whatsapp/qr/' + r.session_id);
+        if (s.status === 'authenticated') {
+          document.getElementById('waStatus').innerHTML = '<i class="fa-solid fa-circle" style="color:#10b981"></i> Connected: ' + (s.phone || '');
+          document.getElementById('waQrStatus').innerHTML = '<i class="fa-solid fa-check"></i> Authenticated!';
+          clearInterval(waPollInterval);
+          toast('WhatsApp connected!', 'success');
+          loadIntegrations();
+        }
+      } catch (e) {}
+    }, 3000);
+  } catch (e) { btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Generate QR'; toast(e.error || e.message, 'error'); }
+}
+
+async function saveSettings() {
+  // For demo, just toast
+  toast('Settings saved (UI only — backend API menyusul)', 'success');
+}
+
+async function linkAccount(platform) {
+  const id = prompt('Masukkan ' + platform + ' ID/username kamu:');
+  if (!id) return;
+  try {
+    await api('/auth/link', { method: 'POST', body: JSON.stringify({ platform, identifier: id }) });
+    toast(platform + ' linked!', 'success');
+    loadSettings();
+  } catch (e) { toast(e.error || e.message, 'error'); }
+}
+
+// === Toast ===
+let toastTimer;
+function toast(msg, type='info') {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.className = 'toast toast-' + type + ' show';
+  const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info';
+  t.innerHTML = '<i class="fa-solid ' + icon + '"></i> ' + msg;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+
+<style>
+.dash-body{display:grid;grid-template-columns:280px 1fr;min-height:100vh;position:relative}
+.dash-sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:24px;border-right:1px solid var(--glass-border);border-radius:0;border-top:0;border-bottom:0;border-left:0;overflow-y:auto}
+.dash-nav{flex:1;display:flex;flex-direction:column;gap:4px;margin:24px 0}
+.dash-nav-item{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;
+  color:var(--text-2);font-size:14px;font-weight:500;transition:all .2s;text-align:left;background:transparent;
+}
+.dash-nav-item:hover{background:var(--glass-hover);color:var(--text)}
+.dash-nav-item.active{background:linear-gradient(135deg,var(--accent-soft),rgba(124,58,237,.1));color:var(--accent);font-weight:700;border:1px solid rgba(56,189,248,.3)}
+.dash-nav-item i{width:20px;text-align:center}
+.dash-nav-item .dash-badge{margin-left:auto;background:var(--accent);color:#fff;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.dash-sidebar-foot{padding-top:16px;border-top:1px solid var(--glass-border)}
+
+.dash-main{padding:0 32px 32px;overflow-y:auto;min-height:100vh}
+.dash-header{padding:20px 24px;border-radius:16px;display:flex;justify-content:space-between;align-items:center;margin:24px 0;position:sticky;top:24px;z-index:50}
+.dash-title{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.dash-sub{font-size:13px;color:var(--text-dim);margin-top:4px}
+.dash-user{display:flex;gap:12px;align-items:center}
+.dash-notif{width:40px;height:40px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;border:1px solid var(--glass-border)}
+.dash-notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--danger);border-radius:50%;box-shadow:0 0 0 2px var(--bg)}
+.dash-account{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#7c3aed);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff}
+
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.dash-stat{padding:20px;border-radius:14px;display:flex;align-items:center;gap:16px;transition:transform .2s}
+.dash-stat:hover{transform:translateY(-2px)}
+.ds-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent-soft),rgba(124,58,237,.1));color:var(--accent);font-size:20px;display:flex;align-items:center;justify-content:center}
+.dash-stat b{display:block;font-size:22px;font-weight:800;color:var(--text)}
+.dash-stat span{font-size:12px;color:var(--text-mute);letter-spacing:1px;text-transform:uppercase}
+
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-panel{padding:20px;border-radius:14px}
+.dash-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.dash-panel-head h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.dash-panel-head h3 i{color:var(--accent)}
+.dash-list{display:flex;flex-direction:column;gap:8px}
+.dl-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--glass);border-radius:10px;border:1px solid var(--glass-border);transition:all .2s}
+.dl-item:hover{border-color:var(--glass-border-hover)}
+.dl-info b{display:block;font-size:13px;font-weight:600;margin-bottom:2px}
+.dl-info small{font-size:11px;color:var(--text-dim)}
+.dl-meta{font-size:12px;font-weight:700;color:var(--accent);text-align:right}
+.dl-meta .oc-status{font-size:10px;padding:2px 6px;border-radius:8px;margin-bottom:4px;display:inline-block}
+
+.prod-list{display:flex;flex-direction:column;gap:10px}
+.pl-item{display:grid;grid-template-columns:48px 1fr auto auto;gap:14px;align-items:center;padding:14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass);transition:all .2s}
+.pl-item:hover{border-color:var(--glass-border-hover)}
+.pl-img{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent-soft),rgba(124,58,237,.1));color:var(--accent);font-size:20px;display:flex;align-items:center;justify-content:center}
+.pl-info b{display:block;font-size:13px;font-weight:600;margin-bottom:2px}
+.pl-info span{font-size:11px;color:var(--text-dim)}
+.pl-price{font-size:14px;font-weight:800;color:var(--accent)}
+.pl-actions{display:flex;gap:6px;align-items:center}
+
+.integ-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.integ-card{padding:18px;border-radius:14px;border:1px solid var(--glass-border);transition:all .2s}
+.integ-card:hover{border-color:var(--glass-border-hover)}
+.integ-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.integ-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.integ-icon.telegram{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.integ-icon.whatsapp{background:linear-gradient(135deg,#10b981,#059669)}
+.integ-icon.discord{background:linear-gradient(135deg,#5865f2,#4752c4)}
+.integ-card h4{font-size:14px;font-weight:700}
+.integ-status{font-size:11px;color:var(--text-mute);display:flex;align-items:center;gap:4px}
+.integ-card p{font-size:12px;color:var(--text-dim);margin:8px 0;line-height:1.5}
+.btn-success{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.35)}
+.btn-discord{background:linear-gradient(135deg,#5865f2,#4752c4);color:#fff;box-shadow:0 4px 14px rgba(88,101,242,.35)}
+.integ-help{padding:18px;border-radius:14px;margin-top:8px}
+.integ-help h4{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.integ-help h4 i{color:var(--accent)}
+.integ-help ol{padding-left:20px;color:var(--text-dim);font-size:12px;line-height:1.8}
+.integ-help b{color:var(--text-2)}
+
+.settings-form label{display:block;font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px}
+.settings-form .form-input{margin-bottom:8px}
+
+.linked-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.linked-item{display:flex;align-items:center;gap:14px;padding:12px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass)}
+.linked-item i{font-size:20px;color:var(--accent);width:30px;text-align:center}
+.linked-item b{display:block;font-size:13px;font-weight:600}
+.linked-item span{font-size:11px;color:var(--text-dim);font-family:monospace}
+.linked-item button{margin-left:auto}
+
+.notif-dropdown{position:fixed;top:80px;right:32px;width:340px;max-height:500px;overflow-y:auto;border-radius:14px;z-index:300;display:none;border:1px solid var(--glass-border)}
+.notif-dropdown.open{display:block}
+.notif-head{padding:14px;border-bottom:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center}
+.notif-head b{font-size:13px}
+.notif-head button{font-size:11px;color:var(--accent);background:none;padding:0}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--glass-border);font-size:12px;line-height:1.4}
+.notif-item b{display:block;font-weight:600;margin-bottom:2px}
+.notif-item small{display:block;color:var(--text-dim);font-size:11px}
+.notif-item.unread{background:var(--accent-soft)}
+
+.modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-content{background:var(--bg-elev);border:1px solid var(--glass-border);border-radius:16px;padding:24px;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:12px;right:12px;background:var(--glass);width:32px;height:32px;border-radius:50%;font-size:14px;color:var(--text-dim);display:flex;align-items:center;justify-content:center;z-index:5}
+.modal-close:hover{background:var(--accent-soft);color:var(--accent)}
+
+.form-input{width:100%;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:11px 14px;font-size:14px;outline:none;color:var(--text);transition:all .2s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--bg-elev);border:1px solid var(--glass-border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:500;z-index:500;transition:transform .3s;display:flex;align-items:center;gap:8px;backdrop-filter:blur(20px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-success{border-color:var(--success);background:rgba(16,185,129,.15)}
+.toast-error{border-color:var(--danger);background:rgba(239,68,68,.15)}
+.toast-info{border-color:var(--accent);background:var(--accent-soft)}
+
+.oc-status{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.oc-status.oc-active,.oc-status.oc-paid{background:rgba(16,185,129,.15);color:var(--success)}
+.oc-status.oc-pending{background:rgba(245,158,11,.15);color:var(--warn)}
+.oc-status.oc-archived,.oc-status.oc-cancelled{background:rgba(239,68,68,.15);color:var(--danger)}
+
+.empty{text-align:center;padding:40px;color:var(--text-mute);font-size:13px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty-ico{font-size:48px;opacity:.5;margin-bottom:12px}
+.empty-state h3{font-size:16px;margin-bottom:12px;color:var(--text)}
+.loading{padding:40px;text-align:center;color:var(--text-mute);font-size:13px}
+
+@media(max-width:1024px){
+  .dash-stats{grid-template-columns:repeat(2,1fr)}
+  .dash-grid{grid-template-columns:1fr}
+  .integ-grid{grid-template-columns:1fr}
+  .dash-body{grid-template-columns:1fr}
+  .dash-sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--glass-border)}
+}
+</style>
+</body>
+</html>

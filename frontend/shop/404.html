@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Halaman Tidak Ditemukan | Z Store</title>
+<meta name="description" content="Halaman yang Anda cari tidak ditemukan. Kembali ke Z Store untuk belanja produk digital premium.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/shop/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/shop/styles.css?v=10">
+<style>
+.error-page{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative}
+.error-page .glass{max-width:520px;padding:48px 40px;border-radius:24px}
+.error-ico{font-size:96px;color:var(--accent);margin-bottom:24px;filter:drop-shadow(0 8px 24px rgba(56,189,248,.4))}
+.error-code{font-size:120px;font-weight:900;background:linear-gradient(135deg,#0ea5e9,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:-5px;margin-bottom:16px}
+.error-title{font-size:24px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.error-desc{font-size:14px;color:var(--text-dim);margin-bottom:24px;line-height:1.6}
+.error-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+@media(max-width:500px){.error-code{font-size:80px}.error-page .glass{padding:32px 24px}}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="bg-mesh"></div>
+<div class="bg-orbs" style="display:none"></div>
+
+<main id="main" class="error-page" role="main">
+  <div class="glass">
+    <div class="error-ico"><i class="fa-solid fa-ghost"></i></div>
+    <div class="error-code">404</div>
+    <h1 class="error-title">Halaman Tidak Ditemukan</h1>
+    <p class="error-desc">Maaf, halaman yang Anda cari tidak ada. Mungkin sudah dipindahkan atau URL-nya salah ketik.</p>
+    <div class="error-actions">
+      <a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-house"></i> Kembali ke Store</a>
+      <a href="/shop/preview/gallery.html" class="btn btn-ghost"><i class="fa-solid fa-images"></i> Lihat Design</a>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

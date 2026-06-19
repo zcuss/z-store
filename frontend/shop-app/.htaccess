@@ -1,0 +1,10 @@
+# Zcus Shop - route all to index.php (PHP proxy ke NodeJS)
+RewriteEngine On
+
+# If file/dir exists, serve directly (e.g. /test.php)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Else route to index.php
+RewriteRule ^ index.php [L,L]

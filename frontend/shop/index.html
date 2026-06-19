@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Z Store — Premium Digital Marketplace | AI Tools, Software, Voucher</title>
+<meta name="description" content="Z Store — marketplace produk digital premium Indonesia. AI tools (Claude, ChatGPT, Midjourney), software original, voucher hosting, dan merchandise. Instant delivery via email, bayar via Midtrans (QRIS, VA, E-Wallet), garansi 30 hari.">
+<meta name="keywords" content="z store, zcus, digital marketplace, ai tools, claude pro, chatgpt, midjourney, voucher hosting, merchandise, instant delivery, midtrans indonesia">
+<meta name="author" content="Z Store">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="canonical" href="https://zcus.biz.id/shop/">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zcus.biz.id/shop/">
+<meta property="og:title" content="Z Store — Premium Digital Marketplace">
+<meta property="og:description" content="Marketplace produk digital premium. AI tools, software, voucher. Instant delivery via email.">
+<meta property="og:image" content="https://zcus.biz.id/shop/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Z Store">
+<meta property="og:locale" content="id_ID">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://zcus.biz.id/shop/">
+<meta name="twitter:title" content="Z Store — Premium Digital Marketplace">
+<meta name="twitter:description" content="AI tools, software, voucher. Instant delivery via email. Midtrans payment.">
+<meta name="twitter:image" content="https://zcus.biz.id/shop/og-image.png">
+<meta name="twitter:site" content="@zstore">
+<meta name="twitter:creator" content="@zcusgt">
+
+<!-- JSON-LD Organization + Product Catalog -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Z Store",
+  "alternateName": "Zcus Store",
+  "url": "https://zcus.biz.id/shop/",
+  "logo": "https://zcus.biz.id/shop/favicon.svg",
+  "description": "Premium digital marketplace Indonesia. AI tools, software, voucher, merchandise.",
+  "foundingDate": "2026",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "telephone": "+62-8xx-xxxx-xxxx",
+    "contactType": "customer service",
+    "availableLanguage": ["Indonesian", "English"]
+  }],
+  "sameAs": [
+    "https://wa.me/628xxxxxxxxxx"
+  ]
+}
+</script>
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XXXXXXXXXXXX"></script>
+<script>
+// Block zoom + horizontal scroll on mobile
+(function(){
+  // Prevent pinch zoom
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length > 1) e.preventDefault();
+  }, {passive:false});
+  // Prevent double-tap zoom
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e){
+    const now = Date.now();
+    if(now - lastTouchEnd <= 300) e.preventDefault();
+    lastTouchEnd = now;
+  }, false);
+  // Prevent gesture zoom
+  document.addEventListener('gesturestart', function(e){e.preventDefault()});
+  document.addEventListener('wheel', function(e){
+    if(e.ctrlKey) e.preventDefault();
+  }, {passive:false});
+  // Prevent keyboard zoom
+  document.addEventListener('keydown', function(e){
+    if((e.ctrlKey||e.metaKey) && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+  });
+  // Force viewport no-zoom (some Android ignore meta)
+  const vp = document.querySelector('meta[name=viewport]');
+  if(vp) vp.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
+  // Block horizontal scroll lock
+  document.addEventListener('touchmove', function(e){
+    if(e.touches.length === 1){
+      const t = e.touches[0];
+      if(t.clientX < 10 || t.clientX > window.innerWidth - 10){
+        // Edge swipe, allow system gesture but block page scroll
+      }
+    }
+  }, {passive:true});
+})();
+</script>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://app.sandbox.midtrans.com" crossorigin>
+<link rel="dns-prefetch" href="https://zcus.biz.id">
+<link rel="alternate" hreflang="id" href="https://zcus.biz.id/shop/">
+<link rel="alternate" hreflang="x-default" href="https://zcus.biz.id/shop/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Apa itu Z Store?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Z Store adalah marketplace produk digital premium Indonesia. Kami menjual akun AI tools (Claude Pro, ChatGPT Plus, Midjourney), software original, voucher hosting, dan merchandise dengan instant delivery via email dan garansi 30 hari."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana cara order di Z Store?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pilih produk, klik tombol + Keranjang, masukkan email untuk delivery, lalu checkout via Midtrans. Produk digital akan dikirim otomatis ke email Anda dalam hitungan detik setelah pembayaran sukses."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Pembayaran apa saja yang didukung?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kami mendukung QRIS, Virtual Account (BCA, BNI, BRI, Mandiri), GoPay, ShopeePay, OVO, DANA, dan Credit Card via Midtrans payment gateway yang aman dan terenkripsi."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah ada garansi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ya, semua produk bergaransi 30 hari. Jika akun tidak berfungsi atau tidak sesuai deskripsi, kami ganti baru atau refund penuh."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Berapa lama delivery?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Instant. Setelah pembayaran sukses, detail akun (email, password, tutorial) langsung dikirim ke email Anda dalam waktu kurang dari 10 menit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana jika ada masalah?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hubungi CS 24/7 via WhatsApp atau email zcusgt@gmail.com. Tim kami siap membantu kapan saja."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://zcus.biz.id/"},
+    {"@type": "ListItem", "position": 2, "name": "Shop", "item": "https://zcus.biz.id/shop/"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Z Store",
+  "alternateName": ["Z Store Digital", "Zcus Store"],
+  "url": "https://zcus.biz.id/shop/",
+  "description": "Premium digital marketplace Indonesia. AI tools, software, voucher, merchandise dengan instant delivery.",
+  "inLanguage": "id-ID",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://zcus.biz.id/shop/?search={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+</head>
+<body>
+
+<!-- Skip to main content (a11y) -->
+<a href="#products" class="skip-link">Skip to main content</a>
+
+<!-- BG MESH (static, no animation) -->
+<div class="bg-mesh"></div>
+<!-- orbs disabled to prevent shift -->
+
+<!-- TOP ANNOUNCEMENT -->
+<div class="announce glass">
+  <div class="announce-track">
+    <span><i class="fa-solid fa-bolt"></i> Instant delivery via email</span>
+    <span>·</span>
+    <span><i class="fa-solid fa-shield-halved"></i> 100% Original & Garansi 30 hari</span>
+    <span>·</span>
+    <span><i class="fa-solid fa-credit-card"></i> Midtrans — QRIS, VA, E-Wallet</span>
+    <span>·</span>
+    <span class="announce-flash"><i class="fa-solid fa-stopwatch"></i> FLASH SALE Berakhir Dalam: <b id="flashCountdown">02:45:12</b></span>
+    <span>·</span>
+    <span><i class="fa-solid fa-ticket"></i> Use code WELCOME50 for Rp 50k off</span>
+    <span>·</span>
+    <span><i class="fa-brands fa-whatsapp"></i> CS 24/7 WhatsApp</span>
+    <span>·</span>
+    <span><i class="fa-solid fa-bolt"></i> Instant delivery via email</span>
+    <span>·</span>
+    <span><i class="fa-solid fa-shield-halved"></i> 100% Original & Garansi 30 hari</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr glass">
+  <a href="#" class="brand" onclick="goHome();return false">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">PREMIUM DIGITAL</div>
+    </div>
+  </a>
+  <div class="hdr-search" role="search">
+    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Cari produk, kategori, atau brand..." oninput="searchProducts()" autocomplete="off">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="search-dropdown glass" id="searchDropdown"></div>
+  </div>
+  <div class="hdr-right">
+    <button class="hdr-btn" onclick="toggleTheme()" aria-label="Toggle dark/light theme" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+    <button class="hdr-btn" onclick="showOrders()" aria-label="My orders" title="Pesanan saya">
+      <i class="fa-solid fa-box"></i><span>Orders</span>
+    </button>
+    <button class="hdr-btn" onclick="showWishlist()" aria-label="Wishlist" title="Wishlist">
+      <i class="fa-solid fa-heart"></i><span class="hdr-badge" id="wishCount" style="display:none">0</span>
+    </button>
+    <button class="hdr-btn" onclick="openCart()" aria-label="Shopping cart" title="Keranjang">
+      <i class="fa-solid fa-cart-shopping"></i><span class="hdr-badge" id="cartCount">0</span>
+    </button>
+    <button class="hdr-btn" id="accountBtn" aria-label="My account" onclick="showAccount()" title="Akun">
+      <i class="fa-solid fa-user" id="accountIcon"></i>
+    </button>
+    <a href="/shop/seller.html" class="hdr-btn" id="sellerLink" aria-label="Seller dashboard" style="display:none" title="Seller Dashboard">
+      <i class="fa-solid fa-chart-line"></i><span>Seller</span>
+    </a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge glass">
+    <span class="pulse-dot"></span>
+    <span>LIVE STOCK · UPDATED EVERY 5 MIN</span>
+  </div>
+  <h1 class="hero-title">
+        <span class="hero-title-main">Z STORE</span>
+        <span class="hero-title-sub">PREMIUM DIGITAL ACCESS</span>
+      </h1>
+  <p class="hero-desc">Akun premium AI, software original, voucher eksklusif. Instant & bergaransi. Instant delivery ke email, bayar aman via Midtrans.</p>
+  <div class="hero-cta">
+    <a href="#products" class="btn btn-primary" aria-label="Browse all products"><i class="fa-solid fa-arrow-right"></i> Browse Products</a>
+    <a href="#trust" class="btn btn-ghost" aria-label="Why choose Z Store"><i class="fa-solid fa-circle-question"></i> Kenapa Z Store?</a>
+  </div>
+  <div class="hero-stats glass">
+    <div class="stat"><b id="statProducts">0</b><span>PRODUK AKTIF</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><b id="statSold">0</b><span>TERJUAL</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><b id="statBuyers">0</b><span>HAPPY BUYERS</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><b>&lt;10m</b><span>DELIVERY</span></div>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<section class="trust" id="trust">
+  <div class="trust-item glass">
+    <i class="fa-solid fa-bolt trust-ico"></i>
+    <div><b>&lt;10min Delivery</b><small>Instant via email</small></div>
+  </div>
+  <div class="trust-item glass">
+    <i class="fa-solid fa-shield-halved trust-ico"></i>
+    <div><b>Full Warranty</b><small>Garansi 30 hari</small></div>
+  </div>
+  <div class="trust-item glass">
+    <i class="fa-solid fa-lock trust-ico"></i>
+    <div><b>100% Original</b><small>Akun resmi</small></div>
+  </div>
+  <div class="trust-item glass">
+    <i class="fa-solid fa-credit-card trust-ico"></i>
+    <div><b>Secure Payment</b><small>Midtrans official</small></div>
+  </div>
+  <div class="trust-item glass">
+    <i class="fa-brands fa-whatsapp trust-ico"></i>
+    <div><b>24/7 Support</b><small>WhatsApp ready</small></div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="main-content" role="main">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-block glass">
+      <div class="sb-title">CATEGORIES</div>
+      <button class="sb-cat active" data-cat="" onclick="filterCat('', this)">
+        <i class="fa-solid fa-layer-group sb-cat-ico"></i>
+        <span class="sb-cat-name">All Products</span>
+        <span class="sb-cat-count" id="cnt-all">0</span>
+      </button>
+      <button class="sb-cat" data-cat="AI Tools" onclick="filterCat('AI Tools', this)">
+        <i class="fa-solid fa-robot sb-cat-ico"></i>
+        <span class="sb-cat-name">AI Tools</span>
+        <span class="sb-cat-count" id="cnt-AI Tools">0</span>
+      </button>
+      <button class="sb-cat" data-cat="Merchandise" onclick="filterCat('Merchandise', this)">
+        <i class="fa-solid fa-shirt sb-cat-ico"></i>
+        <span class="sb-cat-name">Merchandise</span>
+        <span class="sb-cat-count" id="cnt-Merchandise">0</span>
+      </button>
+      <button class="sb-cat" data-cat="Digital Goods" onclick="filterCat('Digital Goods', this)">
+        <i class="fa-solid fa-floppy-disk sb-cat-ico"></i>
+        <span class="sb-cat-name">Digital Goods</span>
+        <span class="sb-cat-count" id="cnt-Digital Goods">0</span>
+      </button>
+      <button class="sb-cat" data-cat="Voucher" onclick="filterCat('Voucher', this)">
+        <i class="fa-solid fa-ticket sb-cat-ico"></i>
+        <span class="sb-cat-name">Voucher</span>
+        <span class="sb-cat-count" id="cnt-Voucher">0</span>
+      </button>
+      <button class="sb-cat" data-cat="Jasa" onclick="filterCat('Jasa', this)">
+        <i class="fa-solid fa-screwdriver-wrench sb-cat-ico"></i>
+        <span class="sb-cat-name">Jasa</span>
+        <span class="sb-cat-count" id="cnt-Jasa">0</span>
+      </button>
+      <button class="sb-cat" data-cat="Elektronik" onclick="filterCat('Elektronik', this)">
+        <i class="fa-solid fa-mobile-screen sb-cat-ico"></i>
+        <span class="sb-cat-name">Elektronik</span>
+        <span class="sb-cat-count" id="cnt-Elektronik">0</span>
+      </button>
+    </div>
+
+    <div class="sb-block glass">
+      <div class="sb-title">SORT BY</div>
+      <select class="sb-select" id="sortSelect" onchange="applySort()">
+        <option value="newest"><i class="fa-solid fa-clock"></i> Newest First</option>
+        <option value="price-asc">Price: Low → High</option>
+        <option value="price-desc">Price: High → Low</option>
+        <option value="discount">Best Discount</option>
+        <option value="sold">Best Seller</option>
+        <option value="rating">Top Rated</option>
+      </select>
+    </div>
+
+    <div class="sb-block glass">
+      <div class="sb-title">PRICE RANGE</div>
+      <div class="price-range">
+        <input type="number" id="priceMin" placeholder="Min" onchange="applyPrice()">
+        <span>—</span>
+        <input type="number" id="priceMax" placeholder="Max" onchange="applyPrice()">
+      </div>
+    </div>
+
+    <div class="sb-block glass">
+      <div class="sb-title">PROMO CODE</div>
+      <div class="promo-input">
+        <input type="text" id="promoInput" placeholder="Kode promo">
+        <button onclick="applyPromo()">Apply</button>
+      </div>
+      <div class="promo-msg" id="promoMsg"></div>
+    </div>
+
+    <div class="sb-block glass sb-cta">
+      <div class="sb-title">NEED HELP?</div>
+      <a href="https://wa.me/628xxxxxxxxxx" class="btn btn-wa" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i> Chat WhatsApp
+      </a>
+      <a href="mailto:zcusgt@gmail.com" class="btn btn-ghost btn-sm">
+        <i class="fa-solid fa-envelope"></i> Email Support
+      </a>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <section class="content" id="products">
+    <div class="content-head">
+      <div>
+        <h2 class="content-title" id="prodTitle">Featured Products</h2>
+        <div class="content-sub" id="prodSub">Showing all available products</div>
+      </div>
+      <div class="content-actions">
+        <div class="view-toggle glass">
+          <button class="vt-btn active" id="vtGrid" onclick="setView('grid')"><i class="fa-solid fa-grip"></i></button>
+          <button class="vt-btn" id="vtList" onclick="setView('list')"><i class="fa-solid fa-list"></i></button>
+        </div>
+        <span class="prod-count-badge"><i class="fa-solid fa-fire"></i> <span id="prodCount">0</span> produk</span>
+      </div>
+    </div>
+
+    <div class="prod-grid" id="prodGrid">
+      <div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading products…</div>
+    </div>
+
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-ico"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <h3>Tidak ada produk</h3>
+      <p>Coba kata kunci lain atau ubah filter</p>
+      <button class="btn btn-ghost" onclick="resetFilter()"><i class="fa-solid fa-rotate-left"></i> Reset Filter</button>
+    </div>
+
+    <!-- Recently viewed -->
+    <section id="recentSection" style="display:none;margin-top:48px;min-height:0">
+      <div class="content-head">
+        <h2 class="content-title"><i class="fa-solid fa-clock-rotate-left"></i> Recently Viewed</h2>
+      </div>
+      <div class="prod-grid" id="recentGrid"></div>
+    </section>
+
+    <!-- Recommended -->
+    <section id="recommendedSection" style="display:none;margin-top:48px;min-height:0">
+      <div class="content-head">
+        <h2 class="content-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Recommended for You</h2>
+      </div>
+      <div class="prod-grid" id="recommendedGrid"></div>
+    </section>
+  </section>
+</main>
+
+<!-- Mobile filter FAB -->
+<button class="mobile-filter-fab" id="mobileFilterFab" onclick="toggleMobileFilter()" aria-label="Filter">
+  <i class="fa-solid fa-sliders"></i>
+  <span class="filter-count" id="filterCount" style="display:none">0</span>
+</button>
+
+<!-- Mobile filter sheet -->
+<div class="mobile-filter-sheet glass" id="mobileFilterSheet">
+  <div class="mobile-filter-sheet-handle"></div>
+  <div class="mobile-filter-sheet-head">
+    <b><i class="fa-solid fa-sliders"></i> Filter & Sort</b>
+    <button onclick="toggleMobileFilter()" style="width:32px;height:32px;border-radius:50%;background:var(--glass)"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="mobile-filter-sheet-body" id="mobileFilterContent">
+    <!-- Will be cloned from sidebar -->
+  </div>
+</div>
+
+<!-- Mobile bottom nav -->
+<nav class="mobile-bottom-nav glass">
+  <button class="mbn-item active" data-nav="home" onclick="goHome()">
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+  </button>
+  <button class="mbn-item" data-nav="search" onclick="document.getElementById('searchInput').focus()">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span>Search</span>
+  </button>
+  <button class="mbn-item" data-nav="cart" onclick="openCart()">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>Cart</span>
+  </button>
+  <button class="mbn-item" data-nav="wishlist" onclick="showWishlist()">
+    <i class="fa-solid fa-heart"></i>
+    <span>Wishlist</span>
+  </button>
+  <button class="mbn-item" data-nav="account" onclick="user?showAccount():showModal('login')">
+    <i class="fa-solid fa-user"></i>
+    <span>Account</span>
+  </button>
+</nav>
+
+<!-- FEATURES SHOWCASE -->
+<section class="features">
+  <div class="section-title glass">
+    <i class="fa-solid fa-wand-magic-sparkles"></i>
+    <h2>Built-in Features</h2>
+    <span>25+ fitur dalam 1 single-page app</span>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card glass"><i class="fa-solid fa-magnifying-glass feature-ico"></i><h3>Live Search</h3><p>Dropdown suggestion real-time saat user mengetik</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-cart-shopping feature-ico"></i><h3>Smart Cart</h3><p>Quantity, promo code, real-time discount, localStorage</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-heart feature-ico"></i><h3>Wishlist</h3><p>Save favorite items, badge count, dedicated modal</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-filter feature-ico"></i><h3>Smart Filter</h3><p>Category, price range, 6-mode sort, view toggle</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-credit-card feature-ico"></i><h3>Midtrans Pay</h3><p>QRIS, VA, GoPay, ShopeePay. Real-time webhook</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-truck-fast feature-ico"></i><h3>Auto Delivery</h3><p>Email credentials otomatis dengan tutorial</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-circle-half-stroke feature-ico"></i><h3>Theme Toggle</h3><p>Dark / light mode, persistent di localStorage</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-mobile-screen feature-ico"></i><h3>Responsive</h3><p>Mobile-first design, breakpoint 900px</p></div>
+    <div class="feature-card glass"><i class="fa-brands fa-google feature-ico"></i><h3>Google OAuth</h3><p>Login cepat dengan Google account</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-shield-halved feature-ico"></i><h3>JWT Auth</h3><p>30-day token, bcrypt password, RBAC</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-ticket feature-ico"></i><h3>Promo Codes</h3><p>Flat & percent discounts dengan min order</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-bell feature-ico"></i><h3>Toast Notify</h3><p>Success / error / info feedback</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-star feature-ico"></i><h3>Reviews & Rating</h3><p>User reviews, star rating per produk</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-clock-rotate-left feature-ico"></i><h3>Recently Viewed</h3><p>Auto-track produk yang dilihat</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-share-nodes feature-ico"></i><h3>Share Product</h3><p>Copy link + share ke WhatsApp/Telegram</p></div>
+    <div class="feature-card glass"><i class="fa-solid fa-stopwatch feature-ico"></i><h3>Flash Sale</h3><p>Countdown timer real-time di announcement</p></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="ftr">
+  <div class="ftr-top container">
+    <div>
+      <a href="/shop/" class="brand" onclick="goHome();return false">
+        <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+        <div class="brand-text">
+          <div class="brand-name">Z<span>Store</span></div>
+          <div class="brand-tag">PREMIUM DIGITAL</div>
+        </div>
+      </a>
+      <p class="ftr-desc">Marketplace produk digital premium. Bayar aman via Midtrans, instant delivery ke email, garansi 30 hari. Kenapa pilih Z Store? Karena instant, original, dan bergaransi.</p>
+      <div class="ftr-social">
+        <a href="#" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+        <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4><i class="fa-solid fa-store"></i> Z Store</h4>
+      <a href="/shop/about.html"><i class="fa-solid fa-circle-info"></i> Tentang Kami</a>
+      <a href="/shop/faq.html"><i class="fa-solid fa-circle-question"></i> FAQ</a>
+      <a href="#"><i class="fa-solid fa-book"></i> Cara Order</a>
+      <a href="#"><i class="fa-solid fa-shield-halved"></i> Garansi</a>
+      <a href="#"><i class="fa-solid fa-rotate-left"></i> Refund Policy</a>
+    </div>
+    <div>
+      <h4><i class="fa-solid fa-credit-card"></i> Pembayaran</h4>
+      <a href="#"><i class="fa-solid fa-qrcode"></i> QRIS</a>
+      <a href="#"><i class="fa-solid fa-building-columns"></i> Virtual Account</a>
+      <a href="#"><i class="fa-brands fa-google-wallet"></i> GoPay</a>
+      <a href="#"><i class="fa-solid fa-wallet"></i> ShopeePay</a>
+      <a href="#"><i class="fa-regular fa-credit-card"></i> Credit Card</a>
+    </div>
+    <div>
+      <h4><i class="fa-solid fa-headset"></i> Hubungi Kami</h4>
+      <a href="mailto:zcusgt@gmail.com"><i class="fa-solid fa-envelope"></i> zcusgt@gmail.com</a>
+      <a href="https://wa.me/628xxxxxxxxxx"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+      <a href="#"><i class="fa-solid fa-location-dot"></i> Jakarta, Indonesia</a>
+      <a href="#"><i class="fa-solid fa-clock"></i> CS 24/7</a>
+    </div>
+  </div>
+  <div class="ftr-bottom container">
+    <div>© 2026 Z Store. All rights reserved.</div>
+    <div class="ftr-meta">
+      <span class="status-dot"></span>
+      <span>API: <a href="/shop-app/api/health">live</a></span>
+      <span>·</span>
+      <span>v3.0.0</span>
+      <span>·</span>
+      <a href="/shop/preview/"><i class="fa-solid fa-images"></i> Design Preview</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Cart Drawer -->
+<div class="drawer" id="cartDrawer">
+  <div class="drawer-head glass">
+    <b><i class="fa-solid fa-cart-shopping"></i> Keranjang <span class="badge-pill" id="cartDrawerCount">0</span></b>
+    <button class="drawer-close" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="drawer-body" id="cartItems">
+    <div class="cd-empty">
+      <div class="empty-ico"><i class="fa-solid fa-cart-arrow-down"></i></div>
+      <p>Keranjang kosong</p>
+      <button class="btn btn-ghost btn-sm" onclick="closeCart()">Mulai Belanja</button>
+    </div>
+  </div>
+  <div class="drawer-foot glass" id="cartFoot" style="display:none">
+    <div class="cart-row"><span>Subtotal</span><b id="cartSubtotal">Rp 0</b></div>
+    <div class="cart-row cart-discount" id="cartDiscountRow" style="display:none">
+      <span><i class="fa-solid fa-ticket"></i> <span id="cartDiscountLabel">-</span></span>
+      <b id="cartDiscount">-Rp 0</b>
+    </div>
+    <div class="cart-row cart-total"><span>Total</span><b id="cartTotal">Rp 0</b></div>
+    <input type="email" id="buyerEmail" placeholder="Email untuk delivery" class="form-input">
+    <button class="btn btn-primary full" onclick="checkout()"><i class="fa-solid fa-lock"></i> Checkout via Midtrans</button>
+    <div class="cart-payments">
+      <span>Pembayaran aman via</span>
+      <div class="pay-icons">
+        <span>QRIS</span><span>VA</span><span>GoPay</span><span>OVO</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Detail -->
+<div class="modal" id="productModal">
+  <div class="modal-content modal-xl glass" id="productModalContent">
+    <button class="modal-close" onclick="closeProduct()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="productDetail"></div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal" id="authModal">
+  <div class="modal-content glass">
+    <button class="modal-close" onclick="hideModal('auth')"><i class="fa-solid fa-xmark"></i></button>
+    <div class="auth-head">
+      <div class="brand-mark big"><i class="fa-solid fa-z"></i></div>
+      <h2 id="authTitle">Login</h2>
+      <p id="authSub">Masuk ke akun Zcus Store kamu</p>
+    </div>
+
+    <div class="tab-content active" id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" class="form-input">
+      <input type="password" id="loginPass" placeholder="Password" class="form-input">
+      <button class="btn btn-primary full" onclick="doLogin()">Login <i class="fa-solid fa-arrow-right"></i></button>
+      <div class="divider"><span>atau</span></div>
+      <button class="btn btn-google full" onclick="doGoogle()">
+        <i class="fa-brands fa-google"></i> Lanjutkan dengan Google
+      </button>
+      <p class="form-foot">Belum punya akun? <a href="#" onclick="showForm('register');return false">Daftar</a></p>
+    </div>
+
+    <div class="tab-content" id="registerForm">
+      <input type="text" id="regName" placeholder="Nama lengkap" class="form-input">
+      <input type="email" id="regEmail" placeholder="Email" class="form-input">
+      <input type="password" id="regPass" placeholder="Password (min 6 char)" class="form-input">
+      <button class="btn btn-primary full" onclick="doRegister()">Buat Akun <i class="fa-solid fa-arrow-right"></i></button>
+      <p class="form-foot">Sudah punya akun? <a href="#" onclick="showForm('login');return false">Login</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Orders Modal -->
+<div class="modal" id="ordersModal">
+  <div class="modal-content modal-lg glass">
+    <button class="modal-close" onclick="hideModal('orders')"><i class="fa-solid fa-xmark"></i></button>
+    <h2><i class="fa-solid fa-box"></i> Pesanan Saya</h2>
+    <div id="ordersList"><div class="loading">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Wishlist Modal -->
+<div class="modal" id="wishlistModal">
+  <div class="modal-content modal-lg glass">
+    <button class="modal-close" onclick="hideModal('wishlist')"><i class="fa-solid fa-xmark"></i></button>
+    <h2><i class="fa-solid fa-heart"></i> Wishlist</h2>
+    <div id="wishlistList"></div>
+  </div>
+</div>
+
+<!-- Account Modal -->
+<div class="modal" id="accountModal">
+  <div class="modal-content glass">
+    <button class="modal-close" onclick="hideModal('account')"><i class="fa-solid fa-xmark"></i></button>
+    <div id="accountContent"></div>
+  </div>
+</div>
+
+<!-- Reviews Modal -->
+<div class="modal" id="reviewsModal">
+  <div class="modal-content modal-lg glass">
+    <button class="modal-close" onclick="hideModal('reviews')"><i class="fa-solid fa-xmark"></i></button>
+    <div id="reviewsContent"></div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal" id="shareModal">
+  <div class="modal-content glass">
+    <button class="modal-close" onclick="hideModal('share')"><i class="fa-solid fa-xmark"></i></button>
+    <h2><i class="fa-solid fa-share-nodes"></i> Share Product</h2>
+    <p class="form-foot" style="text-align:left;margin:8px 0 16px">Bagikan produk ini ke teman kamu</p>
+    <div class="share-grid" id="shareButtons"></div>
+    <input type="text" id="shareLink" class="form-input" readonly>
+    <button class="btn btn-primary full" onclick="copyShareLink()"><i class="fa-solid fa-copy"></i> Copy Link</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- FAB WhatsApp -->
+<a href="https://wa.me/628xxxxxxxxxx" class="fab-wa glass" target="_blank" title="Chat WhatsApp">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+
+<script src="app.js?v=26"></script>
+
+
+<!-- Cookie consent -->
+<div id="cookieBanner" class="cookie-banner glass" style="display:none">
+  <div class="cookie-content">
+    <i class="fa-solid fa-cookie-bite"></i>
+    <div>
+      <b>Cookie & Privasi</b>
+      <p>Z Store menggunakan cookies untuk pengalaman terbaik. Dengan klik "Setuju", kamu setuju dengan <a href="/shop/faq.html">privasi policy</a> kami.</p>
+    </div>
+  </div>
+  <div class="cookie-actions">
+    <button onclick="dismissCookie()" class="btn btn-primary btn-sm">Setuju</button>
+  </div>
+</div>
+
+<script>
+// Cookie consent
+(function(){
+  if(!localStorage.getItem('zcus_cookie_ok')){
+    setTimeout(()=>{
+      const b = document.getElementById('cookieBanner');
+      if(b) b.style.display = 'flex';
+    },2000);
+  }
+})();
+function dismissCookie(){
+  localStorage.setItem('zcus_cookie_ok','1');
+  const b = document.getElementById('cookieBanner');
+  if(b) b.style.display = 'none';
+  toast('Terima kasih!', 'success');
+}
+
+// Global error handler
+window.addEventListener('error', function(e){
+  console.error('Z Store Error:', e.error);
+});
+window.addEventListener('unhandledrejection', function(e){
+  console.error('Z Store Promise Error:', e.reason);
+});
+</script>
+
+<style>
+.cookie-banner{
+  position:fixed;bottom:80px;left:20px;max-width:420px;
+  z-index:300;display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-radius:12px;animation:slideUpCookie .3s ease-out;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);backdrop-filter:blur(20px)
+}
+.cookie-content{display:flex;align-items:center;gap:12px;flex:1}
+.cookie-content i{font-size:24px;color:var(--accent)}
+.cookie-content b{display:block;font-size:13px;margin-bottom:2px}
+.cookie-content p{font-size:11px;color:var(--text-dim);margin:0;line-height:1.4}
+.cookie-content a{color:var(--accent);text-decoration:underline}
+.cookie-actions{flex-shrink:0}
+@keyframes slideUpCookie{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(max-width:500px){.cookie-banner{flex-direction:column;align-items:flex-start;gap:12px}}
+</style>
+</body>
+</html>
