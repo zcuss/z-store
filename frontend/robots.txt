@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /shop/
+Allow: /shop/product.html
+Allow: /shop/about.html
+Allow: /shop/faq.html
+Disallow: /shop/admin.html
+Disallow: /shop/orders.html
+Disallow: /shop-app/
+Disallow: /api/
+
+Sitemap: https://zcus.biz.id/sitemap.xml

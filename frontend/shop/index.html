@@ -234,9 +234,12 @@
   </div>
   <div class="hdr-right">
     <button class="hdr-btn" onclick="toggleTheme()" aria-label="Toggle dark/light theme" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
-    <button class="hdr-btn" onclick="showOrders()" aria-label="My orders" title="Pesanan saya">
+    <a href="/shop/orders.html" class="hdr-btn" aria-label="My orders" title="Pesanan saya (halaman)">
       <i class="fa-solid fa-box"></i><span>Orders</span>
-    </button>
+    </a>
+    <a href="/shop/admin.html" class="hdr-btn" id="adminLink" aria-label="Admin panel" style="display:none" title="Admin Panel">
+      <i class="fa-solid fa-gauge-high"></i><span>Admin</span>
+    </a>
     <button class="hdr-btn" onclick="showWishlist()" aria-label="Wishlist" title="Wishlist">
       <i class="fa-solid fa-heart"></i><span class="hdr-badge" id="wishCount" style="display:none">0</span>
     </button>
@@ -431,72 +434,25 @@
   </section>
 </main>
 
-<!-- Mobile filter FAB -->
-<button class="mobile-filter-fab" id="mobileFilterFab" onclick="toggleMobileFilter()" aria-label="Filter">
-  <i class="fa-solid fa-sliders"></i>
-  <span class="filter-count" id="filterCount" style="display:none">0</span>
-</button>
-
-<!-- Mobile filter sheet -->
-<div class="mobile-filter-sheet glass" id="mobileFilterSheet">
-  <div class="mobile-filter-sheet-handle"></div>
-  <div class="mobile-filter-sheet-head">
-    <b><i class="fa-solid fa-sliders"></i> Filter & Sort</b>
-    <button onclick="toggleMobileFilter()" style="width:32px;height:32px;border-radius:50%;background:var(--glass)"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="mobile-filter-sheet-body" id="mobileFilterContent">
-    <!-- Will be cloned from sidebar -->
-  </div>
-</div>
-
-<!-- Mobile bottom nav -->
-<nav class="mobile-bottom-nav glass">
-  <button class="mbn-item active" data-nav="home" onclick="goHome()">
-    <i class="fa-solid fa-house"></i>
-    <span>Home</span>
-  </button>
-  <button class="mbn-item" data-nav="search" onclick="document.getElementById('searchInput').focus()">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span>Search</span>
-  </button>
-  <button class="mbn-item" data-nav="cart" onclick="openCart()">
-    <i class="fa-solid fa-cart-shopping"></i>
-    <span>Cart</span>
-  </button>
-  <button class="mbn-item" data-nav="wishlist" onclick="showWishlist()">
-    <i class="fa-solid fa-heart"></i>
-    <span>Wishlist</span>
-  </button>
-  <button class="mbn-item" data-nav="account" onclick="user?showAccount():showModal('login')">
-    <i class="fa-solid fa-user"></i>
-    <span>Account</span>
-  </button>
-</nav>
-
 <!-- FEATURES SHOWCASE -->
-<section class="features">
+<section class="features" id="features">
   <div class="section-title glass">
     <i class="fa-solid fa-wand-magic-sparkles"></i>
     <h2>Built-in Features</h2>
     <span>25+ fitur dalam 1 single-page app</span>
   </div>
   <div class="features-grid">
-    <div class="feature-card glass"><i class="fa-solid fa-magnifying-glass feature-ico"></i><h3>Live Search</h3><p>Dropdown suggestion real-time saat user mengetik</p></div>
+    <a href="/shop/product.html" class="feature-card glass" style="text-decoration:none;color:inherit"><i class="fa-solid fa-magnifying-glass feature-ico"></i><h3>Live Search</h3><p>Dropdown suggestion real-time + dedicated product page</p></a>
     <div class="feature-card glass"><i class="fa-solid fa-cart-shopping feature-ico"></i><h3>Smart Cart</h3><p>Quantity, promo code, real-time discount, localStorage</p></div>
     <div class="feature-card glass"><i class="fa-solid fa-heart feature-ico"></i><h3>Wishlist</h3><p>Save favorite items, badge count, dedicated modal</p></div>
     <div class="feature-card glass"><i class="fa-solid fa-filter feature-ico"></i><h3>Smart Filter</h3><p>Category, price range, 6-mode sort, view toggle</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-credit-card feature-ico"></i><h3>Midtrans Pay</h3><p>QRIS, VA, GoPay, ShopeePay. Real-time webhook</p></div>
+    <a href="/shop/orders.html" class="feature-card glass" style="text-decoration:none;color:inherit"><i class="fa-solid fa-credit-card feature-ico"></i><h3>Midtrans Pay</h3><p>QRIS, VA, GoPay, ShopeePay. Real-time webhook + escrow 7 hari</p></a>
     <div class="feature-card glass"><i class="fa-solid fa-truck-fast feature-ico"></i><h3>Auto Delivery</h3><p>Email credentials otomatis dengan tutorial</p></div>
     <div class="feature-card glass"><i class="fa-solid fa-circle-half-stroke feature-ico"></i><h3>Theme Toggle</h3><p>Dark / light mode, persistent di localStorage</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-mobile-screen feature-ico"></i><h3>Responsive</h3><p>Mobile-first design, breakpoint 900px</p></div>
-    <div class="feature-card glass"><i class="fa-brands fa-google feature-ico"></i><h3>Google OAuth</h3><p>Login cepat dengan Google account</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-shield-halved feature-ico"></i><h3>JWT Auth</h3><p>30-day token, bcrypt password, RBAC</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-ticket feature-ico"></i><h3>Promo Codes</h3><p>Flat & percent discounts dengan min order</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-bell feature-ico"></i><h3>Toast Notify</h3><p>Success / error / info feedback</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-star feature-ico"></i><h3>Reviews & Rating</h3><p>User reviews, star rating per produk</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-clock-rotate-left feature-ico"></i><h3>Recently Viewed</h3><p>Auto-track produk yang dilihat</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-share-nodes feature-ico"></i><h3>Share Product</h3><p>Copy link + share ke WhatsApp/Telegram</p></div>
-    <div class="feature-card glass"><i class="fa-solid fa-stopwatch feature-ico"></i><h3>Flash Sale</h3><p>Countdown timer real-time di announcement</p></div>
+    <a href="/shop/admin.html" class="feature-card glass" style="text-decoration:none;color:inherit"><i class="fa-solid fa-gauge-high feature-ico"></i><h3>Admin Panel</h3><p>Dashboard moderasi users, orders, withdrawals</p></a>
+  </div>
+  <div style="text-align:center;margin-top:24px">
+    <a href="/shop/" class="btn btn-ghost" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'});return false"><i class="fa-solid fa-arrow-up"></i> Lihat Semua Produk</a>
   </div>
 </section>
 
@@ -558,8 +514,6 @@
 </footer>
 
 <!-- ============ MODALS ============ -->
-
-<!-- Cart Drawer -->
 <div class="drawer" id="cartDrawer">
   <div class="drawer-head glass">
     <b><i class="fa-solid fa-cart-shopping"></i> Keranjang <span class="badge-pill" id="cartDrawerCount">0</span></b>
@@ -742,5 +696,49 @@ window.addEventListener('unhandledrejection', function(e){
 @keyframes slideUpCookie{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
 @media(max-width:500px){.cookie-banner{flex-direction:column;align-items:flex-start;gap:12px}}
 </style>
+
+<!-- ============ MOBILE UI (sticky, hidden on desktop via CSS) ============ -->
+<!-- Mobile filter FAB -->
+<button class="mobile-filter-fab" id="mobileFilterFab" onclick="toggleMobileFilter()" aria-label="Filter">
+  <i class="fa-solid fa-sliders"></i>
+  <span class="filter-count" id="filterCount" style="display:none">0</span>
+</button>
+
+<!-- Mobile filter sheet (bottom drawer, hidden by translateY(100%)) -->
+<div class="mobile-filter-sheet glass" id="mobileFilterSheet">
+  <div class="mobile-filter-sheet-handle"></div>
+  <div class="mobile-filter-sheet-head">
+    <b><i class="fa-solid fa-sliders"></i> Filter & Sort</b>
+    <button onclick="toggleMobileFilter()" style="width:32px;height:32px;border-radius:50%;background:var(--glass)"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="mobile-filter-sheet-body" id="mobileFilterContent">
+    <!-- Will be cloned from sidebar -->
+  </div>
+</div>
+
+<!-- Mobile bottom nav (fixed bottom, z-index 90) -->
+<nav class="mobile-bottom-nav glass" aria-label="Mobile navigation">
+  <button class="mbn-item active" data-nav="home" onclick="goHome()">
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+  </button>
+  <button class="mbn-item" data-nav="search" onclick="document.getElementById('searchInput').focus()">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span>Search</span>
+  </button>
+  <button class="mbn-item" data-nav="cart" onclick="openCart()">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>Cart</span>
+  </button>
+  <button class="mbn-item" data-nav="wishlist" onclick="showWishlist()">
+    <i class="fa-solid fa-heart"></i>
+    <span>Wishlist</span>
+  </button>
+  <button class="mbn-item" data-nav="account" onclick="user?showAccount():showModal('login')">
+    <i class="fa-solid fa-user"></i>
+    <span>Account</span>
+  </button>
+</nav>
+
 </body>
 </html>

@@ -100,6 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user.role === 'seller' || user.role === 'admin') {
       document.getElementById('sellerLink').style.display = 'flex';
     }
+    if (user.role === 'admin') {
+      const al = document.getElementById('adminLink');
+      if (al) al.style.display = 'flex';
+    }
   }
   loadProducts();
   updateCartUI();
@@ -236,7 +240,7 @@ function productCard(p) {
   else if ((Date.now() - new Date(p.created_at)) < 7*24*60*60*1000) badge = '<span class="pc-badge new"><i class="fa-solid fa-sparkles"></i> NEW</span>';
 
   return `
-  <div class="prod-card glass" onclick='showProduct(${p.id})'>
+  <div class="prod-card glass" onclick='viewProduct(${p.id})'>
     <div class="pc-img">
       <div class="pc-img-glow"></div>
       <div class="pc-badges">${badge}</div>
@@ -257,6 +261,16 @@ function productCard(p) {
       </div>
     </div>
   </div>`;
+}
+
+function slugify(s) { return String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80); }
+
+function viewProduct(id) {
+  // Fetch product to get name for slug URL
+  api('/products/' + id).then(p => {
+    if (p && p.name) location.href = '/shop/product.html?slug=' + slugify(p.name);
+    else location.href = '/shop/product.html?id=' + id;
+  }).catch(() => location.href = '/shop/product.html?id=' + id);
 }
 
 async function showProduct(id) {
@@ -298,6 +312,7 @@ async function showProduct(id) {
           <div class="pd-actions">
             <button class="btn btn-primary" style="flex:1" onclick='addToCart(${p.id});closeProduct()'><i class="fa-solid fa-cart-plus"></i> + Keranjang</button>
             <button class="btn btn-wa" onclick="window.open('https://wa.me/628xxxxxxxxxx?text=${encodeURIComponent('Halo, saya tertarik dengan ' + p.name)}')"><i class="fa-brands fa-whatsapp"></i> Tanya</button>
+            <a class="btn btn-ghost" href="/shop/product.html?slug=${slugify(p.name)}" title="Halaman lengkap (SEO & share-friendly)"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
           </div>
           <div class="pd-features glass">
             <h4><i class="fa-solid fa-check-double"></i> Yang Kamu Dapat</h4>
@@ -510,7 +525,7 @@ function searchProducts() {
     const dd = document.getElementById('searchDropdown');
     if (matches.length) {
       dd.innerHTML = matches.map(p => `
-        <div class="sd-item" onclick='showProduct(${p.id})'>
+        <div class="sd-item" onclick='viewProduct(${p.id})'>
           <div class="sd-ico"><i class="fa-solid ${getCatIcon(p.category)}"></i></div>
           <div class="sd-name">${p.name}</div>
           <div class="sd-price">${fmtIDR(p.price)}</div>
