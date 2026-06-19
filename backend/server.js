@@ -175,8 +175,13 @@ app.post('/api/auth/login', rateLimit('login', 10, 15 * 60 * 1000), async (req, 
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [cleanEmail]);
     if (!rows[0]) {
       // Constant-time response to prevent user enumeration
+      // (1) run bcrypt against dummy hash (real path also runs bcrypt)
       await bcrypt.compare(password, '$2a$12$dummyhashforcomparetimingattack0000000000000000000000000000000');
+      // (2) recordFailedLogin
       recordFailedLogin(cleanEmail);
+      // (3) auditLog + logSecurityEvent (mirror the existing-user-wrong-pw path exactly)
+      auditLog(null, 'login_failed_invalid_user', { ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress, email_hash: sec.sha256Short(cleanEmail) });
+      sec.logSecurityEvent('login_failed', req.ip, { email_hash: sec.sha256Short(cleanEmail) });
       return res.status(401).json({ error: 'invalid credentials' });
     }
     if (!rows[0].password_hash) return res.status(401).json({ error: 'login with Google instead' });

@@ -55,6 +55,12 @@ function sanitizeText(input) {
   return input.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
 }
 
+// First 12 hex chars of sha256 — used for PII-safe identifiers in audit logs
+function sha256Short(input) {
+  if (typeof input !== 'string') return '';
+  return crypto.createHash('sha256').update(input).digest('hex').slice(0, 12);
+}
+
 // Detect common injection patterns in any string
 const INJECTION_PATTERNS = [
   /\bunion\s+select\b/i,
@@ -70,6 +76,17 @@ const INJECTION_PATTERNS = [
   /__import__\(/i,
   /require\s*\(/i,
   /\beval\s*\(/i,
+  // SQL tautologies
+  /(\bor\b|\band\b)\s+\d+\s*=\s*\d+/i,
+  /(\bor\b|\band\b)\s+['"][^'"]*['"]\s*=\s*['"][^'"]*['"]/i,
+  // classic comment-based
+  /'\s*;\s*--/i,
+  /'\s*or\s+'1'\s*=\s*'1/i,
+  /\bxp_cmdshell\b/i,
+  /\b(load_file|into\s+outfile|into\s+dumpfile)\b/i,
+  // NoSQL operator injection
+  /\$[a-z]+\s*:/i,
+  /\bwhere\s+\$where\b/i,
 ];
 
 function detectInjection(input) {
@@ -264,6 +281,7 @@ module.exports = {
   sanitizeHTML,
   sanitizeText,
   detectInjection,
+  sha256Short,
   // middleware
   securityHeaders,
   corsStrict,
