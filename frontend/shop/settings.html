@@ -443,7 +443,7 @@ const API = (location.hostname === 'localhost' || location.hostname === '127.0.0
 let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
 let token = localStorage.getItem('zs_token') || '';
 let platforms = {};
-let linkPlatform = '';
+let linkPlatformTarget = '';
 let prefs = JSON.parse(localStorage.getItem('zs_prefs') || '{"email":true,"whatsapp":false,"telegram":true}');
 
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
@@ -624,7 +624,7 @@ function updPlat(name, p) {
 }
 
 async function linkPlatform(name) {
-  linkPlatform = name;
+  linkPlatformTarget = name;
   // Check if already linked → unlink instead
   if (platforms[name]?.linked) {
     if (!confirm(`Putuskan ${name} dari akun kamu?`)) return;
@@ -651,7 +651,7 @@ async function linkPlatform(name) {
 }
 
 async function requestLinkCode() {
-  const r = await api('/api/auth/link/request', { method: 'POST', body: JSON.stringify({ platform: linkPlatform }) });
+  const r = await api('/api/auth/link/request', { method: 'POST', body: JSON.stringify({ platform: linkPlatformTarget }) });
   if (r.error) return toast(r.error, 'error');
   document.getElementById('linkCode').textContent = r.code;
   document.getElementById('linkInstruction').innerHTML = `<i class="fa-solid fa-circle-info"></i> ${r.instruction}`;
@@ -664,9 +664,9 @@ async function requestLinkCode() {
 async function confirmLinkCode() {
   const code = document.getElementById('linkCode').textContent;
   const identifier = document.getElementById('linkManualId').value.trim();
-  const r = await api('/api/auth/link/confirm', { method: 'POST', body: JSON.stringify({ platform: linkPlatform, code, identifier: identifier || undefined }) });
+  const r = await api('/api/auth/link/confirm', { method: 'POST', body: JSON.stringify({ platform: linkPlatformTarget, code, identifier: identifier || undefined }) });
   if (r.error) return toast(r.error, 'error');
-  toast(`${linkPlatform} berhasil di-link!`, 'success');
+  toast(`${linkPlatformTarget} berhasil di-link!`, 'success');
   closeModal('modalLinkPlatform');
   loadPlatforms();
 }
