@@ -901,6 +901,11 @@
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
+<!-- Keyboard shortcut hint -->
+<div class="kbd-hint">
+  Tekan <kbd>Ctrl</kbd>+<kbd>K</kbd> atau <kbd>/</kbd> untuk cari · <kbd>Esc</kbd> tutup modal
+</div>
+
 <!-- Compare Products Modal -->
 <div class="compare-overlay" id="compareOverlay">
   <div class="compare-modal">
@@ -1319,6 +1324,49 @@ function startCooldown(remain) {
   }
 })();
 
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', e => {
+  // Ctrl+K or "/" → focus search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput')?.focus();
+  }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.getElementById('searchInput')?.focus();
+  }
+  // Esc → close any modal/drawer/chat
+  if (e.key === 'Escape') {
+    if (document.getElementById('liveChat')?.classList.contains('open')) closeLiveChat();
+    if (document.getElementById('cartDrawer')?.classList.contains('open')) closeCart();
+    document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.compare-overlay.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.auth-modal.open,.modal.open').forEach(m => { if (m.id !== 'cookieBanner') m.classList.remove('open'); });
+    document.body.style.overflow = '';
+  }
+  // Ctrl+Enter → checkout
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && cart.length) {
+    e.preventDefault();
+    location.href = '/shop/payment.html';
+  }
+});
+
+// ===== LOADING SKELETON =====
+function showSkeleton(container, count = 6) {
+  const html = Array(count).fill(0).map(() => `
+    <div class="sk-card glass">
+      <div class="sk-img sk-pulse"></div>
+      <div class="sk-body">
+        <div class="sk-line sk-line-short sk-pulse"></div>
+        <div class="sk-line sk-line-long sk-pulse"></div>
+        <div class="sk-line sk-line-med sk-pulse"></div>
+      </div>
+    </div>
+  `).join('');
+  if (typeof container === 'string') container = document.getElementById(container);
+  if (container) container.innerHTML = html;
+}
+
 // ===== COMPARE PRODUCTS =====
 let compareList = JSON.parse(localStorage.getItem('zs_compare') || '[]');
 function toggleCompare(id) {
@@ -1446,6 +1494,23 @@ window.addEventListener('unhandledrejection', function(e){
 .cookie-actions{flex-shrink:0;display:flex;gap:6px}
 .cookie-actions button{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
 .cookie-actions .cookie-accept{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}
+
+/* ===== LOADING SKELETON ===== */
+.sk-card{padding:0;overflow:hidden;border-radius:var(--radius-lg);margin-bottom:0}
+.sk-img{aspect-ratio:1/1;background:rgba(0,0,0,.2);border-radius:0}
+.sk-body{padding:16px}
+.sk-line{height:10px;background:rgba(255,255,255,.06);border-radius:4px;margin-bottom:8px}
+.sk-line-short{width:30%}
+.sk-line-med{width:60%}
+.sk-line-long{width:90%}
+.sk-pulse{animation:skPulse 1.4s ease-in-out infinite}
+@keyframes skPulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+/* ===== KEYBOARD HINT BADGE ===== */
+.kbd-hint{position:fixed;bottom:24px;left:24px;background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:10px;padding:6px 10px;font-size:11px;color:var(--text-dim);z-index:50;display:flex;align-items:center;gap:6px;animation:fadeInUp .4s ease-out .5s backwards}
+.kbd-hint kbd{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-family:monospace;color:var(--accent);border:1px solid var(--glass-border);font-size:10px}
+@media(max-width:700px){.kbd-hint{display:none}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .cookie-actions .cookie-accept:hover{transform:translateY(-1px)}
 .cookie-actions .cookie-deny{background:transparent;color:var(--text-dim);border:1px solid var(--glass-border)}
 .cookie-actions .cookie-deny:hover{color:var(--text)}
