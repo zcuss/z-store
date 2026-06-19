@@ -1617,7 +1617,7 @@ window.addEventListener('unhandledrejection', function(e){
 </div>
 
 <!-- Mobile bottom nav (fixed bottom, z-index 90) -->
-<nav class="mobile-bottom-nav glass" aria-label="Mobile navigation">
+<nav class="mobile-bottom-nav glass" aria-label="Mobile navigation" id="mobileBottomNav">
   <button class="mbn-item active" data-nav="home" onclick="goHome()">
     <i class="fa-solid fa-house"></i>
     <span>Home</span>
@@ -1629,16 +1629,71 @@ window.addEventListener('unhandledrejection', function(e){
   <button class="mbn-item" data-nav="cart" onclick="openCart()">
     <i class="fa-solid fa-cart-shopping"></i>
     <span>Cart</span>
+    <span class="mbn-badge" id="mbnCartBadge">0</span>
   </button>
   <button class="mbn-item" data-nav="wishlist" onclick="showWishlist()">
     <i class="fa-solid fa-heart"></i>
     <span>Wishlist</span>
+    <span class="mbn-badge" id="mbnWishBadge">0</span>
   </button>
   <button class="mbn-item" data-nav="account" onclick="user?showAccount():showModal('login')">
     <i class="fa-solid fa-user"></i>
     <span>Account</span>
   </button>
 </nav>
+
+<script>
+// Mobile UX: auto-hide bottom nav on scroll down, show on scroll up
+(function mobileNavScroll() {
+  if (!('ontouchstart' in window)) return;
+  let lastY = 0, ticking = false;
+  const nav = document.getElementById('mobileBottomNav');
+  if (!nav) return;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const dy = window.scrollY - lastY;
+        if (dy > 8 && window.scrollY > 100) nav.classList.add('hide');
+        else if (dy < -8) nav.classList.remove('hide');
+        lastY = window.scrollY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+  // Update badges
+  const updateBadges = () => {
+    const c = JSON.parse(localStorage.getItem('zs_cart') || '[]').reduce((s, x) => s + x.qty, 0);
+    const cb = document.getElementById('mbnCartBadge');
+    if (cb) { cb.textContent = c; cb.classList.toggle('show', c > 0); }
+    const w = JSON.parse(localStorage.getItem('zs_wishlist') || '[]').length;
+    const wb = document.getElementById('mbnWishBadge');
+    if (wb) { wb.textContent = w; wb.classList.toggle('show', w > 0); }
+  };
+  updateBadges();
+  setInterval(updateBadges, 1500);
+})();
+
+// Swipe right edge → open cart (mobile only)
+(function edgeSwipe() {
+  if (window.innerWidth > 900) return;
+  let startX = 0, startY = 0;
+  document.addEventListener('touchstart', e => {
+    if (e.touches[0].clientX < 30) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (startX < 30) {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = Math.abs(e.changedTouches[0].clientY - startY);
+      if (dx > 80 && dy < 60) openCart();
+      startX = 0;
+    }
+  }, { passive: true });
+})();
+</script>
 
 </body>
 </html>
