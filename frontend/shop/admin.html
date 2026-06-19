@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Admin Panel — Z Store</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.admin-wrap{max-width:1400px;margin:0 auto;padding:24px}
+.admin-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.admin-head h1{margin:0;font-size:24px;display:flex;align-items:center;gap:10px}
+.admin-head h1 i{color:var(--accent)}
+.admin-tabs{display:flex;gap:6px;border-bottom:1px solid var(--glass-border);margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tab{padding:12px 18px;background:transparent;border:none;color:var(--text-dim);font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-size:14px}
+.admin-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.admin-tab .badge-pill{margin-left:6px;background:rgba(244,63,94,.2);color:#fb7185;font-size:11px;padding:2px 6px;border-radius:8px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:var(--glass);border:1px solid var(--glass-border);padding:20px;border-radius:16px;position:relative;overflow:hidden}
+.stat-card::before{content:"";position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.15;border-radius:50%}
+.stat-card .stat-ico{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.stat-card .stat-val{font-size:24px;font-weight:800;color:var(--text)}
+.stat-card .stat-lbl{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.admin-table{width:100%;border-collapse:collapse;background:var(--glass);border-radius:14px;overflow:hidden;border:1px solid var(--glass-border)}
+.admin-table th{text-align:left;padding:14px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);background:rgba(0,0,0,.2);font-weight:700;border-bottom:1px solid var(--glass-border)}
+.admin-table td{padding:14px 12px;border-bottom:1px solid var(--glass-border);font-size:13px;color:var(--text);vertical-align:middle}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:rgba(14,165,233,.05)}
+.admin-table .role-pill{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase}
+.role-pill.admin{background:rgba(244,63,94,.2);color:#fb7185}
+.role-pill.seller{background:rgba(34,197,94,.2);color:#22c55e}
+.role-pill.buyer{background:rgba(14,165,233,.2);color:#38bdf8}
+.role-pill.cs{background:rgba(168,85,247,.2);color:#a855f7}
+.role-pill.marketing{background:rgba(251,191,36,.2);color:#fbbf24}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.status-pill.pending{background:rgba(251,191,36,.2);color:#fbbf24}
+.status-pill.paid{background:rgba(14,165,233,.2);color:#38bdf8}
+.status-pill.delivered{background:rgba(34,197,94,.2);color:#22c55e}
+.status-pill.completed{background:rgba(34,197,94,.3);color:#22c55e}
+.status-pill.cancelled{background:rgba(244,63,94,.2);color:#fb7185}
+.status-pill.archived{background:rgba(107,114,128,.2);color:#9ca3af}
+.admin-search{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.admin-search input,.admin-search select{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:13px;outline:none;transition:border .2s}
+.admin-search input:focus,.admin-search select:focus{border-color:var(--accent)}
+.admin-search input{min-width:200px;flex:1}
+.btn-icon{background:transparent;border:1px solid var(--glass-border);color:var(--text-dim);width:32px;height:32px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .2s;margin:0 2px}
+.btn-icon:hover{background:var(--accent);color:#fff;border-color:transparent}
+.btn-icon.danger:hover{background:#f43f5e}
+.admin-loading{padding:40px;text-align:center;color:var(--text-dim)}
+.admin-empty{padding:40px;text-align:center;color:var(--text-mute)}
+.admin-empty i{font-size:48px;margin-bottom:12px;display:block;opacity:.5}
+.admin-filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.admin-filters .chip{padding:6px 12px;background:var(--glass);border:1px solid var(--glass-border);border-radius:999px;font-size:12px;cursor:pointer;color:var(--text-dim);transition:all .2s}
+.admin-filters .chip.active,.admin-filters .chip:hover{background:var(--accent);color:#fff;border-color:transparent}
+.admin-guard{padding:80px 24px;text-align:center;color:var(--text-dim)}
+.admin-guard i{font-size:64px;color:#f43f5e;margin-bottom:16px;display:block}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">ADMIN PANEL</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn" title="Back to store"><i class="fa-solid fa-arrow-left"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="hdr-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</header>
+
+<main id="main" class="admin-wrap">
+  <div class="admin-head">
+    <h1><i class="fa-solid fa-gauge-high"></i> Admin Panel</h1>
+    <div style="color:var(--text-dim);font-size:13px" id="adminInfo">Loading…</div>
+  </div>
+
+  <div id="adminGuard" class="admin-guard" style="display:none">
+    <i class="fa-solid fa-lock"></i>
+    <h2>Akses ditolak</h2>
+    <p>Halaman ini hanya untuk admin. <a href="/shop/">Kembali ke toko</a> atau <a href="#" onclick="showLogin();return false">login sebagai admin</a>.</p>
+  </div>
+
+  <div id="loginCard" class="admin-guard" style="display:none">
+    <i class="fa-solid fa-user-shield"></i>
+    <h2>Login Admin</h2>
+    <div style="max-width:320px;margin:20px auto;text-align:left">
+      <input id="loginEmail" type="email" placeholder="Email" class="form-input" style="margin-bottom:8px">
+      <input id="loginPass" type="password" placeholder="Password" class="form-input" style="margin-bottom:12px">
+      <button class="btn btn-primary full" onclick="doLogin()">Login</button>
+    </div>
+  </div>
+
+  <div id="adminContent" style="display:none">
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="overview" onclick="showTab('overview',this)"><i class="fa-solid fa-chart-line"></i> Overview</button>
+      <button class="admin-tab" data-tab="orders" onclick="showTab('orders',this)"><i class="fa-solid fa-box"></i> Orders <span class="badge-pill" id="badgeOrders">0</span></button>
+      <button class="admin-tab" data-tab="products" onclick="showTab('products',this)"><i class="fa-solid fa-cube"></i> Products</button>
+      <button class="admin-tab" data-tab="users" onclick="showTab('users',this)"><i class="fa-solid fa-users"></i> Users</button>
+      <button class="admin-tab" data-tab="withdrawals" onclick="showTab('withdrawals',this)"><i class="fa-solid fa-money-bill-transfer"></i> Withdrawals <span class="badge-pill" id="badgeWd">0</span></button>
+    </div>
+
+    <div class="admin-tab-pane" id="pane-overview">
+      <div class="stats-grid" id="statsGrid"></div>
+      <h3 style="margin:32px 0 12px"><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showTab('withdrawals',document.querySelector('[data-tab=withdrawals]'))"><i class="fa-solid fa-money-bill-transfer"></i> Review Withdrawals</button>
+        <button class="btn btn-ghost" onclick="showTab('orders',document.querySelector('[data-tab=orders]'))"><i class="fa-solid fa-box"></i> Lihat Orders</button>
+        <button class="btn btn-ghost" onclick="showTab('users',document.querySelector('[data-tab=users]'))"><i class="fa-solid fa-users"></i> Manage Users</button>
+        <button class="btn btn-ghost" onclick="exportData()"><i class="fa-solid fa-download"></i> Export Data</button>
+      </div>
+    </div>
+
+    <div class="admin-tab-pane" id="pane-orders" style="display:none">
+      <div class="admin-filters" id="orderFilters">
+        <div class="chip active" data-status="" onclick="filterOrders('',this)">All</div>
+        <div class="chip" data-status="pending" onclick="filterOrders('pending',this)">Pending</div>
+        <div class="chip" data-status="paid" onclick="filterOrders('paid',this)">Paid</div>
+        <div class="chip" data-status="delivered" onclick="filterOrders('delivered',this)">Delivered</div>
+        <div class="chip" data-status="completed" onclick="filterOrders('completed',this)">Completed</div>
+        <div class="chip" data-status="cancelled" onclick="filterOrders('cancelled',this)">Cancelled</div>
+      </div>
+      <div style="overflow-x:auto;border-radius:14px"><table class="admin-table" id="ordersTable"><thead><tr><th>ID</th><th>Buyer</th><th>Items</th><th>Total</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="admin-tab-pane" id="pane-products" style="display:none">
+      <div class="admin-search">
+        <input id="prodSearch" placeholder="Cari produk..." oninput="loadProducts()">
+        <select id="prodStatus" onchange="loadProducts()">
+          <option value="">Semua status</option>
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;border-radius:14px"><table class="admin-table" id="productsTable"><thead><tr><th>ID</th><th>Name</th><th>Seller</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="admin-tab-pane" id="pane-users" style="display:none">
+      <div class="admin-search">
+        <input id="userSearch" placeholder="Cari email / nama..." oninput="loadUsers()">
+        <select id="userRole" onchange="loadUsers()">
+          <option value="">Semua role</option>
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+          <option value="admin">Admin</option>
+          <option value="cs">CS</option>
+          <option value="marketing">Marketing</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;border-radius:14px"><table class="admin-table" id="usersTable"><thead><tr><th>ID</th><th>Email</th><th>Name</th><th>Role</th><th>Linked</th><th>Created</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="admin-tab-pane" id="pane-withdrawals" style="display:none">
+      <div class="admin-filters" id="wdFilters">
+        <div class="chip active" data-status="" onclick="filterWd('',this)">All</div>
+        <div class="chip" data-status="pending" onclick="filterWd('pending',this)">Pending</div>
+        <div class="chip" data-status="completed" onclick="filterWd('completed',this)">Completed</div>
+        <div class="chip" data-status="rejected" onclick="filterWd('rejected',this)">Rejected</div>
+      </div>
+      <div style="overflow-x:auto;border-radius:14px"><table class="admin-table" id="wdTable"><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Method</th><th>Destination</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let orderFilter = '';
+let wdFilter = '';
+
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtDate = d => new Date(d).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
+
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function showLogin() { document.getElementById('loginCard').style.display = 'block'; document.getElementById('adminGuard').style.display = 'none'; }
+function logout() { localStorage.removeItem('zs_user'); localStorage.removeItem('zs_token'); location.href = '/shop/'; }
+function showTab(name, btn) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-pane').forEach(p => p.style.display = 'none');
+  if (btn) btn.classList.add('active'); else document.querySelector(`.admin-tab[data-tab="${name}"]`)?.classList.add('active');
+  document.getElementById('pane-' + name).style.display = 'block';
+  if (name === 'overview') loadStats();
+  if (name === 'orders') loadOrders();
+  if (name === 'products') loadProducts();
+  if (name === 'users') loadUsers();
+  if (name === 'withdrawals') loadWithdrawals();
+}
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  if (r.error) return toast(r.error, 'error');
+  localStorage.setItem('zs_user', JSON.stringify(r.user));
+  localStorage.setItem('zs_token', r.token);
+  user = r.user; token = r.token;
+  toast('Login berhasil', 'success');
+  checkAuth();
+}
+
+async function checkAuth() {
+  if (!token) { showLogin(); return; }
+  const r = await api('/api/auth/me');
+  if (r.error || !r.user) { showLogin(); return; }
+  user = r.user; token = localStorage.getItem('zs_token');
+  if (user.role !== 'admin') { document.getElementById('adminGuard').style.display = 'block'; document.getElementById('adminContent').style.display = 'none'; document.getElementById('loginCard').style.display = 'none'; return; }
+  document.getElementById('adminGuard').style.display = 'none';
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('adminContent').style.display = 'block';
+  document.getElementById('adminInfo').textContent = `Logged in as ${user.email} · ${user.role}`;
+  showTab('overview');
+}
+
+async function loadStats() {
+  const r = await api('/api/admin/stats');
+  if (r.error) return toast(r.error, 'error');
+  const cards = [
+    { ico: 'fa-users', label: 'Total Users', val: r.users.total || 0, sub: `${r.users.buyers||0} buyer · ${r.users.sellers||0} seller` },
+    { ico: 'fa-cube', label: 'Total Products', val: r.products.total || 0, sub: `${r.products.in_stock||0} ready stock` },
+    { ico: 'fa-box', label: 'Total Orders', val: r.orders.total || 0, sub: `${r.orders.paid||0} paid · ${r.orders.delivered||0} delivered · ${r.orders.completed||0} done` },
+    { ico: 'fa-coins', label: 'Total Revenue', val: fmtRp(r.orders.revenue || 0), sub: `30d: ${fmtRp(r.month.revenue_30d || 0)}` },
+    { ico: 'fa-chart-line', label: 'Orders (30d)', val: r.month.orders_30d || 0, sub: '' },
+    { ico: 'fa-money-bill-transfer', label: 'Pending Withdrawals', val: r.withdrawals?.pending || 0, sub: fmtRp(r.withdrawals?.amount_pending || 0) },
+    { ico: 'fa-hand-holding-dollar', label: 'Escrow Held', val: r.escrow?.held || 0, sub: fmtRp(r.escrow?.amount_held || 0) },
+    { ico: 'fa-fire', label: 'Total Sold', val: r.products.total_sold || 0, sub: 'units' }
+  ];
+  document.getElementById('statsGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-ico"><i class="fa-solid ${c.ico}"></i></div><div class="stat-val">${c.val}</div><div class="stat-lbl">${c.label}</div>${c.sub ? `<div style="font-size:11px;color:var(--text-mute);margin-top:4px">${c.sub}</div>` : ''}</div>`).join('');
+  document.getElementById('badgeOrders').textContent = (r.orders.pending||0);
+  document.getElementById('badgeWd').textContent = (r.withdrawals?.pending||0);
+}
+
+function filterOrders(s, btn) { orderFilter = s; document.querySelectorAll('#orderFilters .chip').forEach(c => c.classList.remove('active')); btn.classList.add('active'); loadOrders(); }
+function filterWd(s, btn) { wdFilter = s; document.querySelectorAll('#wdFilters .chip').forEach(c => c.classList.remove('active')); btn.classList.add('active'); loadWithdrawals(); }
+
+async function loadOrders() {
+  const tbody = document.querySelector('#ordersTable tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  const r = await api('/api/admin/orders' + (orderFilter ? '?status=' + orderFilter : ''));
+  if (r.error) { tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">${r.error}</td></tr>`; return; }
+  if (!r.length) { tbody.innerHTML = '<tr><td colspan="7" class="admin-empty"><i class="fa-solid fa-box-open"></i>Tidak ada order</td></tr>'; return; }
+  tbody.innerHTML = r.map(o => `<tr>
+    <td><b>#${o.id}</b></td>
+    <td>${o.buyer_name || '—'}<br><small style="color:var(--text-mute)">${o.buyer_email || ''}</small></td>
+    <td><small>${(o.items || '').slice(0, 60)}${(o.items || '').length > 60 ? '…' : ''}</small></td>
+    <td><b>${fmtRp(o.total)}</b></td>
+    <td><span class="status-pill ${o.status}">${o.status}</span></td>
+    <td><small>${fmtDate(o.created_at)}</small></td>
+    <td><a class="btn-icon" href="/shop/product.html?id=${(o.items||'').match(/\d+/)?.[0]||''}" title="View"><i class="fa-solid fa-eye"></i></a></td>
+  </tr>`).join('');
+}
+
+async function loadProducts() {
+  const tbody = document.querySelector('#productsTable tbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  const search = document.getElementById('prodSearch').value;
+  const status = document.getElementById('prodStatus').value;
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (status) params.set('status', status);
+  const r = await api('/api/admin/products?' + params.toString());
+  if (r.error) { tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">${r.error}</td></tr>`; return; }
+  if (!r.length) { tbody.innerHTML = '<tr><td colspan="8" class="admin-empty"><i class="fa-solid fa-cube"></i>Tidak ada produk</td></tr>'; return; }
+  tbody.innerHTML = r.map(p => `<tr>
+    <td>#${p.id}</td>
+    <td><a href="/shop/product.html?slug=${slugify(p.name)}" style="color:var(--text);text-decoration:none"><b>${p.name}</b></a><br><small style="color:var(--text-mute)">${p.category}</small></td>
+    <td>${p.seller_name || '—'}</td>
+    <td><b>${fmtRp(p.price)}</b></td>
+    <td>${p.stock || 0}</td>
+    <td>${p.sold || 0}</td>
+    <td><span class="status-pill ${p.status}">${p.status}</span></td>
+    <td>
+      <button class="btn-icon" onclick="toggleProductStatus(${p.id},'${p.status}')" title="Toggle status"><i class="fa-solid fa-toggle-${p.status==='active'?'on':'off'}"></i></button>
+      <a class="btn-icon" href="/shop/product.html?slug=${slugify(p.name)}" target="_blank" title="View"><i class="fa-solid fa-external-link"></i></a>
+    </td>
+  </tr>`).join('');
+}
+
+async function toggleProductStatus(id, current) {
+  const newStatus = current === 'active' ? 'archived' : 'active';
+  const r = await api('/api/products/' + id, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
+  if (r.error) return toast(r.error, 'error');
+  toast('Status updated', 'success');
+  loadProducts();
+}
+
+async function loadUsers() {
+  const tbody = document.querySelector('#usersTable tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  const search = document.getElementById('userSearch').value;
+  const role = document.getElementById('userRole').value;
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (role) params.set('role', role);
+  const r = await api('/api/admin/users?' + params.toString());
+  if (r.error) { tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">${r.error}</td></tr>`; return; }
+  if (!r.length) { tbody.innerHTML = '<tr><td colspan="7" class="admin-empty"><i class="fa-solid fa-users"></i>Tidak ada user</td></tr>'; return; }
+  tbody.innerHTML = r.map(u => {
+    const linked = [];
+    if (u.linked_telegram_id) linked.push('<i class="fa-brands fa-telegram" title="Telegram"></i>');
+    if (u.linked_whatsapp_number) linked.push('<i class="fa-brands fa-whatsapp" title="WhatsApp"></i>');
+    if (u.linked_discord_id) linked.push('<i class="fa-brands fa-discord" title="Discord"></i>');
+    return `<tr>
+      <td>#${u.id}</td>
+      <td>${u.email}</td>
+      <td>${u.name || '—'}</td>
+      <td><span class="role-pill ${u.role}">${u.role}</span></td>
+      <td>${linked.join(' ') || '—'}</td>
+      <td><small>${fmtDate(u.created_at)}</small></td>
+      <td>
+        <select class="role-select" onchange="changeRole(${u.id},this.value)" style="background:var(--glass);border:1px solid var(--glass-border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
+          ${['buyer','seller','admin','cs','marketing'].map(r => `<option value="${r}" ${r===u.role?'selected':''}>${r}</option>`).join('')}
+        </select>
+        <button class="btn-icon danger" onclick="deleteUser(${u.id},'${u.email}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function changeRole(id, role) {
+  const r = await api('/api/admin/users/' + id + '/role', { method: 'PUT', body: JSON.stringify({ role }) });
+  if (r.error) return toast(r.error, 'error');
+  toast('Role updated', 'success');
+  loadUsers();
+}
+
+async function deleteUser(id, email) {
+  if (!confirm(`Hapus user ${email}? Tindakan ini tidak bisa dibatalkan.`)) return;
+  const r = await api('/api/admin/users/' + id, { method: 'DELETE' });
+  if (r.error) return toast(r.error, 'error');
+  toast('User dihapus', 'success');
+  loadUsers();
+}
+
+async function loadWithdrawals() {
+  const tbody = document.querySelector('#wdTable tbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  const r = await api('/api/admin/withdrawals' + (wdFilter ? '?status=' + wdFilter : ''));
+  if (r.error) { tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">${r.error}</td></tr>`; return; }
+  if (!r.length) { tbody.innerHTML = '<tr><td colspan="8" class="admin-empty"><i class="fa-solid fa-money-bill-transfer"></i>Tidak ada withdrawal</td></tr>'; return; }
+  tbody.innerHTML = r.map(w => `<tr>
+    <td>#${w.id}</td>
+    <td>${w.user_name || '—'}<br><small style="color:var(--text-mute)">${w.user_email || ''}</small></td>
+    <td><b>${fmtRp(w.amount)}</b><br><small style="color:var(--text-mute)">fee: ${fmtRp(w.fee)}</small></td>
+    <td>${w.method}${w.bank_code ? '<br><small style="color:var(--text-mute)">' + w.bank_code + '</small>' : ''}</td>
+    <td><small>${w.destination}<br>${w.destination_name || ''}</small></td>
+    <td><span class="status-pill ${w.status}">${w.status}</span></td>
+    <td><small>${fmtDate(w.created_at)}</small></td>
+    <td>${w.status === 'pending' ? `<button class="btn-icon" onclick="approveWd(${w.id})" title="Approve" style="color:#22c55e"><i class="fa-solid fa-check"></i></button><button class="btn-icon danger" onclick="rejectWd(${w.id})" title="Reject"><i class="fa-solid fa-xmark"></i></button>` : '<small style="color:var(--text-mute)">—</small>'}</td>
+  </tr>`).join('');
+}
+
+async function approveWd(id) {
+  if (!confirm('Setujui withdrawal ini?')) return;
+  const r = await api('/api/admin/withdrawals/' + id + '/approve', { method: 'POST' });
+  if (r.error) return toast(r.error, 'error');
+  toast('Disetujui', 'success');
+  loadWithdrawals();
+}
+
+async function rejectWd(id) {
+  const reason = prompt('Alasan reject (opsional):') || '';
+  const r = await api('/api/admin/withdrawals/' + id + '/reject', { method: 'POST', body: JSON.stringify({ reason }) });
+  if (r.error) return toast(r.error, 'error');
+  toast('Ditolak. Saldo dikembalikan.', 'success');
+  loadWithdrawals();
+}
+
+function exportData() {
+  const data = { exported_at: new Date().toISOString(), stats: 'see /api/admin/stats' };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'zstore-admin-export-' + Date.now() + '.json';
+  a.click();
+  toast('Export dimulai', 'success');
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+checkAuth();
+</script>
+</body>
+</html>
