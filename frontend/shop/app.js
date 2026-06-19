@@ -140,6 +140,13 @@ function startFlashCountdown() {
     const txt = `${h} : ${m} : ${s}`;
     const el = document.getElementById('flashCountdown');
     if (el) el.textContent = txt;
+    // Flash sale section digits
+    const elH = document.getElementById('flashH');
+    const elM = document.getElementById('flashM');
+    const elS = document.getElementById('flashS');
+    if (elH) elH.textContent = h;
+    if (elM) elM.textContent = m;
+    if (elS) elS.textContent = s;
   };
   update();
   setInterval(update, 1000);
@@ -252,8 +259,10 @@ function productCard(p) {
       <div class="pc-cat">${p.category}</div>
       <div class="pc-name">${p.name}</div>
       <div class="pc-rating">
-        <i class="fa-solid fa-star star"></i> ${p.rating > 0 ? p.rating : '<span style="color:var(--text-mute)">Baru</span>'}
-        ${p.sold > 0 ? `<span class="dot">·</span> <span>${p.sold} sold</span>` : ''}
+        ${p.rating > 0
+          ? `<i class="fa-solid fa-star star"></i><b>${p.rating}</b>`
+          : `<span class="pc-new-badge">NEW</span>`}
+        ${p.sold > 0 ? `<span class="pc-sold"><span class="dot">·</span> ${p.sold} sold</span>` : ''}
       </div>
       <div class="pc-price">${fmtIDR(p.price)}${p.original_price ? `<span class="pc-old">${fmtIDR(p.original_price)}</span>` : ''}</div>
       <div class="pc-stock ${stockClass}">
