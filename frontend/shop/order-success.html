@@ -218,9 +218,27 @@ async function loadOrder() {
     } catch (e) { /* dev mode */ }
   }
   if (!orderData) {
-    // Dev fallback: read from localStorage orders
-    const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]');
-    orderData = orders[0] || { id: 'DEMO', total: 0, items: [], status: 'paid', created_at: new Date().toISOString(), buyer_email: user?.email || 'demo@zstore.local' };
+    // Dev fallback: read from localStorage orders OR use built-in mock
+    try {
+      const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]');
+      orderData = orders[0] || null;
+    } catch (e) { orderData = null; }
+    if (!orderData) {
+      orderData = {
+        id: 'DEMO-12345',
+        total: 2998000,
+        items: [
+          { name: 'Claude Pro Annual License', qty: 1, price: 2400000, category: 'AI Tools' },
+          { name: 'Capcut Pro Annual License', qty: 2, price: 299000, category: 'Digital Goods' }
+        ],
+        status: 'paid',
+        created_at: new Date().toISOString(),
+        paid_at: new Date().toISOString(),
+        buyer_email: 'demo@zstore.local',
+        payment_type: 'qris',
+        midtrans_order_id: 'ZCUS-DEMO-12345-1'
+      };
+    }
   }
   renderOrder();
 }

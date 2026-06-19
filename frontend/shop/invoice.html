@@ -202,11 +202,11 @@ async function loadInvoice() {
     }
   } catch (e) { /* dev mode */ }
   // Dev fallback
-  const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]');
-  const local = orders.find(o => String(o.id) === String(id));
+  let local = null;
+  try { const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]'); local = orders.find(o => String(o.id) === String(id)); } catch (e) {}
   if (local) {
     invoiceData = {
-      number: 'INV-' + new Date(local.created_at).getFullYear() + '-' + String(local.id).padStart(5, '0'),
+      number: 'INV-' + new Date(local.created_at || Date.now()).getFullYear() + '-' + String(local.id).padStart(5, '0'),
       issued_at: new Date().toISOString(),
       company: { name: 'Z Store', email: 'zcusgt@gmail.com' },
       buyer: { name: user?.name || 'Customer', email: local.buyer_email },
@@ -221,7 +221,25 @@ async function loadInvoice() {
     };
     return renderInvoice();
   }
-  showError('Invoice tidak ditemukan');
+  // Built-in dev mock
+  invoiceData = {
+    number: 'INV-' + new Date().getFullYear() + '-' + String(id).padStart(5, '0'),
+    issued_at: new Date().toISOString(),
+    company: { name: 'Z Store', email: 'zcusgt@gmail.com' },
+    buyer: { name: user?.name || 'Demo Customer', email: user?.email || 'demo@zstore.local' },
+    items: [
+      { name: 'Claude Pro Annual License', qty: 1, price: 2400000, category: 'AI Tools' },
+      { name: 'Capcut Pro Annual License', qty: 2, price: 299000, category: 'Digital Goods' }
+    ],
+    subtotal: 2998000,
+    total: 2998000,
+    payment_method: 'qris',
+    status: 'paid',
+    paid_at: new Date().toISOString(),
+    delivered_at: new Date().toISOString(),
+    midtrans_order_id: 'ZCUS-' + id + '-' + (user?.id || 1)
+  };
+  renderInvoice();
 }
 
 function showError(msg) {
