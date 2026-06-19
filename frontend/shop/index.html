@@ -1365,6 +1365,38 @@ document.addEventListener('keydown', e => {
   }, { passive: true });
 })();
 
+// ===== SCROLL PROGRESS BAR =====
+(function scrollProgress() {
+  const bar = document.createElement('div');
+  bar.style.cssText = 'position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,#0ea5e9,#a855f7);z-index:200;transition:width .1s ease;pointer-events:none';
+  document.body.appendChild(bar);
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = h > 0 ? (window.scrollY / h * 100) : 0;
+    bar.style.width = pct + '%';
+  }, { passive: true });
+})();
+
+// ===== INTERSECTION OBSERVER FOR SCROLL ANIMATIONS =====
+(function scrollAnimate() {
+  if (!('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  // Apply to sections after DOM ready
+  setTimeout(() => {
+    document.querySelectorAll('.section-title, .stat-card, .pc-card, .feature-card, .testimonial, .trust-item, .cat-icon, .stat, .sw-text').forEach(el => {
+      el.classList.add('animate-on-scroll');
+      observer.observe(el);
+    });
+  }, 100);
+})();
+
 // ===== LOADING SKELETON =====
 function showSkeleton(container, count = 6) {
   const html = Array(count).fill(0).map(() => `
@@ -1525,6 +1557,18 @@ window.addEventListener('unhandledrejection', function(e){
 .kbd-hint kbd{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-family:monospace;color:var(--accent);border:1px solid var(--glass-border);font-size:10px}
 @media(max-width:700px){.kbd-hint{display:none}}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.animate-on-scroll{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1)}
+.animate-on-scroll.in-view{opacity:1;transform:translateY(0)}
+.animate-on-scroll:nth-child(2){transition-delay:.08s}
+.animate-on-scroll:nth-child(3){transition-delay:.16s}
+.animate-on-scroll:nth-child(4){transition-delay:.24s}
+.animate-on-scroll:nth-child(5){transition-delay:.32s}
+.animate-on-scroll:nth-child(6){transition-delay:.4s}
+.animate-on-scroll:nth-child(7){transition-delay:.48s}
+.animate-on-scroll:nth-child(8){transition-delay:.56s}
+@media(prefers-reduced-motion:reduce){.animate-on-scroll{opacity:1;transform:none;transition:none}}
 
 /* ===== BACK TO TOP ===== */
 .back-to-top{position:fixed;bottom:160px;right:20px;width:44px;height:44px;border-radius:50%;background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--text-dim);font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:55;transition:all .2s}
