@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice — Z Store</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f8fafc;color:#0f172a;padding:24px;line-height:1.5}
+.invoice-wrap{max-width:780px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);overflow:hidden}
+.invoice-toolbar{display:flex;justify-content:space-between;padding:16px 32px;background:#0f172a;color:#fff;align-items:center}
+.invoice-toolbar b{font-size:14px}
+.invoice-toolbar .actions{display:flex;gap:8px}
+.invoice-toolbar button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;transition:all .2s}
+.invoice-toolbar button:hover{background:rgba(255,255,255,.2)}
+.invoice-toolbar a{color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px}
+.invoice-body{padding:40px 32px}
+.invoice-head{display:flex;justify-content:space-between;align-items:start;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid #0ea5e9}
+.invoice-brand{display:flex;align-items:center;gap:12px}
+.invoice-brand-logo{width:48px;height:48px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700}
+.invoice-brand h1{font-size:22px;margin:0;color:#0f172a}
+.invoice-brand p{margin:2px 0 0;font-size:12px;color:#64748b}
+.invoice-meta{text-align:right}
+.invoice-meta h2{margin:0;font-size:24px;color:#0ea5e9;letter-spacing:1px}
+.invoice-meta p{margin:2px 0;font-size:12px;color:#64748b}
+.invoice-meta .inv-status{display:inline-block;background:#22c55e;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.5px;margin-top:6px}
+.invoice-parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px}
+.invoice-party h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;font-weight:700}
+.invoice-party p{margin:2px 0;font-size:13px;color:#0f172a}
+.invoice-party p .lbl{display:inline-block;width:80px;color:#94a3b8;font-size:11px}
+.invoice-items{width:100%;border-collapse:collapse;margin-bottom:24px}
+.invoice-items thead{background:#f1f5f9}
+.invoice-items th{padding:12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#475569;font-weight:700;border-bottom:2px solid #0ea5e9}
+.invoice-items td{padding:14px 12px;font-size:13px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+.invoice-items td.desc{color:#64748b;font-size:12px}
+.invoice-items td.price{text-align:right;font-weight:600;white-space:nowrap}
+.invoice-items tfoot td{padding:10px 12px;font-size:13px;border-bottom:none}
+.invoice-items tfoot .total-row{background:#f1f5f9;font-weight:700;font-size:15px}
+.invoice-items tfoot .total-row td{color:#0ea5e9;padding:14px 12px}
+.invoice-payment{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;background:#f8fafc;border-radius:10px;margin-bottom:24px}
+.invoice-payment h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;font-weight:700}
+.invoice-payment p{font-size:13px;margin:2px 0;color:#0f172a}
+.invoice-qr{display:flex;gap:16px;align-items:center;padding:16px;background:#0f172a;border-radius:10px;color:#fff;margin-bottom:24px}
+.invoice-qr-img{width:80px;height:80px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#0f172a;font-size:32px}
+.invoice-qr-text{flex:1}
+.invoice-qr-text b{display:block;font-size:14px;margin-bottom:4px}
+.invoice-qr-text small{font-size:11px;color:#94a3b8;line-height:1.5}
+.invoice-footer{padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#64748b;line-height:1.6}
+.invoice-footer p{margin:2px 0}
+.invoice-signature{display:flex;justify-content:space-around;margin:32px 0;padding:20px 0}
+.invoice-sign-item{text-align:center;width:200px}
+.invoice-sign-line{border-bottom:1px solid #cbd5e1;height:60px;margin-bottom:8px}
+.invoice-sign-item p{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.invoice-sign-item b{font-size:13px;color:#0f172a}
+.invoice-thanks{padding:20px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;border-radius:10px;text-align:center;margin-top:20px}
+.invoice-thanks h3{margin:0 0 4px;font-size:16px}
+.invoice-thanks p{margin:0;font-size:13px;opacity:.9}
+@media print{
+  body{background:#fff;padding:0;color:#000}
+  .invoice-wrap{box-shadow:none;border-radius:0;max-width:100%}
+  .invoice-toolbar{display:none!important}
+  .invoice-body{padding:24px}
+  .invoice-qr{background:#f1f5f9!important;color:#000!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .invoice-thanks{background:#f1f5f9!important;color:#000!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="invoice-toolbar no-print">
+  <b>Z Store — Invoice Preview</b>
+  <div class="actions">
+    <button onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+    <a href="/shop/orders.html"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+  </div>
+</div>
+
+<div class="invoice-wrap" id="invoiceRoot">
+  <div class="invoice-body">
+    <div class="invoice-head">
+      <div class="invoice-brand">
+        <div class="invoice-brand-logo">Z</div>
+        <div>
+          <h1>Z Store</h1>
+          <p>Premium Digital Marketplace</p>
+          <p>zcusgt@gmail.com · Jakarta, Indonesia</p>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <h2>INVOICE</h2>
+        <p id="invNumber">INV-2026-00001</p>
+        <p>Issued: <span id="invIssued">-</span></p>
+        <span class="inv-status" id="invStatus">PAID</span>
+      </div>
+    </div>
+
+    <div class="invoice-parties">
+      <div class="invoice-party">
+        <h3>Bill To</h3>
+        <p><b id="billName">Customer Name</b></p>
+        <p id="billEmail">email@example.com</p>
+        <p id="billPhone">+62 8xx xxxx xxxx</p>
+      </div>
+      <div class="invoice-party">
+        <h3>From</h3>
+        <p><b>Z Store Official</b></p>
+        <p>zcusgt@gmail.com</p>
+        <p>Jakarta, Indonesia</p>
+        <p>Order ID: <b id="invOrderId">#00001</b></p>
+      </div>
+    </div>
+
+    <table class="invoice-items">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Kategori</th>
+          <th style="text-align:center">Qty</th>
+          <th style="text-align:right">Harga</th>
+          <th style="text-align:right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody id="invItemsBody">
+        <tr><td>Loading...</td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="4" style="text-align:right">Subtotal</td><td class="price" id="invSubtotal">Rp 0</td></tr>
+        <tr><td colspan="4" style="text-align:right">Biaya Layanan</td><td class="price">Gratis</td></tr>
+        <tr><td colspan="4" style="text-align:right">PPN (0%)</td><td class="price">Rp 0</td></tr>
+        <tr class="total-row"><td colspan="4" style="text-align:right">TOTAL</td><td class="price" id="invTotal">Rp 0</td></tr>
+      </tfoot>
+    </table>
+
+    <div class="invoice-payment">
+      <div>
+        <h3>Metode Pembayaran</h3>
+        <p><b id="payMethod">QRIS</b></p>
+        <p>Status: <span style="color:#22c55e;font-weight:700">LUNAS</span></p>
+        <p>Tanggal bayar: <span id="payDate">-</span></p>
+      </div>
+      <div>
+        <h3>Midtrans Order ID</h3>
+        <p style="font-family:monospace;font-size:12px;word-break:break-all" id="midtransId">ZCUS-1234567890-1</p>
+      </div>
+    </div>
+
+    <div class="invoice-qr">
+      <div class="invoice-qr-img"><i class="fa-solid fa-qrcode"></i></div>
+      <div class="invoice-qr-text">
+        <b>Verifikasi Order</b>
+        <small>Scan QR untuk cek status order real-time, atau buka link: <span id="trackUrl">zcus.biz.id/shop/track.html?id=...</span></small>
+      </div>
+    </div>
+
+    <div class="invoice-signature">
+      <div class="invoice-sign-item">
+        <div class="invoice-sign-line"></div>
+        <p>Buyer</p>
+        <b id="signBuyer">-</b>
+      </div>
+      <div class="invoice-sign-item">
+        <div class="invoice-sign-line"></div>
+        <p>Z Store</p>
+        <b>Zcus Owner</b>
+      </div>
+    </div>
+
+    <div class="invoice-thanks">
+      <h3><i class="fa-solid fa-heart"></i> Terima kasih atas order kamu!</h3>
+      <p>Garansi 30 hari · Support 24/7 via WhatsApp · Refund dalam 7 hari</p>
+    </div>
+  </div>
+
+  <div class="invoice-footer">
+    <p><b>Z Store</b> · Premium Digital Marketplace</p>
+    <p>zcusgt@gmail.com · Jakarta, Indonesia · www.zcus.biz.id/shop</p>
+    <p style="margin-top:8px">Invoice ini digenerate otomatis oleh sistem. Simpan sebagai bukti pembayaran yang sah.</p>
+  </div>
+</div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-';
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let invoiceData = null;
+
+async function loadInvoice() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if (!id) { showError('Tidak ada order ID'); return; }
+  // Try API
+  try {
+    const r = await fetch(API + '/api/orders/' + id + '/invoice', { headers: { Authorization: 'Bearer ' + token } });
+    if (r.ok) {
+      const j = await r.json();
+      invoiceData = j.invoice;
+      return renderInvoice();
+    }
+  } catch (e) { /* dev mode */ }
+  // Dev fallback
+  const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]');
+  const local = orders.find(o => String(o.id) === String(id));
+  if (local) {
+    invoiceData = {
+      number: 'INV-' + new Date(local.created_at).getFullYear() + '-' + String(local.id).padStart(5, '0'),
+      issued_at: new Date().toISOString(),
+      company: { name: 'Z Store', email: 'zcusgt@gmail.com' },
+      buyer: { name: user?.name || 'Customer', email: local.buyer_email },
+      items: typeof local.items === 'string' ? [{name: local.items, qty: 1, price: local.total, category: '-'}] : (local.items || []),
+      subtotal: local.total,
+      total: local.total,
+      payment_method: 'qris',
+      status: local.status || 'paid',
+      paid_at: local.paid_at || local.created_at,
+      delivered_at: local.delivered_at,
+      midtrans_order_id: local.midtrans_order_id || `ZCUS-${local.id}-${user?.id || 1}`
+    };
+    return renderInvoice();
+  }
+  showError('Invoice tidak ditemukan');
+}
+
+function showError(msg) {
+  document.getElementById('invoiceRoot').innerHTML = `<div style="padding:80px 32px;text-align:center"><h2 style="color:#0f172a">${msg}</h2><p style="color:#64748b;margin-top:8px">Order ID: ${new URLSearchParams(location.search).get('id') || '-'}</p><a href="/shop/orders.html" style="display:inline-block;margin-top:24px;padding:12px 24px;background:#0ea5e9;color:#fff;border-radius:8px;text-decoration:none">Kembali ke Pesanan</a></div>`;
+}
+
+function renderInvoice() {
+  const inv = invoiceData;
+  document.title = `${inv.number} — Z Store`;
+  document.getElementById('invNumber').textContent = inv.number;
+  document.getElementById('invIssued').textContent = fmtDate(inv.issued_at);
+  document.getElementById('invOrderId').textContent = '#' + (inv.midtrans_order_id?.split('-')[1] || '00000');
+  document.getElementById('invStatus').textContent = (inv.status || 'paid').toUpperCase();
+  document.getElementById('invStatus').style.background = inv.status === 'paid' || inv.status === 'delivered' || inv.status === 'completed' ? '#22c55e' : '#f59e0b';
+  document.getElementById('billName').textContent = inv.buyer?.name || 'Customer';
+  document.getElementById('billEmail').textContent = inv.buyer?.email || '-';
+  document.getElementById('billPhone').textContent = inv.buyer?.phone || '-';
+  document.getElementById('payMethod').textContent = (inv.payment_method || 'QRIS').toUpperCase();
+  document.getElementById('payDate').textContent = fmtDate(inv.paid_at);
+  document.getElementById('midtransId').textContent = inv.midtrans_order_id || '-';
+  document.getElementById('signBuyer').textContent = inv.buyer?.name || '-';
+  document.getElementById('invSubtotal').textContent = fmtRp(inv.subtotal);
+  document.getElementById('invTotal').textContent = fmtRp(inv.total);
+  document.getElementById('trackUrl').textContent = `zcus.biz.id/shop/track.html?id=${inv.midtrans_order_id || inv.number}`;
+  // Items
+  const tbody = document.getElementById('invItemsBody');
+  if (Array.isArray(inv.items) && inv.items.length) {
+    tbody.innerHTML = inv.items.map(it => `<tr>
+      <td><b>${it.name || 'Produk'}</b></td>
+      <td class="desc">${it.category || '-'}</td>
+      <td style="text-align:center">${it.qty || 1}</td>
+      <td class="price">${fmtRp(it.price || 0)}</td>
+      <td class="price">${fmtRp((it.price || 0) * (it.qty || 1))}</td>
+    </tr>`).join('');
+  } else {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b">Tidak ada item</td></tr>';
+  }
+}
+
+loadInvoice();
+</script>
+</body>
+</html>

@@ -330,7 +330,7 @@ async function processPayment() {
           orders.unshift(mockOrder);
           localStorage.setItem('zs_orders', JSON.stringify(orders));
           cart = []; localStorage.setItem('zs_cart', '[]');
-          location.href = '/shop/orders.html';
+          location.href = '/shop/order-success.html?id=' + (mockOrder.id || '');
         }, 1500);
         return;
       }
@@ -339,8 +339,8 @@ async function processPayment() {
     // Real Midtrans Snap
     if (window.snap && r.snap_token) {
       window.snap.pay(r.snap_token, {
-        onSuccess: () => { toast('Pembayaran sukses!', 'success'); cart = []; localStorage.setItem('zs_cart', '[]'); setTimeout(() => location.href = '/shop/orders.html', 1000); },
-        onPending: () => { toast('Menunggu pembayaran', 'info'); setTimeout(() => location.href = '/shop/orders.html', 1500); },
+        onSuccess: () => { toast('Pembayaran sukses!', 'success'); cart = []; localStorage.setItem('zs_cart', '[]'); setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1000); },
+        onPending: () => { toast('Menuju halaman sukses', 'info'); setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1500); },
         onError: () => { toast('Pembayaran gagal', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang'; },
         onClose: () => { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang'; }
       });
@@ -348,7 +348,7 @@ async function processPayment() {
       // Fallback: direct redirect to orders
       toast('Order dibuat #' + r.order_id, 'success');
       cart = []; localStorage.setItem('zs_cart', '[]');
-      setTimeout(() => location.href = '/shop/orders.html', 1000);
+      setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1000);
     }
   } catch (e) {
     btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang';
