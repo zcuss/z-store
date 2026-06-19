@@ -249,7 +249,11 @@
     <button class="hdr-btn" id="accountBtn" aria-label="My account" onclick="showAccount()" title="Akun">
       <i class="fa-solid fa-user" id="accountIcon"></i>
     </button>
-    <a href="/shop/settings.html" class="hdr-btn" aria-label="Settings" id="settingsLink" style="display:none" title="Pengaturan Akun">
+    <a href="/shop/notifications.html" class="hdr-btn" id="notifBell" title="Notifikasi" onclick="updateNotifBadge()">
+      <i class="fa-solid fa-bell"></i>
+      <span class="hdr-badge" id="notifBadge" style="display:none">0</span>
+    </a>
+    <a href="/shop/settings.html" class="hdr-btn" id="settingsLink" aria-label="Settings" style="display:none" title="Pengaturan Akun">
       <i class="fa-solid fa-gear"></i>
     </a>
     <a href="/shop/seller.html" class="hdr-btn" id="sellerLink" aria-label="Seller dashboard" style="display:none" title="Seller Dashboard">

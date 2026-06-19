@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Notifikasi — Z Store</title>
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.notif-wrap{max-width:760px;margin:0 auto;padding:24px}
+.notif-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.notif-head h1{margin:0;font-size:22px;display:flex;align-items:center;gap:10px}
+.notif-head h1 i{color:var(--accent)}
+.notif-actions{display:flex;gap:8px}
+.notif-actions .btn{padding:8px 14px;font-size:13px;border-radius:8px}
+.notif-tabs{display:flex;gap:6px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:4px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.notif-tab{flex:1;min-width:max-content;padding:8px 14px;background:transparent;border:none;color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.notif-tab.active{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}
+.notif-tab .badge-pill{margin-left:6px;background:rgba(244,63,94,.9);color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:700;min-width:18px;text-align:center}
+.notif-list{display:flex;flex-direction:column;gap:10px}
+.notif-item{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:16px 20px;display:flex;align-items:flex-start;gap:14px;transition:all .2s;cursor:pointer;position:relative}
+.notif-item:hover{border-color:var(--accent);transform:translateX(2px)}
+.notif-item.unread{background:linear-gradient(135deg,rgba(14,165,233,.08),transparent)}
+.notif-item.unread::before{content:"";position:absolute;top:50%;left:-4px;transform:translateY(-50%);width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent)}
+.notif-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0;background:linear-gradient(135deg,#0ea5e9,#38bdf8)}
+.notif-icon.order{background:linear-gradient(135deg,#22c55e,#10b981)}
+.notif-icon.escrow{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+.notif-icon.platform{background:linear-gradient(135deg,#a855f7,#6366f1)}
+.notif-icon.welcome{background:linear-gradient(135deg,#ec4899,#f472b6)}
+.notif-icon.system{background:linear-gradient(135deg,#64748b,#475569)}
+.notif-content{flex:1;min-width:0}
+.notif-content b{display:block;color:var(--text);font-size:14px;font-weight:700;margin-bottom:2px}
+.notif-content p{margin:0;font-size:13px;color:var(--text-dim);line-height:1.5}
+.notif-content small{display:block;margin-top:6px;font-size:11px;color:var(--text-mute)}
+.notif-actions-inline{display:flex;gap:6px;flex-shrink:0}
+.notif-actions-inline button{background:transparent;border:none;color:var(--text-mute);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px}
+.notif-actions-inline button:hover{background:var(--glass);color:var(--text)}
+.notif-empty{text-align:center;padding:80px 20px;color:var(--text-dim)}
+.notif-empty i{font-size:64px;margin-bottom:16px;display:block;opacity:.5}
+</style>
+</head>
+<body>
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">NOTIFIKASI</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></a>
+    <a href="/shop/settings.html" class="hdr-btn" title="Settings"><i class="fa-solid fa-gear"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+  </div>
+</header>
+
+<main class="notif-wrap">
+  <div class="notif-head">
+    <h1><i class="fa-solid fa-bell"></i> Notifikasi</h1>
+    <div class="notif-actions">
+      <button class="btn btn-ghost" onclick="markAllRead()"><i class="fa-solid fa-check-double"></i> Tandai Semua Dibaca</button>
+      <button class="btn btn-ghost" onclick="clearAll()"><i class="fa-solid fa-trash"></i> Hapus Semua</button>
+    </div>
+  </div>
+
+  <div class="notif-tabs">
+    <button class="notif-tab active" data-tab="all" onclick="switchNotifTab('all', this)">Semua <span class="badge-pill" id="cntAll">0</span></button>
+    <button class="notif-tab" data-tab="unread" onclick="switchNotifTab('unread', this)">Belum Dibaca <span class="badge-pill" id="cntUnread">0</span></button>
+    <button class="notif-tab" data-tab="order" onclick="switchNotifTab('order', this)">Order</button>
+    <button class="notif-tab" data-tab="escrow" onclick="switchNotifTab('escrow', this)">Escrow</button>
+    <button class="notif-tab" data-tab="system" onclick="switchNotifTab('system', this)">Sistem</button>
+  </div>
+
+  <div id="notifList" class="notif-list">
+    <div style="padding:40px;text-align:center;color:var(--text-dim)"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
+const fmtRel = d => {
+  if (!d) return '';
+  const s = (Date.now() - new Date(d).getTime()) / 1000;
+  if (s < 60) return 'baru saja';
+  if (s < 3600) return Math.floor(s/60) + ' menit lalu';
+  if (s < 86400) return Math.floor(s/3600) + ' jam lalu';
+  if (s < 604800) return Math.floor(s/86400) + ' hari lalu';
+  return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+};
+let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let token = localStorage.getItem('zs_token') || '';
+let allNotifs = [];
+let activeTab = 'all';
+
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function switchNotifTab(tab, btn) { activeTab = tab; document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
+function typeIcon(t) { const m = { order: 'fa-box', escrow: 'fa-hand-holding-dollar', platform: 'fa-link', welcome: 'fa-sparkles', withdraw: 'fa-money-bill-transfer' }; return m[t] || 'fa-bell'; }
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
+}
+
+async function loadNotifs() {
+  let r;
+  try { r = await api('/api/notifications'); } catch (e) { r = { error: e.message }; }
+  allNotifs = r.notifications || [];
+  if (!allNotifs.length && location.hostname === 'localhost') {
+    // Dev mock
+    allNotifs = [
+      { id: 1, type: 'order', title: 'Order #12345 sukses dibayar', body: 'Pembayaran Midtrans diterima. Credentials Claude Pro sudah dikirim ke email zcusgt@gmail.com.', created_at: new Date(Date.now() - 1800000).toISOString(), read_at: null },
+      { id: 2, type: 'escrow', title: 'Saldo escrow released', body: 'Rp 250.000 dari Order #12340 sudah masuk ke available balance kamu.', created_at: new Date(Date.now() - 86400000 * 2).toISOString(), read_at: null },
+      { id: 3, type: 'withdraw', title: 'Withdraw disetujui', body: 'Withdraw Rp 500.000 ke BCA telah ditransfer. Saldo updated.', created_at: new Date(Date.now() - 86400000 * 3).toISOString(), read_at: new Date(Date.now() - 86400000 * 3 + 3600000).toISOString() },
+      { id: 4, type: 'platform', title: 'Telegram bot terhubung', body: 'Akun @ZcusStore_bot kamu sudah terhubung. Pesan order akan dikirim ke Telegram.', created_at: new Date(Date.now() - 86400000 * 5).toISOString(), read_at: new Date(Date.now() - 86400000 * 5 + 7200000).toISOString() },
+      { id: 5, type: 'welcome', title: 'Selamat datang di Z Store!', body: 'Akun kamu sudah aktif. Belanja produk digital premium pertama kamu sekarang.', created_at: new Date(Date.now() - 86400000 * 7).toISOString(), read_at: new Date(Date.now() - 86400000 * 7).toISOString() },
+      { id: 6, type: 'system', title: 'Update sistem v5.0.0', body: 'Z Store v5 sudah live dengan banyak fitur baru: Affiliate, Spin Wheel, Compare Products, dan Live Chat.', created_at: new Date(Date.now() - 86400000 * 10).toISOString(), read_at: new Date(Date.now() - 86400000 * 9).toISOString() }
+    ];
+  }
+  updateCounts();
+  render();
+}
+
+function updateCounts() {
+  document.getElementById('cntAll').textContent = allNotifs.length;
+  document.getElementById('cntUnread').textContent = allNotifs.filter(n => !n.read_at).length;
+}
+
+function render() {
+  const list = document.getElementById('notifList');
+  let filtered = allNotifs;
+  if (activeTab === 'unread') filtered = allNotifs.filter(n => !n.read_at);
+  else if (activeTab !== 'all') filtered = allNotifs.filter(n => n.type === activeTab);
+  if (!filtered.length) {
+    list.innerHTML = `<div class="notif-empty"><i class="fa-solid fa-bell-slash"></i><b>Tidak ada notifikasi</b><p>${activeTab === 'unread' ? 'Semua sudah dibaca 🎉' : 'Belum ada notifikasi ' + activeTab}</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(n => {
+    const cls = n.type || 'system';
+    const isUnread = !n.read_at;
+    return `<div class="notif-item ${isUnread ? 'unread' : ''}" onclick="markRead(${n.id})">
+      <div class="notif-icon ${cls}"><i class="fa-solid ${typeIcon(cls)}"></i></div>
+      <div class="notif-content">
+        <b>${n.title}</b>
+        <p>${n.body}</p>
+        <small><i class="fa-regular fa-clock"></i> ${fmtRel(n.created_at)} · ${fmtDate(n.created_at)}</small>
+      </div>
+      <div class="notif-actions-inline">
+        ${isUnread ? '<button title="Tandai dibaca" onclick="event.stopPropagation();markRead(' + n.id + ')"><i class="fa-solid fa-check"></i></button>' : ''}
+        <button title="Hapus" onclick="event.stopPropagation();deleteNotif(' + n.id + ')"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function markRead(id) {
+  if (token) await api('/api/notifications/' + id + '/read', { method: 'POST' }).catch(() => {});
+  const n = allNotifs.find(x => x.id === id);
+  if (n) n.read_at = new Date().toISOString();
+  updateCounts(); render();
+}
+
+async function markAllRead() {
+  if (token) await api('/api/notifications/read-all', { method: 'POST' }).catch(() => {});
+  allNotifs.forEach(n => n.read_at = new Date().toISOString());
+  updateCounts(); render();
+  toast('Semua notifikasi ditandai dibaca', 'success');
+}
+
+function deleteNotif(id) {
+  allNotifs = allNotifs.filter(x => x.id !== id);
+  updateCounts(); render();
+  toast('Notifikasi dihapus', 'info');
+}
+
+function clearAll() {
+  if (!confirm('Hapus semua notifikasi?')) return;
+  allNotifs = [];
+  updateCounts(); render();
+  toast('Semua notifikasi dihapus', 'info');
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+loadNotifs();
+</script>
+</body>
+</html>

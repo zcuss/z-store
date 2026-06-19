@@ -114,7 +114,22 @@ document.addEventListener('DOMContentLoaded', () => {
   renderRecommended();
   initTheme();
   startFlashCountdown();
+  pollNotificationBadge();
 });
+
+async function pollNotificationBadge() {
+  if (!token) return;
+  try {
+    const r = await fetch(API + '/api/notifications', { headers: { Authorization: 'Bearer ' + token } });
+    if (r.ok) {
+      const d = await r.json();
+      const unread = (d.notifications || []).filter(n => !n.read_at).length;
+      const b = document.getElementById('notifBadge');
+      if (b) { b.textContent = unread; b.style.display = unread > 0 ? 'flex' : 'none'; }
+    }
+  } catch (e) { /* dev */ }
+  setTimeout(pollNotificationBadge, 30000);
+}
 
 function initTheme() {
   const saved = localStorage.getItem('zcus_theme') || 'dark';
@@ -748,6 +763,11 @@ function updateCartUI() {
 
   document.getElementById('cartCount').textContent = count;
   document.getElementById('cartDrawerCount').textContent = count;
+  // Mobile bottom-nav badge
+  const mbn = document.getElementById('mbnCartBadge');
+  if (mbn) { mbn.textContent = count; mbn.classList.toggle('show', count > 0); }
+  const wbn = document.getElementById('mbnWishBadge');
+  if (wbn) { const w = wishlist.length; wbn.textContent = w; wbn.classList.toggle('show', w > 0); }
   document.getElementById('cartSubtotal').textContent = fmtIDR(subtotal);
   document.getElementById('cartDiscount').textContent = '-' + fmtIDR(discount);
   document.getElementById('cartTotal').textContent = fmtIDR(total);
