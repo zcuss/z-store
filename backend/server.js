@@ -1,5 +1,6 @@
-// Zcus Shop v4 — Multi-platform backend
+// Z Store v5 — Multi-platform backend
 // Adds: seller dashboard, admin panel, platform integrations, reviews, notifications, link-account
+// v5: SEO slug, admin orders/products/withdrawals, categories, promos, order detail, confirm delivery
 require('dotenv').config({ path: __dirname + '/.env' });
 
 const express = require('express');
@@ -254,6 +255,42 @@ app.get('/api/products/:id/jsonld', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ============ CATEGORIES (distinct) ============
+function slugify(s) {
+  return String(s || '').toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '').slice(0, 80);
+}
+
+app.get('/api/categories', async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT category, COUNT(*) as count FROM products WHERE status = 'active' GROUP BY category ORDER BY count DESC");
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ PROMOS (active codes) ============
+app.get('/api/promos', async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT code, type, value, min_order, max_uses, used_count, expires_at, label FROM promo_codes WHERE active = TRUE AND (expires_at IS NULL OR expires_at > NOW())");
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ PRODUCTS (slug) ============
+app.get('/api/products/slug/:slug', async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const [all] = await pool.query("SELECT id, name FROM products WHERE status = 'active'");
+    const match = all.find(p => slugify(p.name) === slug);
+    if (!match) return res.status(404).json({ error: 'not found' });
+    req.params.id = match.id;
+    return app._router.handle({ ...req, url: '/api/products/' + match.id }, res, () => {});
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/products/:id', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -499,6 +536,40 @@ app.get('/api/orders/me', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Order detail
+app.get('/api/orders/:id', authMiddleware, async (req, res) => {
+  try {
+    const [orders] = await pool.query('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    if (!orders[0]) return res.status(404).json({ error: 'not found' });
+    const o = orders[0];
+    if (o.buyer_id !== req.user.id && req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+    const [items] = await pool.query(`SELECT oi.*, p.name, p.emoji, p.image_url, p.category FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?`, [req.params.id]);
+    const [deliveries] = await pool.query('SELECT * FROM deliveries WHERE order_id = ? ORDER BY sent_at DESC', [req.params.id]);
+    const [escrow] = await pool.query('SELECT * FROM escrow_holds WHERE order_id = ?', [req.params.id]);
+    res.json({ ...o, items, deliveries, escrow });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Buyer confirm delivery → release escrow early
+app.post('/api/orders/:id/confirm-delivery', authMiddleware, async (req, res) => {
+  try {
+    const [orders] = await pool.query('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    if (!orders[0]) return res.status(404).json({ error: 'not found' });
+    const o = orders[0];
+    if (o.buyer_id !== req.user.id) return res.status(403).json({ error: 'not your order' });
+    if (!['paid', 'delivered'].includes(o.status)) return res.status(400).json({ error: 'order not in confirmable state' });
+    await pool.query('UPDATE orders SET status = ?, confirmed_at = NOW() WHERE id = ?', ['completed', req.params.id]);
+    const [holds] = await pool.query("SELECT * FROM escrow_holds WHERE order_id = ? AND status = 'held'", [req.params.id]);
+    for (const h of holds) {
+      await pool.query("UPDATE escrow_holds SET status = ?, released_at = NOW() WHERE id = ?", ['released', h.id]);
+      await pool.query('UPDATE seller_balances SET pending = pending - ?, available = available + ? WHERE user_id = ?', [h.seller_amount, h.seller_amount, h.seller_id]);
+      await pool.query("INSERT INTO transactions (user_id, type, amount, reference_type, reference_id, description) VALUES (?, 'sale', ?, 'order', ?, ?)", [h.seller_id, h.seller_amount, h.order_id, `Buyer confirmed early: Order #${h.order_id}`]);
+      await sendNotification(h.seller_id, 'escrow', 'Saldo released (buyer confirm)', `Rp ${Number(h.seller_amount).toLocaleString('id-ID')} dari order #${h.order_id} released.`);
+    }
+    res.json({ ok: true, released: holds.length });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ============ SELLER ============
 app.get('/api/seller/dashboard', authMiddleware, requireRole('seller', 'admin'), async (req, res) => {
   try {
@@ -595,18 +666,109 @@ app.get('/api/seller/transactions', authMiddleware, requireRole('seller', 'admin
 // ============ ADMIN ============
 app.get('/api/admin/users', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, email, name, role, created_at, linked_telegram_id, linked_whatsapp_number, linked_discord_id FROM users ORDER BY created_at DESC LIMIT 100');
+    const { role, search, limit = 100 } = req.query;
+    let sql = 'SELECT id, email, name, role, created_at, linked_telegram_id, linked_whatsapp_number, linked_discord_id FROM users WHERE 1=1';
+    const args = [];
+    if (role) { sql += ' AND role = ?'; args.push(role); }
+    if (search) { sql += ' AND (email LIKE ? OR name LIKE ?)'; args.push('%' + search + '%', '%' + search + '%'); }
+    sql += ' ORDER BY created_at DESC LIMIT ?';
+    args.push(parseInt(limit));
+    const [rows] = await pool.query(sql, args);
     res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/admin/users/:id/role', authMiddleware, requireRole('admin'), async (req, res) => {
+  const { role } = req.body;
+  if (!['buyer', 'seller', 'admin', 'cs', 'marketing'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  try {
+    await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/users/:id', authMiddleware, requireRole('admin'), async (req, res) => {
+  if (parseInt(req.params.id) === req.user.id) return res.status(400).json({ error: 'cannot delete self' });
+  try {
+    await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/orders', authMiddleware, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, limit = 100 } = req.query;
+    let sql = `SELECT o.*, u.name as buyer_name, u.email as buyer_email_account, GROUP_CONCAT(CONCAT(oi.qty, 'x ', p.name) SEPARATOR ', ') as items FROM orders o LEFT JOIN users u ON o.buyer_id = u.id LEFT JOIN order_items oi ON oi.order_id = o.id LEFT JOIN products p ON oi.product_id = p.id WHERE 1=1`;
+    const args = [];
+    if (status) { sql += ' AND o.status = ?'; args.push(status); }
+    sql += ' GROUP BY o.id ORDER BY o.created_at DESC LIMIT ?';
+    args.push(parseInt(limit));
+    const [rows] = await pool.query(sql, args);
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/products', authMiddleware, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, limit = 200 } = req.query;
+    let sql = 'SELECT p.*, u.name as seller_name, u.email as seller_email FROM products p JOIN users u ON p.seller_id = u.id WHERE 1=1';
+    const args = [];
+    if (status) { sql += ' AND p.status = ?'; args.push(status); }
+    sql += ' ORDER BY p.created_at DESC LIMIT ?';
+    args.push(parseInt(limit));
+    const [rows] = await pool.query(sql, args);
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/withdrawals', authMiddleware, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, limit = 100 } = req.query;
+    let sql = `SELECT w.*, u.name as user_name, u.email as user_email FROM withdrawals w JOIN users u ON w.user_id = u.id WHERE 1=1`;
+    const args = [];
+    if (status) { sql += ' AND w.status = ?'; args.push(status); }
+    sql += ' ORDER BY w.created_at DESC LIMIT ?';
+    args.push(parseInt(limit));
+    const [rows] = await pool.query(sql, args);
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/withdrawals/:id/approve', authMiddleware, requireRole('admin'), async (req, res) => {
+  try {
+    const [w] = await pool.query('SELECT * FROM withdrawals WHERE id = ?', [req.params.id]);
+    if (!w[0]) return res.status(404).json({ error: 'not found' });
+    if (w[0].status !== 'pending') return res.status(400).json({ error: `already ${w[0].status}` });
+    await pool.query("UPDATE withdrawals SET status = 'completed', processed_at = NOW() WHERE id = ?", [req.params.id]);
+    await sendNotification(w[0].user_id, 'withdraw', 'Withdraw disetujui', `Withdraw #${req.params.id} Rp ${Number(w[0].net_amount).toLocaleString('id-ID')} sudah ditransfer ke ${w[0].destination}.`);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/withdrawals/:id/reject', authMiddleware, requireRole('admin'), async (req, res) => {
+  const { reason } = req.body;
+  try {
+    const [w] = await pool.query('SELECT * FROM withdrawals WHERE id = ?', [req.params.id]);
+    if (!w[0]) return res.status(404).json({ error: 'not found' });
+    if (w[0].status !== 'pending') return res.status(400).json({ error: `already ${w[0].status}` });
+    // Refund
+    await pool.query('UPDATE seller_balances SET available = available + ?, total_withdrawn = total_withdrawn - ? WHERE user_id = ?', [w[0].amount + w[0].fee, w[0].amount, w[0].user_id]);
+    await pool.query("UPDATE withdrawals SET status = 'rejected', processed_at = NOW(), notes = CONCAT(COALESCE(notes,''), ' | Rejected: ', ?) WHERE id = ?", [reason || 'no reason', req.params.id]);
+    await pool.query("INSERT INTO transactions (user_id, type, amount, reference_type, reference_id, description) VALUES (?, 'refund', ?, 'withdrawal', ?, ?)", [w[0].user_id, w[0].amount + w[0].fee, w[0].id, `Withdraw rejected: ${reason || 'no reason'}`]);
+    await sendNotification(w[0].user_id, 'withdraw', 'Withdraw ditolak', `Withdraw #${req.params.id} ditolak. Saldo sudah dikembalikan.${reason ? ' Alasan: ' + reason : ''}`);
+    res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/admin/stats', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
-    const [u] = await pool.query('SELECT COUNT(*) as total, SUM(role="buyer") as buyers, SUM(role="seller") as sellers, SUM(role="admin") as admins FROM users');
+    const [u] = await pool.query('SELECT COUNT(*) as total, SUM(role="buyer") as buyers, SUM(role="seller") as sellers, SUM(role="admin") as admins, SUM(role="cs") as cs, SUM(role="marketing") as marketing FROM users');
     const [p] = await pool.query('SELECT COUNT(*) as total, SUM(stock>0) as in_stock, COALESCE(SUM(sold),0) as total_sold FROM products');
-    const [o] = await pool.query('SELECT COUNT(*) as total, COALESCE(SUM(total),0) as revenue, SUM(status="paid") as paid, SUM(status="delivered") as delivered FROM orders');
+    const [o] = await pool.query('SELECT COUNT(*) as total, COALESCE(SUM(total),0) as revenue, SUM(status="pending") as pending, SUM(status="paid") as paid, SUM(status="delivered") as delivered, SUM(status="completed") as completed, SUM(status="cancelled") as cancelled FROM orders');
     const [m] = await pool.query('SELECT COALESCE(SUM(total),0) as revenue_30d, COUNT(*) as orders_30d FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)');
-    res.json({ users: u[0], products: p[0], orders: o[0], month: m[0] });
+    const [w] = await pool.query("SELECT COUNT(*) as pending, COALESCE(SUM(amount),0) as amount_pending FROM withdrawals WHERE status = 'pending'");
+    const [e] = await pool.query("SELECT COUNT(*) as held, COALESCE(SUM(seller_amount),0) as amount_held FROM escrow_holds WHERE status = 'held'");
+    res.json({ users: u[0], products: p[0], orders: o[0], month: m[0], withdrawals: w[0], escrow: e[0] });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -715,11 +877,16 @@ app.post('/api/notifications/read-all', authMiddleware, async (req, res) => {
 });
 
 // ============ START ============
+const RELEASE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h
+setInterval(releaseEscrow, RELEASE_INTERVAL_MS);
+releaseEscrow(); // run once on boot
+
 app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Zcus Shop API v4.0.0`);
+  console.log(`Z Store API v5.0.0`);
   console.log(`Listening: http://127.0.0.1:${PORT}`);
   console.log(`NodeJS ${process.version}`);
   console.log(`Multi-platform: web + telegram + whatsapp + discord`);
+  console.log(`Escrow auto-release: every ${RELEASE_INTERVAL_MS / 3600000}h`);
 });
 
 process.on('uncaughtException', (err) => console.error('UNCAUGHT:', err));
