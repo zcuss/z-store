@@ -605,6 +605,94 @@ app.get('/api/products/:id/reviews', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Recently viewed — server-side per user
+app.get('/api/users/me/recently-viewed', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT p.id, p.name, p.price, p.original_price, p.category, p.emoji, p.image_url, p.sold, p.review_avg, p.review_count,
+             pv.viewed_at
+      FROM product_views pv
+      JOIN products p ON p.id = pv.product_id
+      WHERE pv.user_id = ?
+      ORDER BY pv.viewed_at DESC
+      LIMIT 20
+    `, [req.user.id]);
+    res.json({ items: rows });
+  } catch (e) {
+    res.json({ items: [] });
+  }
+});
+
+app.delete('/api/users/me/recently-viewed', authMiddleware, async (req, res) => {
+  try { await pool.query('DELETE FROM product_views WHERE user_id = ?', [req.user.id]); res.json({ ok: true }); }
+  catch (e) { res.json({ ok: true }); }
+});
+
+// Compare products
+app.post('/api/products/compare', async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'ids array required' });
+  if (ids.length > 4) return res.status(400).json({ error: 'max 4 products' });
+  try {
+    const [rows] = await pool.query(`
+      SELECT p.id, p.name, p.price, p.original_price, p.category, p.emoji, p.description, p.stock, p.sold,
+             (SELECT COUNT(*) FROM reviews WHERE product_id = p.id) as review_count,
+             (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE product_id = p.id) as review_avg
+      FROM products p WHERE p.id IN (?) AND p.status = 'active'
+    `, [ids]);
+    rows.forEach(r => { if (r.review_avg) r.review_avg = Number(r.review_avg).toFixed(1); });
+    res.json({ products: rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Spin wheel — random discount
+app.post('/api/spin-wheel', async (req, res) => {
+  const prizes = [
+    { label: '5% OFF', code: 'SPIN5', value: 5, type: 'percent', weight: 30 },
+    { label: '10% OFF', code: 'SPIN10', value: 10, type: 'percent', weight: 25 },
+    { label: '15% OFF', code: 'SPIN15', value: 15, type: 'percent', weight: 15 },
+    { label: '20% OFF', code: 'SPIN20', value: 20, type: 'percent', weight: 10 },
+    { label: 'Rp 25.000 OFF', code: 'SPIN25K', value: 25000, type: 'flat', weight: 12 },
+    { label: 'Rp 50.000 OFF', code: 'SPIN50K', value: 50000, type: 'flat', weight: 6 },
+    { label: 'Free Shipping', code: 'FREESHIP', value: 0, type: 'shipping', weight: 2 }
+  ];
+  const totalWeight = prizes.reduce((s, p) => s + p.weight, 0);
+  let r = Math.random() * totalWeight;
+  let chosen = prizes[0];
+  for (const p of prizes) { if (r < p.weight) { chosen = p; break; } r -= p.weight; }
+  res.json({ prize: chosen, expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString() });
+});
+
+// Live visitors count (simple in-memory)
+app.get('/api/stats/live', async (req, res) => {
+  if (!global._liveCount) global._liveCount = Math.floor(Math.random() * 30) + 10;
+  // Increment occasionally to simulate activity
+  if (Math.random() < 0.3) global._liveCount += Math.random() < 0.5 ? 1 : -1;
+  global._liveCount = Math.max(5, Math.min(80, global._liveCount));
+  res.json({ online: global._liveCount });
+});
+
+// Newsletter subscribe (real backend, not just localStorage)
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  const { email, source } = req.body;
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'valid email required' });
+  try {
+    await pool.query('INSERT IGNORE INTO newsletter_subscribers (email, source) VALUES (?, ?)', [email, source || 'homepage']);
+    // Send welcome email if Gmail configured
+    if (process.env.GMAIL_APP_PASS) {
+      try {
+        await mailer.sendMail({
+          from: `"Z Store" <${process.env.GMAIL_USER || 'zcusgt@gmail.com'}>`,
+          to: email,
+          subject: 'Selamat datang di Z Store Newsletter!',
+          html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#0f172a;color:#fff;border-radius:12px"><h2 style="color:#38bdf8">Selamat Datang!</h2><p>Terima kasih sudah subscribe newsletter Z Store. Kamu akan dapat update promo & produk baru.</p><p>Gunakan kode <b style="color:#fbbf24">WELCOME10</b> untuk diskon 10% order pertama kamu.</p></div>`
+        });
+      } catch (e) { console.error('Newsletter email failed:', e.message); }
+    }
+    res.json({ ok: true, message: 'Subscribed! Cek email kamu untuk kode diskon.' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
   const { rating, text } = req.body;
   if (!rating || rating < 1 || rating > 5) return res.status(400).json({ error: 'rating 1-5 required' });
