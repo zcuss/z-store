@@ -1,0 +1,63 @@
+{
+  "name": "Z Store — Premium Digital Marketplace",
+  "short_name": "Z Store",
+  "description": "Marketplace produk digital premium Indonesia. AI tools, software, voucher, dan merchandise. Instant delivery via email.",
+  "start_url": "/shop/",
+  "scope": "/shop/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0ea5e9",
+  "categories": ["shopping", "business", "productivity"],
+  "lang": "id-ID",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/shop/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/shop/og-image.svg",
+      "sizes": "1200x630",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Products",
+      "short_name": "Shop",
+      "description": "Lihat semua produk digital premium",
+      "url": "/shop/",
+      "icons": [{ "src": "/shop/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "Cek status pesanan kamu",
+      "url": "/shop/orders.html",
+      "icons": [{ "src": "/shop/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Wishlist",
+      "short_name": "Wishlist",
+      "description": "Produk favorit kamu",
+      "url": "/shop/wishlist.html",
+      "icons": [{ "src": "/shop/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Support",
+      "short_name": "Help",
+      "description": "Hubungi CS 24/7",
+      "url": "/shop/support.html",
+      "icons": [{ "src": "/shop/favicon.svg", "sizes": "any" }]
+    }
+  ],
+  "share_target": {
+    "action": "/shop/product.html",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  }
+}

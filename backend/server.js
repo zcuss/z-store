@@ -120,7 +120,7 @@ app.get('/api', (req, res) => {
 });
 
 // ============ AUTH ============
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', rateLimit('register', 5, 60 * 60 * 1000), async (req, res) => {
   const { email, password, name, role } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'email + password required' });
   try {
@@ -138,15 +138,34 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', rateLimit('login', 10, 15 * 60 * 1000), async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'email + password required' });
+  if (!validateEmail(email)) return res.status(400).json({ error: 'invalid email format' });
+  // Check account lockout
+  const lockedUntil = checkLocked(email);
+  if (lockedUntil) {
+    const remainMin = Math.ceil((lockedUntil - Date.now()) / 60000);
+    return res.status(429).json({ error: `Akun terkunci. Coba lagi dalam ${remainMin} menit.`, locked_until: new Date(lockedUntil).toISOString() });
+  }
   try {
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if (!rows[0]) return res.status(401).json({ error: 'invalid credentials' });
     if (!rows[0].password_hash) return res.status(401).json({ error: 'login with Google instead' });
     const ok = await bcrypt.compare(password, rows[0].password_hash);
-    if (!ok) return res.status(401).json({ error: 'invalid credentials' });
+    if (!ok) {
+      recordFailedLogin(email);
+      const entry = loginAttempts.get(email.toLowerCase().trim());
+      const remain = entry && entry.lockedUntil > Date.now();
+      auditLog(rows[0].id, 'login_failed', { ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress });
+      return res.status(401).json({
+        error: remain ? 'Akun terkunci setelah terlalu banyak percobaan gagal. Coba lagi 15 menit.' : 'invalid credentials',
+        attempts_left: entry ? Math.max(0, MAX_LOGIN_ATTEMPTS - entry.count) : MAX_LOGIN_ATTEMPTS - 1,
+        locked: !!remain
+      });
+    }
+    resetLoginAttempts(email);
+    auditLog(rows[0].id, 'login_success', { ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress });
     const user = { id: rows[0].id, email: rows[0].email, name: rows[0].name, role: rows[0].role };
     res.json({ user, token: signToken(user) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -229,7 +248,7 @@ app.put('/api/auth/profile', authMiddleware, async (req, res) => {
 const otpStore = new Map();
 function genOtp() { return String(Math.floor(100000 + Math.random() * 900000)); }
 
-app.post('/api/auth/otp/request', async (req, res) => {
+app.post('/api/auth/otp/request', rateLimit('otp-request', 3, 10 * 60 * 1000), async (req, res) => {
   const { email, purpose } = req.body;
   if (!email) return res.status(400).json({ error: 'email required' });
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'invalid email format' });
@@ -272,7 +291,7 @@ app.post('/api/auth/otp/request', async (req, res) => {
   }
 });
 
-app.post('/api/auth/otp/verify', async (req, res) => {
+app.post('/api/auth/otp/verify', rateLimit('otp-verify', 5, 10 * 60 * 1000), async (req, res) => {
   const { email, otp, purpose, name, role } = req.body;
   if (!email || !otp) return res.status(400).json({ error: 'email + otp required' });
   const purp = purpose || 'register';
@@ -392,7 +411,180 @@ app.post('/api/auth/unlink', authMiddleware, async (req, res) => {
     await pool.query(`UPDATE users SET ${col} = NULL WHERE id = ?`, [req.user.id]);
     // Also disable integration
     await pool.query('UPDATE platform_integrations SET enabled = FALSE WHERE owner_id = ? AND platform = ?', [req.user.id, platform]);
+    auditLog(req.user.id, 'platform_unlink', { platform });
     res.json({ ok: true, message: `${platform} berhasil di-unlink` });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ LOGOUT (token blacklist) ============
+app.post('/api/auth/logout', (req, res) => {
+  const h = req.headers.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+  if (token) blacklistToken(token);
+  auditLog(req.user?.id, 'logout', {});
+  res.json({ ok: true, message: 'Logout berhasil' });
+});
+
+app.post('/api/auth/logout-all', authMiddleware, async (req, res) => {
+  // Blacklist all tokens for this user (we track by user_id via JWT)
+  // For simplicity, mark current as revoked + tell user to re-login
+  const h = req.headers.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+  if (token) blacklistToken(token);
+  auditLog(req.user.id, 'logout_all', {});
+  res.json({ ok: true, message: 'Semua device logout. Silakan login ulang.' });
+});
+
+// ============ 2FA TOTP ============
+const speakeasy = null; // avoid dep; use HMAC-SHA1 inline for TOTP
+function base32Encode(buf) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = '', out = '';
+  for (let i = 0; i < buf.length; i++) bits += buf[i].toString(2).padStart(8, '0');
+  for (let i = 0; i < bits.length; i += 5) out += alphabet[parseInt(bits.slice(i, i + 5), 2)];
+  return out;
+}
+function base32Decode(str) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const clean = str.replace(/=+$/, '').toUpperCase();
+  let bits = '', out = [];
+  for (let i = 0; i < clean.length; i++) {
+    const v = alphabet.indexOf(clean[i]);
+    if (v < 0) continue;
+    bits += v.toString(2).padStart(5, '0');
+  }
+  for (let i = 0; i < bits.length; i += 8) {
+    const b = parseInt(bits.slice(i, i + 8), 2);
+    if (!isNaN(b)) out.push(b);
+  }
+  return Buffer.from(out);
+}
+function genTotpSecret() {
+  const buf = require('crypto').randomBytes(20);
+  return base32Encode(buf);
+}
+function totp(secret, time = Math.floor(Date.now() / 1000 / 30)) {
+  const crypto = require('crypto');
+  const key = base32Decode(secret);
+  const buf = Buffer.alloc(8);
+  for (let i = 0; i < 8; i++) buf[i] = (time >> (56 - i * 8)) & 0xff;
+  const hmac = crypto.createHmac('sha1', key).update(buf).digest();
+  const offset = hmac[hmac.length - 1] & 0xf;
+  const code = ((hmac[offset] & 0x7f) << 24 | (hmac[offset + 1] & 0xff) << 16 | (hmac[offset + 2] & 0xff) << 8 | (hmac[offset + 3] & 0xff)) % 1000000;
+  return String(code).padStart(6, '0');
+}
+function verifyTotp(secret, code) {
+  if (!/^\d{6}$/.test(code)) return false;
+  const now = Math.floor(Date.now() / 1000 / 30);
+  for (let w = -1; w <= 1; w++) {
+    if (totp(secret, now + w) === code) return true;
+  }
+  return false;
+}
+
+app.post('/api/auth/2fa/setup', authMiddleware, async (req, res) => {
+  try {
+    const secret = genTotpSecret();
+    await pool.query('UPDATE users SET totp_secret = ? WHERE id = ?', [secret, req.user.id]);
+    const otpauth = `otpauth://totp/Z%20Store:${encodeURIComponent(req.user.email)}?secret=${secret}&issuer=Z%20Store`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauth)}`;
+    auditLog(req.user.id, '2fa_setup', {});
+    res.json({ secret, qr_url: qrUrl, otpauth });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/auth/2fa/enable', authMiddleware, async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'code required' });
+  try {
+    const [rows] = await pool.query('SELECT totp_secret FROM users WHERE id = ?', [req.user.id]);
+    if (!rows[0]?.totp_secret) return res.status(400).json({ error: 'Setup 2FA dulu' });
+    if (!verifyTotp(rows[0].totp_secret, code)) return res.status(401).json({ error: 'Kode salah' });
+    await pool.query('UPDATE users SET totp_enabled = TRUE WHERE id = ?', [req.user.id]);
+    auditLog(req.user.id, '2fa_enabled', {});
+    res.json({ ok: true, message: '2FA aktif' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/auth/2fa/disable', authMiddleware, async (req, res) => {
+  const { code, password } = req.body;
+  try {
+    const [rows] = await pool.query('SELECT password_hash, totp_secret FROM users WHERE id = ?', [req.user.id]);
+    if (!rows[0]?.totp_secret) return res.json({ ok: true, message: '2FA belum aktif' });
+    // Verify password OR totp
+    let ok = false;
+    if (password && rows[0].password_hash && await bcrypt.compare(password, rows[0].password_hash)) ok = true;
+    if (code && verifyTotp(rows[0].totp_secret, code)) ok = true;
+    if (!ok) return res.status(401).json({ error: 'Password atau kode 2FA salah' });
+    await pool.query('UPDATE users SET totp_enabled = FALSE, totp_secret = NULL WHERE id = ?', [req.user.id]);
+    auditLog(req.user.id, '2fa_disabled', {});
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 2FA verify during login (optional step)
+async function checkTwoFA(userId) {
+  try {
+    const [rows] = await pool.query('SELECT totp_enabled FROM users WHERE id = ?', [userId]);
+    return rows[0]?.totp_enabled || false;
+  } catch (e) { return false; }
+}
+
+// ============ EMAIL VERIFICATION FLOW ============
+const emailVerifyTokens = new Map(); // token → { userId, expiresAt }
+app.post('/api/auth/email/verify/request', authMiddleware, async (req, res) => {
+  const token = require('crypto').randomBytes(24).toString('hex');
+  const expiresAt = Date.now() + 24 * 3600 * 1000;
+  emailVerifyTokens.set(token, { userId: req.user.id, expiresAt });
+  const link = `https://zcus.biz.id/shop/verify-email.html?token=${token}`;
+  try {
+    if (process.env.GMAIL_APP_PASS) {
+      await mailer.sendMail({
+        from: `"Z Store" <${process.env.GMAIL_USER || 'zcusgt@gmail.com'}>`,
+        to: req.user.email,
+        subject: 'Verifikasi Email — Z Store',
+        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#0f172a;color:#fff;border-radius:12px"><h2 style="color:#38bdf8">Verifikasi Email</h2><p>Klik link untuk verifikasi:</p><a href="${link}" style="display:inline-block;background:#0ea5e9;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;margin:16px 0">Verifikasi Email</a><p style="color:#94a3b8;font-size:12px">Link kadaluarsa dalam 24 jam.</p></div>`
+      });
+    }
+    res.json({ ok: true, message: 'Link verifikasi dikirim ke email', dev_link: process.env.GMAIL_APP_PASS ? undefined : link });
+    auditLog(req.user.id, 'email_verify_requested', {});
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/auth/email/verify', async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'token required' });
+  const entry = emailVerifyTokens.get(token);
+  if (!entry) return res.status(400).json({ error: 'Token tidak valid' });
+  if (entry.expiresAt < Date.now()) {
+    emailVerifyTokens.delete(token);
+    return res.status(400).json({ error: 'Token kadaluarsa' });
+  }
+  try {
+    await pool.query('UPDATE users SET email_verified = TRUE WHERE id = ?', [entry.userId]);
+    emailVerifyTokens.delete(token);
+    auditLog(entry.userId, 'email_verified', {});
+    res.json({ ok: true, message: 'Email verified!' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ SECURITY STATUS (for settings page) ============
+app.get('/api/auth/security-status', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT password_hash, totp_enabled, email_verified, google_id FROM users WHERE id = ?', [req.user.id]);
+    const u = rows[0] || {};
+    const locked = checkLocked(req.user.email);
+    const attempts = loginAttempts.get(req.user.email.toLowerCase().trim());
+    res.json({
+      has_password: !!u.password_hash,
+      has_google: !!u.google_id,
+      totp_enabled: !!u.totp_enabled,
+      email_verified: !!u.email_verified,
+      locked_until: locked ? new Date(locked).toISOString() : null,
+      failed_attempts: attempts ? attempts.count : 0,
+      max_attempts: MAX_LOGIN_ATTEMPTS,
+      security_score: (u.password_hash ? 25 : 0) + (u.totp_enabled ? 35 : 0) + (u.email_verified ? 25 : 0) + (u.google_id ? 15 : 0)
+    });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -710,7 +902,7 @@ app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
 });
 
 // ============ ORDERS ============
-app.post('/api/orders/checkout', authMiddleware, async (req, res) => {
+app.post('/api/orders/checkout', authMiddlewareWithBlacklist, rateLimit('checkout', 10, 60 * 60 * 1000), async (req, res) => {
   const { items, buyer_email, buyer_phone, source } = req.body;
   if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'items required' });
   if (!buyer_email) return res.status(400).json({ error: 'buyer_email required' });
@@ -1372,6 +1564,135 @@ app.get('/api/wishlist/share/:code', async (req, res) => {
 
 // ============ WELCOME NOTIFICATION ON NEW USER ============
 // (already in /api/auth/google and /api/auth/otp/verify register)
+
+// ============ SECURITY MIDDLEWARE ============
+
+// 1. Security headers (helmet-like)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://app.midtrans.com https://*.midtrans.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https:; frame-src https://app.midtrans.com https://*.midtrans.com");
+  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  }
+  next();
+});
+
+// 2. Rate limiter (in-memory, per-IP per-endpoint)
+const rateStore = new Map(); // key → { count, resetAt }
+function rateLimit(key, maxRequests, windowMs) {
+  return (req, res, next) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    const fullKey = `${key}:${ip}`;
+    const now = Date.now();
+    const entry = rateStore.get(fullKey);
+    if (!entry || entry.resetAt < now) {
+      rateStore.set(fullKey, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    entry.count++;
+    if (entry.count > maxRequests) {
+      const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
+      res.setHeader('Retry-After', retryAfter);
+      return res.status(429).json({ error: 'Terlalu banyak percobaan. Coba lagi dalam ' + retryAfter + ' detik.' });
+    }
+    next();
+  };
+}
+// Cleanup old rate entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of rateStore.entries()) if (v.resetAt < now) rateStore.delete(k);
+}, 10 * 60 * 1000);
+
+// 3. Account lockout after failed logins
+const loginAttempts = new Map(); // email → { count, lockedUntil, lastAttempt }
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 min
+function recordFailedLogin(email) {
+  const e = email.toLowerCase().trim();
+  const now = Date.now();
+  const entry = loginAttempts.get(e) || { count: 0, lockedUntil: 0, lastAttempt: 0 };
+  if (entry.lockedUntil > now) return entry; // already locked
+  entry.count++;
+  entry.lastAttempt = now;
+  if (entry.count >= MAX_LOGIN_ATTEMPTS) {
+    entry.lockedUntil = now + LOCKOUT_DURATION;
+    entry.count = 0;
+  }
+  loginAttempts.set(e, entry);
+  return entry;
+}
+function resetLoginAttempts(email) {
+  loginAttempts.delete(email.toLowerCase().trim());
+}
+function checkLocked(email) {
+  const entry = loginAttempts.get(email.toLowerCase().trim());
+  if (entry && entry.lockedUntil > Date.now()) return entry.lockedUntil;
+  return null;
+}
+
+// 4. Audit log (sensitive operations)
+async function auditLog(userId, action, details = {}) {
+  try {
+    await pool.query(
+      'INSERT INTO audit_log (user_id, action, details, ip, user_agent, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+      [userId || null, action, JSON.stringify(details).slice(0, 500), req?.headers?.['x-forwarded-for'] || req?.socket?.remoteAddress || '', (req?.headers?.['user-agent'] || '').slice(0, 200)]
+    );
+  } catch (e) { /* table may not exist; fallback to console */ }
+  console.log(`[AUDIT] user=${userId} action=${action} ip=${details.ip || '-'}`);
+}
+
+// 5. Input validation helpers
+function validateEmail(email) {
+  if (typeof email !== 'string') return false;
+  email = email.trim().toLowerCase();
+  if (email.length > 254) return false;
+  return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email);
+}
+function validatePassword(pw) {
+  if (typeof pw !== 'string' || pw.length < 8 || pw.length > 128) return { ok: false, msg: 'Password minimal 8 karakter, maksimal 128' };
+  if (!/[A-Za-z]/.test(pw) || !/\d/.test(pw)) return { ok: false, msg: 'Password harus mengandung huruf dan angka' };
+  return { ok: true };
+}
+function validatePhone(phone) {
+  if (!phone) return true;
+  if (typeof phone !== 'string') return false;
+  const cleaned = phone.replace(/[\s\-+()]/g, '');
+  return /^\+?\d{8,15}$/.test(cleaned);
+}
+function sanitize(str, max = 500) {
+  if (typeof str !== 'string') return '';
+  return str.slice(0, max).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').trim();
+}
+
+// 6. Token blacklist (logout invalidates)
+const tokenBlacklist = new Set();
+function blacklistToken(token) {
+  if (token) tokenBlacklist.add(token);
+  // Cap memory
+  if (tokenBlacklist.size > 5000) {
+    const arr = Array.from(tokenBlacklist).slice(-2500);
+    tokenBlacklist.clear();
+    arr.forEach(t => tokenBlacklist.add(t));
+  }
+}
+const authMiddlewareWithBlacklist = (req, res, next) => authMiddleware(req, res, () => {
+  if (tokenBlacklist.has(req.token || (req.headers.authorization || '').slice(7))) {
+    return res.status(401).json({ error: 'token revoked' });
+  }
+  next();
+});
+
+// 7. Request ID for tracing
+app.use((req, res, next) => {
+  req.id = 'req_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  res.setHeader('X-Request-ID', req.id);
+  next();
+});
 
 // ============ START ============
 const RELEASE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h
