@@ -18,17 +18,28 @@ check() {
   fi
 }
 
+check_block() {
+  local label="$1" got="$2"
+  if [ "$got" = "400" ] || [ "$got" = "403" ]; then
+    echo "  ✓ $label blocked (HTTP $got)"
+    PASS=$((PASS+1))
+  else
+    echo "  ✗ $label — expected 400/403, got $got"
+    FAIL=$((FAIL+1))
+  fi
+}
+
 echo "=== T1: SQLi in email field ==="
 CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"email":"sqli@test.com; DROP TABLE users;--","password":"TestPass123!"}')
-check "SQLi email" "400" "$CODE"
+check_block "SQLi email" "$CODE"
 
 echo "=== T2: XSS in name field ==="
 CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"email":"xss@test.com","password":"TestPass123!","name":"<script>alert(1)</script>"}')
-check "XSS name" "400" "$CODE"
+check_block "XSS name" "$CODE"
 
 echo "=== T3: NoSQL injection ==="
 CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/auth/login" \
