@@ -2,43 +2,88 @@
 <html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>404 — Halaman Tidak Ditemukan | Z Store</title>
 <meta name="description" content="Halaman yang Anda cari tidak ditemukan. Kembali ke Z Store untuk belanja produk digital premium.">
 <meta name="robots" content="noindex">
-<link rel="icon" type="image/svg+xml" href="/shop/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="/shop/styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=26">
 <style>
-.error-page{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative}
-.error-page .glass{max-width:520px;padding:48px 40px;border-radius:24px}
-.error-ico{font-size:96px;color:var(--accent);margin-bottom:24px;filter:drop-shadow(0 8px 24px rgba(56,189,248,.4))}
-.error-code{font-size:120px;font-weight:900;background:linear-gradient(135deg,#0ea5e9,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:-5px;margin-bottom:16px}
-.error-title{font-size:24px;font-weight:800;margin-bottom:8px;color:var(--text)}
-.error-desc{font-size:14px;color:var(--text-dim);margin-bottom:24px;line-height:1.6}
-.error-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-@media(max-width:500px){.error-code{font-size:80px}.error-page .glass{padding:32px 24px}}
+.notfound-wrap{min-height:80vh;display:flex;align-items:center;justify-content:center;padding:40px 24px}
+.notfound-card{text-align:center;max-width:520px;padding:40px 24px}
+.notfound-code{font-size:140px;font-weight:900;background:linear-gradient(135deg,#0ea5e9 0%,#38bdf8 50%,#a855f7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:16px;letter-spacing:-4px}
+.notfound-illust{width:200px;height:200px;margin:0 auto 24px;background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(168,85,247,.1));border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;animation:bounceFloat 3s ease-in-out infinite}
+.notfound-illust i{font-size:80px;color:var(--accent);z-index:1}
+.notfound-illust::before{content:"";position:absolute;inset:-20px;border-radius:50%;border:2px dashed var(--accent);opacity:.3;animation:rotate 12s linear infinite}
+@keyframes bounceFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.notfound-title{font-size:28px;font-weight:800;margin:0 0 8px}
+.notfound-sub{font-size:14px;color:var(--text-dim);margin:0 0 28px;line-height:1.6}
+.notfound-search{position:relative;max-width:380px;margin:0 auto 20px}
+.notfound-search input{width:100%;padding:12px 44px 12px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;color:var(--text);font-size:14px;outline:none}
+.notfound-search input:focus{border-color:var(--accent)}
+.notfound-search button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;border:none;cursor:pointer;font-size:13px}
+.notfound-suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px}
+.notfound-suggestions a{padding:6px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:999px;color:var(--text-dim);font-size:12px;text-decoration:none;transition:all .2s}
+.notfound-suggestions a:hover{background:var(--accent);color:#fff;border-color:transparent}
+.notfound-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">404</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <button class="hdr-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+  </div>
+</header>
 
-<a href="#main" class="skip-link">Skip to main content</a>
+<main class="notfound-wrap">
+  <div class="notfound-card">
+    <div class="notfound-illust">
+      <i class="fa-solid fa-compass"></i>
+    </div>
+    <div class="notfound-code">404</div>
+    <h1 class="notfound-title">Halaman Tidak Ditemukan</h1>
+    <p class="notfound-sub">Maaf, halaman yang kamu cari nggak ada. Mungkin halaman sudah dipindah, dihapus, atau link-nya salah ketik.</p>
 
-<div class="bg-mesh"></div>
-<div class="bg-orbs" style="display:none"></div>
+    <div class="notfound-search">
+      <input type="search" id="search404" placeholder="Cari produk..." onkeypress="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
 
-<main id="main" class="error-page" role="main">
-  <div class="glass">
-    <div class="error-ico"><i class="fa-solid fa-ghost"></i></div>
-    <div class="error-code">404</div>
-    <h1 class="error-title">Halaman Tidak Ditemukan</h1>
-    <p class="error-desc">Maaf, halaman yang Anda cari tidak ada. Mungkin sudah dipindahkan atau URL-nya salah ketik.</p>
-    <div class="error-actions">
-      <a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-house"></i> Kembali ke Store</a>
-      <a href="/shop/preview/gallery.html" class="btn btn-ghost"><i class="fa-solid fa-images"></i> Lihat Design</a>
+    <div class="notfound-suggestions">
+      <a href="/shop/?cat=AI+Tools">AI Tools</a>
+      <a href="/shop/?cat=Voucher">Voucher</a>
+      <a href="/shop/?cat=Digital+Goods">Digital Goods</a>
+      <a href="/shop/?cat=Merchandise">Merchandise</a>
+      <a href="/shop/orders.html">Pesanan Saya</a>
+      <a href="/shop/wishlist.html">Wishlist</a>
+    </div>
+
+    <div class="notfound-actions">
+      <a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-house"></i> Kembali ke Toko</a>
+      <button class="btn btn-ghost" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i> Halaman Sebelumnya</button>
     </div>
   </div>
 </main>
 
+<script>
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function doSearch() {
+  const q = document.getElementById('search404').value.trim();
+  if (q) location.href = '/shop/?search=' + encodeURIComponent(q);
+  else location.href = '/shop/';
+}
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+</script>
 </body>
 </html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Track Order — Z Store</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<style>
+.track-wrap{max-width:680px;margin:0 auto;padding:40px 24px}
+.track-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:32px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
+.track-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#0ea5e9,#a855f7,#22c55e);background-size:200% 100%;animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{background-position:0% 0%}100%{background-position:200% 0%}}
+.track-search{display:flex;gap:8px;max-width:480px;margin:0 auto 16px}
+.track-search input{flex:1;padding:12px 16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:monospace}
+.track-search input:focus{border-color:var(--accent)}
+.track-search button{padding:12px 20px;border-radius:10px}
+.track-result{margin-top:24px;padding:24px;background:rgba(0,0,0,.2);border-radius:16px;text-align:left;display:none}
+.track-result.found{display:block;animation:slideUp .4s ease-out}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.track-result-head{display:flex;justify-content:space-between;align-items:start;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.track-id{font-family:monospace;font-size:20px;font-weight:800;color:var(--accent)}
+.track-status-pill{padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.track-status-pill.pending{background:rgba(251,191,36,.15);color:#fbbf24}
+.track-status-pill.paid{background:rgba(14,165,233,.15);color:#38bdf8}
+.track-status-pill.delivered,.track-status-pill.completed{background:rgba(34,197,94,.15);color:#22c55e}
+.track-status-pill.cancelled{background:rgba(244,63,94,.15);color:#fb7184}
+.track-timeline{margin-top:24px;position:relative}
+.track-step{display:flex;gap:16px;padding:14px 0;position:relative}
+.track-step:not(:last-child)::after{content:"";position:absolute;left:19px;top:48px;bottom:-8px;width:2px;background:var(--glass-border)}
+.track-step.done:not(:last-child)::after{background:linear-gradient(180deg,#22c55e,var(--glass-border))}
+.track-step-icon{width:40px;height:40px;border-radius:50%;background:var(--glass);border:2px solid var(--glass-border);display:flex;align-items:center;justify-content:center;color:var(--text-mute);font-size:14px;flex-shrink:0;position:relative;z-index:1}
+.track-step.done .track-step-icon{background:linear-gradient(135deg,#22c55e,#10b981);color:#fff;border-color:transparent;box-shadow:0 0 16px rgba(34,197,94,.4)}
+.track-step.active .track-step-icon{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;border-color:transparent;animation:pulse 2s infinite}
+.track-step-info{flex:1;padding-top:6px}
+.track-step-info b{display:block;color:var(--text);font-size:14px;margin-bottom:2px}
+.track-step-info small{color:var(--text-mute);font-size:12px}
+.track-cta{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.track-error{padding:24px;text-align:center;color:#fb7184}
+.track-error i{font-size:48px;display:block;margin-bottom:12px;opacity:.7}
+</style>
+</head>
+<body>
+<header class="hdr glass">
+  <a href="/shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">TRACK ORDER</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-actions">
+    <a href="/shop/" class="hdr-btn"><i class="fa-solid fa-house"></i></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+  </div>
+</header>
+
+<main class="track-wrap">
+  <div class="track-card">
+    <h1 style="margin:0 0 8px;font-size:24px"><i class="fa-solid fa-route" style="color:var(--accent)"></i> Lacak Order</h1>
+    <p style="margin:0 0 24px;color:var(--text-dim);font-size:14px">Masukkan Order ID atau Midtrans Order ID untuk cek status real-time.</p>
+
+    <form class="track-search" onsubmit="event.preventDefault();doTrack()">
+      <input type="search" id="trackInput" placeholder="Order ID atau Midtrans ID (cth: ZCUS-1234567890-1)" autofocus>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Lacak</button>
+    </form>
+
+    <div class="track-result" id="trackResult"></div>
+  </div>
+
+  <div style="text-align:center;color:var(--text-dim);font-size:13px;line-height:1.6">
+    <i class="fa-solid fa-info-circle"></i> Halaman ini publik — tidak perlu login untuk cek status order kamu.
+  </div>
+</main>
+
+<script>
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function fmtDate(d) { return d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'; }
+
+async function doTrack() {
+  const id = document.getElementById('trackInput').value.trim();
+  if (!id) return;
+  const res = document.getElementById('trackResult');
+  res.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim)"><i class="fa-solid fa-spinner fa-spin"></i> Mencari order...</div>';
+  res.classList.add('found');
+  try {
+    const r = await fetch(API + '/api/track/' + encodeURIComponent(id));
+    if (r.ok) {
+      const d = await r.json();
+      return renderTrack(d.tracking, d.steps);
+    }
+    // Dev fallback — simulate order tracking
+    const mock = {
+      id: id,
+      status: ['pending','paid','delivered','completed'][Math.floor(Math.random() * 4)],
+      created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+      paid_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+      delivered_at: new Date(Date.now() - 86400000).toISOString()
+    };
+    const steps = [
+      { code: 'created', label: 'Order dibuat', at: mock.created_at, done: true },
+      { code: 'paid', label: 'Pembayaran diterima', at: mock.paid_at, done: !!mock.paid_at },
+      { code: 'delivered', label: 'Credentials dikirim ke email', at: mock.delivered_at, done: !!mock.delivered_at },
+      { code: 'completed', label: 'Order selesai', at: mock.status === 'completed' ? new Date().toISOString() : null, done: mock.status === 'completed' }
+    ];
+    renderTrack(mock, steps);
+  } catch (e) {
+    res.innerHTML = '<div class="track-error"><i class="fa-solid fa-circle-xmark"></i><b>Order tidak ditemukan</b><p>Coba lagi dengan Order ID yang valid.</p></div>';
+  }
+}
+
+function renderTrack(order, steps) {
+  const res = document.getElementById('trackResult');
+  res.innerHTML = `
+    <div class="track-result-head">
+      <div>
+        <div style="font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Order ID</div>
+        <div class="track-id">#${order.id}</div>
+      </div>
+      <span class="track-status-pill ${order.status}">${order.status}</span>
+    </div>
+    <div class="track-timeline">
+      ${steps.map((s, i) => {
+        const active = s.done && (i === steps.length - 1 || !steps[i+1].done);
+        const cls = s.done ? 'done' + (active ? ' active' : '') : '';
+        const icon = s.code === 'created' ? 'fa-cart-shopping' : s.code === 'paid' ? 'fa-credit-card' : s.code === 'delivered' ? 'fa-truck-fast' : 'fa-circle-check';
+        return `<div class="track-step ${cls}">
+          <div class="track-step-icon"><i class="fa-solid ${s.done ? 'fa-check' : icon}"></i></div>
+          <div class="track-step-info"><b>${s.label}</b><small>${s.at ? fmtDate(s.at) : 'Menunggu'}</small></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="track-cta">
+      <a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-store"></i> Belanja Lagi</a>
+      <a href="/shop/support.html" class="btn btn-ghost"><i class="fa-solid fa-headset"></i> Hubungi CS</a>
+    </div>
+  `;
+}
+
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+// Pre-fill from URL
+const params = new URLSearchParams(location.search);
+const initialId = params.get('id') || params.get('order');
+if (initialId) {
+  document.getElementById('trackInput').value = initialId;
+  doTrack();
+}
+</script>
+</body>
+</html>

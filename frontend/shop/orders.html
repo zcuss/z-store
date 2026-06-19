@@ -213,6 +213,8 @@ function renderList() {
         <div class="ord-total">${fmtRp(o.total)}</div>
         <div style="display:flex;gap:8px">
           <button class="ord-action" onclick="event.stopPropagation();openDetail(${o.id})">Detail</button>
+          <a class="ord-action" href="/shop/invoice.html?id=${o.id}" onclick="event.stopPropagation()" style="text-decoration:none;display:inline-flex;align-items:center"><i class="fa-solid fa-file-invoice"></i> Invoice</a>
+          <a class="ord-action" href="/shop/track.html?id=${o.id}" onclick="event.stopPropagation()" style="text-decoration:none;display:inline-flex;align-items:center"><i class="fa-solid fa-route"></i> Track</a>
           ${(o.status === 'paid' || o.status === 'delivered') ? `<button class="ord-action primary" onclick="event.stopPropagation();confirmDelivery(${o.id})"><i class="fa-solid fa-circle-check"></i> Konfirmasi</button>` : ''}
         </div>
       </div>

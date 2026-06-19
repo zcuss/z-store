@@ -906,6 +906,11 @@
   Tekan <kbd>Ctrl</kbd>+<kbd>K</kbd> atau <kbd>/</kbd> untuk cari · <kbd>Esc</kbd> tutup modal
 </div>
 
+<!-- Back to top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Kembali ke atas">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
 <!-- Compare Products Modal -->
 <div class="compare-overlay" id="compareOverlay">
   <div class="compare-modal">
@@ -1351,6 +1356,15 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ===== BACK TO TOP =====
+(function backToTop() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('show', window.scrollY > 400);
+  }, { passive: true });
+})();
+
 // ===== LOADING SKELETON =====
 function showSkeleton(container, count = 6) {
   const html = Array(count).fill(0).map(() => `
@@ -1511,6 +1525,11 @@ window.addEventListener('unhandledrejection', function(e){
 .kbd-hint kbd{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-family:monospace;color:var(--accent);border:1px solid var(--glass-border);font-size:10px}
 @media(max-width:700px){.kbd-hint{display:none}}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== BACK TO TOP ===== */
+.back-to-top{position:fixed;bottom:160px;right:20px;width:44px;height:44px;border-radius:50%;background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--text-dim);font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:55;transition:all .2s}
+.back-to-top.show{display:flex;animation:fadeInUp .3s ease-out}
+.back-to-top:hover{background:var(--accent);color:#fff;border-color:transparent;transform:translateY(-2px)}
 .cookie-actions .cookie-accept:hover{transform:translateY(-1px)}
 .cookie-actions .cookie-deny{background:transparent;color:var(--text-dim);border:1px solid var(--glass-border)}
 .cookie-actions .cookie-deny:hover{color:var(--text)}
