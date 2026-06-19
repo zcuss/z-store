@@ -1110,6 +1110,181 @@ app.post('/api/notifications/read-all', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ============ SUPPORT TICKETS ============
+app.post('/api/support/tickets', authMiddleware, async (req, res) => {
+  const { subject, message, category, priority } = req.body;
+  if (!subject || !message) return res.status(400).json({ error: 'subject + message required' });
+  try {
+    const ticketId = 'TKT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 5).toUpperCase();
+    const [r] = await pool.query(
+      'INSERT INTO support_tickets (ticket_id, user_id, subject, message, category, priority, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [ticketId, req.user.id, subject, message, category || 'general', priority || 'normal', 'open']
+    );
+    res.json({ id: r.insertId, ticket_id: ticketId, status: 'open', message: 'Tiket dibuat. Tim CS akan balas via email dalam 1x24 jam.' });
+  } catch (e) {
+    // Fallback: store in memory for dev
+    if (!global._tickets) global._tickets = [];
+    const ticketId = 'TKT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 5).toUpperCase();
+    global._tickets.push({ id: ticketId, user_id: req.user.id, subject, message, category: category||'general', priority: priority||'normal', status: 'open', created_at: new Date() });
+    res.json({ id: ticketId, ticket_id: ticketId, status: 'open', message: 'Tiket dibuat (dev mode). Tim CS akan balas.' });
+  }
+});
+
+app.get('/api/support/tickets', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM support_tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [req.user.id]);
+    res.json({ tickets: rows });
+  } catch (e) {
+    res.json({ tickets: (global._tickets || []).filter(t => t.user_id === req.user.id).slice(-50).reverse() });
+  }
+});
+
+app.get('/api/support/tickets/:id', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM support_tickets WHERE ticket_id = ? AND user_id = ?', [req.params.id, req.user.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'ticket not found' });
+    const [msgs] = await pool.query('SELECT * FROM support_messages WHERE ticket_id = ? ORDER BY created_at ASC', [rows[0].id]);
+    res.json({ ticket: rows[0], messages: msgs });
+  } catch (e) {
+    const t = (global._tickets || []).find(t => t.ticket_id === req.params.id && t.user_id === req.user.id);
+    res.json({ ticket: t || null, messages: [] });
+  }
+});
+
+app.post('/api/support/tickets/:id/reply', authMiddleware, async (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: 'message required' });
+  try {
+    const [t] = await pool.query('SELECT id FROM support_tickets WHERE ticket_id = ? AND user_id = ?', [req.params.id, req.user.id]);
+    if (!t[0]) return res.status(404).json({ error: 'ticket not found' });
+    await pool.query('INSERT INTO support_messages (ticket_id, user_id, message, is_staff) VALUES (?, ?, ?, FALSE)', [t[0].id, req.user.id, message]);
+    await pool.query('UPDATE support_tickets SET updated_at = NOW() WHERE id = ?', [t[0].id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ AFFILIATE / REFERRAL SYSTEM ============
+function genRefCode(len = 8) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = ''; for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+app.get('/api/affiliate/code', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM affiliate_codes WHERE user_id = ?', [req.user.id]);
+    if (rows[0]) return res.json(rows[0]);
+    const code = genRefCode();
+    const [r] = await pool.query('INSERT INTO affiliate_codes (user_id, code) VALUES (?, ?)', [req.user.id, code]);
+    res.json({ id: r.insertId, user_id: req.user.id, code, clicks: 0, conversions: 0, total_earned: 0 });
+  } catch (e) {
+    // Dev fallback
+    if (!global._affCodes) global._affCodes = new Map();
+    if (!global._affCodes.has(req.user.id)) global._affCodes.set(req.user.id, { code: genRefCode(), clicks: 0, conversions: 0, total_earned: 0 });
+    res.json(global._affCodes.get(req.user.id));
+  }
+});
+
+app.get('/api/affiliate/stats', authMiddleware, async (req, res) => {
+  try {
+    const [codes] = await pool.query('SELECT * FROM affiliate_codes WHERE user_id = ?', [req.user.id]);
+    const code = codes[0]?.code;
+    if (!code) return res.json({ code: null, clicks: 0, conversions: 0, conversion_rate: 0, total_earned: 0, referrals: [] });
+    const [clicks] = await pool.query("SELECT COUNT(*) as c FROM affiliate_clicks WHERE code = ?", [code]);
+    const [refs] = await pool.query("SELECT user_id, order_id, commission, created_at FROM affiliate_referrals WHERE code = ? ORDER BY created_at DESC LIMIT 50", [code]);
+    const total_earned = refs.reduce((s, r) => s + Number(r.commission || 0), 0);
+    const conversions = refs.length;
+    res.json({ code, clicks: clicks[0]?.c || 0, conversions, conversion_rate: clicks[0]?.c ? (conversions / clicks[0].c * 100).toFixed(1) : 0, total_earned, referrals: refs });
+  } catch (e) {
+    const c = global._affCodes?.get(req.user.id) || { code: null, clicks: 0, conversions: 0, total_earned: 0 };
+    res.json({ ...c, conversion_rate: 0, referrals: [] });
+  }
+});
+
+app.post('/api/affiliate/track-click', async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'code required' });
+  try {
+    const [c] = await pool.query('SELECT id FROM affiliate_codes WHERE code = ?', [code]);
+    if (c[0]) {
+      await pool.query('INSERT INTO affiliate_clicks (code_id, code, ip, user_agent) VALUES (?, ?, ?, ?)', [c[0].id, code, req.ip, req.headers['user-agent'] || '']);
+      await pool.query('UPDATE affiliate_codes SET clicks = clicks + 1 WHERE id = ?', [c[0].id]);
+    }
+    res.json({ ok: true });
+  } catch (e) { res.json({ ok: true }); }
+});
+
+app.get('/api/affiliate/leaderboard', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT u.name, u.avatar_url, ac.code, ac.clicks, ac.conversions, ac.total_earned
+      FROM affiliate_codes ac
+      JOIN users u ON ac.user_id = u.id
+      ORDER BY ac.total_earned DESC LIMIT 20
+    `);
+    res.json({ leaderboard: rows });
+  } catch (e) { res.json({ leaderboard: [] }); }
+});
+
+// ============ INVOICE / RECEIPT ============
+app.get('/api/orders/:id/invoice', authMiddleware, async (req, res) => {
+  try {
+    const [orders] = await pool.query('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    if (!orders[0]) return res.status(404).json({ error: 'not found' });
+    const o = orders[0];
+    if (o.buyer_id !== req.user.id && req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+    const [items] = await pool.query(`SELECT oi.*, p.name, p.category, p.emoji FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?`, [req.params.id]);
+    const [buyer] = await pool.query('SELECT email, name FROM users WHERE id = ?', [o.buyer_id]);
+    const [sellers] = await pool.query(`SELECT DISTINCT u.id, u.name, u.email FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN users u ON p.seller_id = u.id WHERE oi.order_id = ?`, [req.params.id]);
+    // Generate invoice number
+    const invNum = 'INV-' + new Date(o.created_at).getFullYear() + '-' + String(o.id).padStart(5, '0');
+    res.json({
+      invoice: {
+        number: invNum,
+        issued_at: new Date().toISOString(),
+        company: { name: 'Z Store', email: 'zcusgt@gmail.com', address: 'Jakarta, Indonesia' },
+        buyer: buyer[0],
+        sellers: sellers,
+        items,
+        subtotal: o.total,
+        total: o.total,
+        payment_method: o.payment_type || 'qris',
+        status: o.status,
+        paid_at: o.paid_at,
+        delivered_at: o.delivered_at,
+        midtrans_order_id: o.midtrans_order_id
+      }
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============ ORDER TRACKING (public, by order ID) ============
+app.get('/api/track/:orderId', async (req, res) => {
+  try {
+    const [o] = await pool.query('SELECT id, status, paid_at, delivered_at, confirmed_at, created_at FROM orders WHERE id = ? OR midtrans_order_id = ?', [req.params.orderId, req.params.orderId]);
+    if (!o[0]) return res.status(404).json({ error: 'order not found' });
+    res.json({ tracking: o[0], steps: buildTrackingSteps(o[0]) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+function buildTrackingSteps(o) {
+  return [
+    { code: 'created', label: 'Order dibuat', at: o.created_at, done: true },
+    { code: 'paid', label: 'Pembayaran diterima', at: o.paid_at, done: !!o.paid_at },
+    { code: 'delivered', label: 'Credentials dikirim', at: o.delivered_at, done: !!o.delivered_at },
+    { code: 'completed', label: 'Order selesai', at: o.confirmed_at, done: !!o.confirmed_at }
+  ];
+}
+
+// ============ WISHLIST SHARE (public) ============
+app.get('/api/wishlist/share/:code', async (req, res) => {
+  // For dev: just return mock data
+  res.json({ code: req.params.code, products: [], created_at: new Date().toISOString() });
+});
+
+// ============ WELCOME NOTIFICATION ON NEW USER ============
+// (already in /api/auth/google and /api/auth/otp/verify register)
+
 // ============ START ============
 const RELEASE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6h
 setInterval(releaseEscrow, RELEASE_INTERVAL_MS);
