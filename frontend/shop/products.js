@@ -1,4 +1,6 @@
 // Zcus Store — product catalog (20 items)
+// Wrapped in IIFE to avoid const collisions with app.js (fmtIDR, disc, etc.)
+;(function(){
 const PRODUCTS = [
   // FLASH SALE (8 items, disc > 30%)
   {id:1,  name:"Wireless Earbuds Pro X5 - Active Noise Cancelling",  price:399000,  old:899000,  disc:56, emoji:"🎧", cat:"Elektronik", sold:1240, rating:4.8, flash:true},
@@ -29,3 +31,9 @@ const PRODUCTS = [
 
 const fmtIDR = n => 'Rp ' + n.toLocaleString('id-ID');
 const disc = p => Math.round((1 - p.price / p.old) * 100);
+
+// Expose to global scope (avoids collisions with app.js)
+window.PRODUCTS = PRODUCTS;
+window.PRODUCTS_fmtIDR = fmtIDR;
+window.PRODUCTS_disc = disc;
+})();

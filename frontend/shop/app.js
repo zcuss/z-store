@@ -3,7 +3,7 @@
 // (orders.html, settings.html, etc. each declare their own `let user/token`).
 // Without this isolation, both `let user` declarations collide → SyntaxError
 // halts entire app.js, breaking cart/wishlist/theme on every page.
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : 'https://zcus.biz.id/shop-app/api';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : 'https://zcus.biz.id/shop-app/api';
 window.products = window.products || [];
 window.cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 window.wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const al = $('adminLink'); if (al) al.style.display = 'flex';
     }
   }
-  if ($$('.products-grid, #productsGrid, #productsList')) loadProducts();
+  if ($$('.prod-grid, .products-grid, #prodGrid, #productsGrid, #productsList')) loadProducts();
   if ($('cartCount')) updateCartUI();
   if ($('wishCount')) updateWishlistUI();
   if ($('recentSection')) renderRecentlyViewed();
@@ -192,11 +192,29 @@ async function api(path, opts = {}) {
 async function loadProducts() {
   try {
     products = await api('/products');
+    if (!Array.isArray(products) || !products.length) throw new Error('empty response');
     applyFilterLocal();
     updateCategoryCounts();
     updateStats();
   } catch (e) {
-    document.getElementById('prodGrid').innerHTML = `<div class="empty-state"><div class="empty-ico"><i class="fa-solid fa-triangle-exclamation"></i></div><h3>Gagal load</h3><p>${e.message}</p></div>`;
+    console.warn('[loadProducts] API failed, using local PRODUCTS fallback:', e.message);
+    // Local fallback: use PRODUCTS catalog from products.js (exposed as window.PRODUCTS) for static QA / dev
+    const LOCAL_PRODUCTS = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) ? PRODUCTS
+      : (window.PRODUCTS && Array.isArray(window.PRODUCTS) ? window.PRODUCTS : null);
+    if (LOCAL_PRODUCTS && LOCAL_PRODUCTS.length) {
+      window.products = LOCAL_PRODUCTS.map(p => ({
+        id: p.id, name: p.name, price: p.price, original_price: p.old,
+        category: p.cat, emoji: p.emoji, sold: p.sold || 0, rating: p.rating || 4.5,
+        review_count: 0, review_avg: p.rating || 0,
+        stock: 1 + (p.id % 30), created_at: new Date(Date.now() - p.id * 86400000).toISOString(),
+        flash: !!p.flash, featured: !!p.featured, is_new: !!p.new, badge: ''
+      }));
+      applyFilterLocal();
+      updateCategoryCounts();
+      updateStats();
+    } else {
+      document.getElementById('prodGrid').innerHTML = `<div class="empty-state"><div class="empty-ico"><i class="fa-solid fa-triangle-exclamation"></i></div><h3>Gagal load</h3><p>${e.message}</p></div>`;
+    }
   }
 }
 
@@ -278,7 +296,9 @@ function productCard(p) {
       <div class="pc-badges">${badge}</div>
       <button class="pc-wish ${isWished?'active':''}" onclick="event.stopPropagation();toggleWish(${p.id})"><i class="fa-${isWished?'solid':'regular'} fa-heart"></i></button>
       ${d > 0 ? `<span class="pc-disc">-${d}%</span>` : ''}
-      <i class="fa-solid ${getCatIcon(p.category)} pc-ico"></i>
+      ${p.emoji
+        ? `<div class="pc-ico" style="font-size:56px;line-height:1">${p.emoji}</div>`
+        : `<i class="fa-solid ${getCatIcon(p.category)} pc-ico"></i>`}
     </div>
     <div class="pc-body">
       <div class="pc-cat">${p.category}</div>

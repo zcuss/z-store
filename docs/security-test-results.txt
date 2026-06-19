@@ -1,0 +1,50 @@
+[92m✓[0m XSS register: <img src=x onerror=alert(1)> → 429 (clean)
+[92m✓[0m XSS register: javascript:alert(1) → 403 (clean)
+[92m✓[0m XSS register: <svg/onload=alert(1)> → 429 (clean)
+
+[93m[6] XSS — search query[0m
+[92m✓[0m XSS in search: <script>alert(1)</script> → 403 (clean)
+[92m✓[0m XSS in search: <img src=x onerror=alert(1)> → 403 (clean)
+[92m✓[0m XSS in search: javascript:alert(1) → 403 (clean)
+[92m✓[0m XSS in search: <svg/onload=alert(1)> → 403 (clean)
+
+[93m[7] Auth bypass[0m
+[92m✓[0m Protected route w/o token → 401
+[92m✓[0m Protected route w/ bad token → 401
+[92m✓[0m Admin route as guest → 401
+[92m✓[0m Admin route w/ SQLi token → 401
+
+[93m[8] IDOR — order access[0m
+[92m✓[0m Order 1 w/o auth → 401
+[92m✓[0m Order 99999 w/o auth → 401
+
+[93m[9] Rate limit — rapid burst[0m
+[93m⚠[0m No 429 in 80 rapid requests (last: 200) — global limit may be high
+
+[93m[10] Rate limit — login flood[0m
+[92m✓[0m Login rate-limit triggered (20/20 got 429)
+
+[93m[11] Security headers[0m
+[91m✗[0m X-Content-Type-Options missing
+[92m✓[0m X-Frame-Options present
+[91m✗[0m Strict-Transport-Security missing
+[91m✗[0m Content-Security-Policy missing
+[92m✓[0m Referrer-Policy present
+
+[93m[12] HTTP method override[0m
+[92m✓[0m TRACE blocked: 405
+
+[93m[13] Path traversal[0m
+[92m✓[0m Traversal blocked: ../../../etc/passwd
+[92m✓[0m Traversal blocked: %2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd
+
+[93m[14] Request size limit[0m
+[91m✗[0m Huge body (>512kb) →  (expected: 413 400 403)
+
+[94m============================================================[0m
+[94m  Summary[0m
+[94m============================================================[0m
+Total:  44
+[92mPassed: 39[0m
+[91mFailed: 5[0m
+

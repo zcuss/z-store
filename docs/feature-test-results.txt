@@ -1,0 +1,44 @@
+[94m============================================================[0m
+[94m  Z Store Feature Smoke Tests[0m
+[94m  Target: https://zcus.biz.id/shop-app/api[0m
+[94m============================================================[0m
+
+[93m[1] PUBLIC PRODUCTS[0m
+[92mOK[0m GET /products -> 200
+[92mOK[0m GET /products/1 -> 200
+[92mOK[0m GET /categories -> 200
+[92mOK[0m Search claude -> 200
+[92mOK[0m Filter+sort -> 200
+[92mOK[0m Price range -> 200
+[92mOK[0m GET /stats/live -> 200
+[92mOK[0m GET reviews -> 200
+[92mOK[0m POST /spin-wheel -> 200
+[91mFAIL[0m POST /newsletter -> 500 (expected 200)
+
+[93m[2] AUTH[0m
+[91mFAIL[0m POST /auth/register -> 429 (expected 200)
+[91mFAIL[0m POST /auth/login -> 429 (expected 200)
+[91mFAIL[0m Login wrong pass -> 429 (expected 401)
+[91mFAIL[0m GET /auth/me -> 401 (expected 200)
+[91mFAIL[0m GET /auth/security-status -> 401 (expected 200)
+[92mOK[0m POST /auth/google -> 200
+[92mOK[0m GET /auth/me bad token -> 401
+
+[93m[3] AUTHED ENDPOINTS[0m
+[91mFAIL[0m GET /orders/me -> 401 (expected 200)
+[91mFAIL[0m GET /orders/99999 IDOR -> 404 (expected 403)
+[91mFAIL[0m GET /wishlist/share/invalid -> 200 (expected 404)
+[91mFAIL[0m GET /notifications -> 401 (expected 200)
+
+[93m[4] ADMIN ROLE[0m
+[91mFAIL[0m GET /admin/users as buyer -> 401 (expected 403)
+[91mFAIL[0m GET /admin/withdrawals -> 401 (expected 403)
+[92mOK[0m GET /admin/users guest -> 401
+
+[94m============================================================[0m
+[94m  Summary[0m
+[94m============================================================[0m
+Total:  24
+[92mPassed: 12[0m
+[91mFailed: 12[0m
+
