@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Loading… — Z Store</title>
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="styles.css?v=26">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://app.midtrans.com" crossorigin>
+<style>
+/* Product-page specific */
+.pdp-wrap{max-width:1280px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
+@media(max-width:900px){.pdp-wrap{grid-template-columns:1fr;padding:0 16px;gap:24px}}
+.pdp-gallery{position:sticky;top:96px;align-self:start}
+.pdp-img-main{aspect-ratio:1/1;border-radius:24px;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:flex;align-items:center;justify-content:center;font-size:120px;color:#fff;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(14,165,233,.25)}
+.pdp-img-main::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 50%)}
+.pdp-img-main .pdp-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.15);filter:blur(40px);top:-50px;left:-50px}
+.pdp-thumbs{display:flex;gap:8px;margin-top:12px}
+.pdp-thumb{flex:1;aspect-ratio:1/1;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--text-dim);cursor:pointer;transition:all .2s}
+.pdp-thumb:hover,.pdp-thumb.active{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;border-color:transparent}
+.pdp-info h1{font-size:32px;font-weight:800;margin:0 0 8px;line-height:1.2;letter-spacing:-.5px}
+@media(max-width:900px){.pdp-info h1{font-size:24px}}
+.pdp-cat{display:inline-flex;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--glass-border);padding:6px 12px;border-radius:999px;font-size:12px;color:var(--accent);margin-bottom:12px}
+.pdp-rating{display:flex;align-items:center;gap:8px;margin:12px 0}
+.pdp-stars{color:#fbbf24;display:flex;gap:2px}
+.pdp-rating-text{color:var(--text-dim);font-size:14px}
+.pdp-price-row{display:flex;align-items:baseline;gap:12px;margin:20px 0;padding:20px 0;border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border)}
+.pdp-price{font-size:36px;font-weight:800;color:var(--accent)}
+.pdp-orig{font-size:18px;color:var(--text-mute);text-decoration:line-through}
+.pdp-discount{background:linear-gradient(135deg,#f43f5e,#fb7185);color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;font-weight:700}
+.pdp-desc{color:var(--text-dim);line-height:1.7;margin:16px 0;white-space:pre-wrap}
+.pdp-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.pdp-meta-item{background:var(--glass);border:1px solid var(--glass-border);padding:12px;border-radius:12px;display:flex;align-items:center;gap:10px}
+.pdp-meta-item i{color:var(--accent);width:20px;text-align:center}
+.pdp-meta-item .lbl{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.5px}
+.pdp-meta-item .val{font-size:14px;font-weight:600;color:var(--text)}
+.pdp-actions{display:flex;gap:12px;margin:24px 0;position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg) 30%);padding-top:16px}
+.pdp-actions .btn{flex:1;padding:16px;font-size:16px;font-weight:700;border-radius:14px}
+.pdp-tabs{margin:32px 0;display:flex;gap:8px;border-bottom:1px solid var(--glass-border)}
+.pdp-tab{padding:12px 20px;background:transparent;border:none;color:var(--text-dim);font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.pdp-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.pdp-tab-content{display:none;padding:20px 0;color:var(--text-dim);line-height:1.7}
+.pdp-tab-content.active{display:block}
+.pdp-reviews{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.pdp-review{background:var(--glass);border:1px solid var(--glass-border);padding:16px;border-radius:14px}
+.pdp-review-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pdp-review-name{font-weight:700;color:var(--text)}
+.pdp-review-date{font-size:12px;color:var(--text-mute)}
+.pdp-related{margin:40px 0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.pdp-related{grid-template-columns:repeat(2,1fr)}}
+.pdp-breadcrumb{font-size:13px;color:var(--text-dim);padding:16px 24px;max-width:1280px;margin:0 auto}
+.pdp-breadcrumb a{color:var(--text-dim);text-decoration:none}
+.pdp-breadcrumb a:hover{color:var(--accent)}
+.pdp-breadcrumb .sep{margin:0 8px;opacity:.5}
+.pdp-loading,.pdp-error{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.pdp-error i{font-size:64px;color:#f43f5e}
+.pdp-error h2{margin:0}
+.pdp-share-bar{display:flex;gap:8px;margin:16px 0}
+.pdp-share-btn{width:40px;height:40px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;color:var(--text-dim);cursor:pointer;transition:all .2s;text-decoration:none}
+.pdp-share-btn:hover{background:var(--accent);color:#fff;border-color:transparent;transform:translateY(-2px)}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<!-- ANNOUNCEMENT -->
+<div class="announce"><div class="announce-track">
+  <span><i class="fa-solid fa-truck-fast"></i> Instant delivery via email</span>
+  <span><i class="fa-solid fa-shield-halved"></i> Garansi 30 hari</span>
+  <span><i class="fa-solid fa-credit-card"></i> QRIS, VA, GoPay, ShopeePay</span>
+  <span><i class="fa-solid fa-bolt"></i> Flash sale tiap jam 12:00 & 20:00</span>
+  <span><i class="fa-solid fa-headset"></i> CS 24/7 via WhatsApp</span>
+</div></div>
+
+<!-- HEADER -->
+<header class="hdr glass">
+  <a href="/shop/" class="brand" onclick="goHome(event)">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">PREMIUM DIGITAL</div>
+    </div>
+  </a>
+  <div class="hdr-search">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" id="searchInput" placeholder="Cari produk…">
+  </div>
+  <div class="hdr-actions">
+    <button class="hdr-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="hdr-btn" onclick="user?showAccount():showModal('login')" title="Account"><i class="fa-solid fa-user"></i></button>
+    <button class="hdr-btn cart-btn" onclick="openCart()" title="Cart">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <nav class="pdp-breadcrumb" id="breadcrumb"></nav>
+
+  <div id="pdpRoot">
+    <div class="pdp-loading">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:48px;color:var(--accent)"></i>
+      <p style="color:var(--text-dim)">Memuat produk…</p>
+    </div>
+  </div>
+
+  <!-- RELATED -->
+  <section class="pdp-related-wrap container" id="relatedWrap" style="display:none">
+    <h2 style="font-size:22px;margin:32px 0 16px"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent)"></i> Produk Serupa</h2>
+    <div class="pdp-related" id="relatedGrid"></div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="ftr">
+  <div class="ftr-top container">
+    <div>
+      <a href="/shop/" class="brand" onclick="goHome(event)">
+        <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+        <div class="brand-text">
+          <div class="brand-name">Z<span>Store</span></div>
+          <div class="brand-tag">PREMIUM DIGITAL</div>
+        </div>
+      </a>
+      <p class="ftr-desc">Marketplace produk digital premium. Bayar aman via Midtrans, instant delivery ke email, garansi 30 hari.</p>
+      <div class="ftr-social">
+        <a href="#" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+        <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4><i class="fa-solid fa-store"></i> Z Store</h4>
+      <a href="/shop/about.html"><i class="fa-solid fa-circle-info"></i> Tentang Kami</a>
+      <a href="/shop/faq.html"><i class="fa-solid fa-circle-question"></i> FAQ</a>
+      <a href="#"><i class="fa-solid fa-book"></i> Cara Order</a>
+      <a href="#"><i class="fa-solid fa-shield-halved"></i> Garansi</a>
+    </div>
+    <div>
+      <h4><i class="fa-solid fa-credit-card"></i> Pembayaran</h4>
+      <a href="#"><i class="fa-solid fa-qrcode"></i> QRIS</a>
+      <a href="#"><i class="fa-solid fa-building-columns"></i> Virtual Account</a>
+      <a href="#"><i class="fa-brands fa-google-wallet"></i> GoPay</a>
+      <a href="#"><i class="fa-solid fa-wallet"></i> ShopeePay</a>
+    </div>
+    <div>
+      <h4><i class="fa-solid fa-headset"></i> Hubungi Kami</h4>
+      <a href="mailto:zcusgt@gmail.com"><i class="fa-solid fa-envelope"></i> zcusgt@gmail.com</a>
+      <a href="https://wa.me/628xxxxxxxxxx"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+      <a href="#"><i class="fa-solid fa-location-dot"></i> Jakarta, Indonesia</a>
+      <a href="#"><i class="fa-solid fa-clock"></i> CS 24/7</a>
+    </div>
+  </div>
+  <div class="ftr-bottom container">
+    <div>© 2026 Z Store. All rights reserved.</div>
+    <div class="ftr-meta">
+      <span class="status-dot"></span>
+      <span>API: <a href="/shop-app/api/health">live</a></span>
+      <span>·</span>
+      <span>v5.0.0</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Cart Drawer (shared) -->
+<div class="drawer" id="cartDrawer">
+  <div class="drawer-head glass">
+    <b><i class="fa-solid fa-cart-shopping"></i> Keranjang <span class="badge-pill" id="cartDrawerCount">0</span></b>
+    <button class="drawer-close" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="drawer-body" id="cartItems">
+    <div class="cd-empty">
+      <div class="empty-ico"><i class="fa-solid fa-cart-arrow-down"></i></div>
+      <p>Keranjang kosong</p>
+      <button class="btn btn-ghost btn-sm" onclick="closeCart()">Mulai Belanja</button>
+    </div>
+  </div>
+  <div class="drawer-foot glass" id="cartFoot" style="display:none">
+    <div class="cart-row"><span>Subtotal</span><b id="cartSubtotal">Rp 0</b></div>
+    <div class="cart-row cart-discount" id="cartDiscountRow" style="display:none">
+      <span><i class="fa-solid fa-ticket"></i> <span id="cartDiscountLabel">-</span></span>
+      <b id="cartDiscount">-Rp 0</b>
+    </div>
+    <div class="cart-row cart-total"><span>Total</span><b id="cartTotal">Rp 0</b></div>
+    <input type="email" id="buyerEmail" placeholder="Email untuk delivery" class="form-input">
+    <button class="btn btn-primary full" onclick="checkout()"><i class="fa-solid fa-lock"></i> Checkout via Midtrans</button>
+    <div class="cart-payments">
+      <span>Pembayaran aman via</span>
+      <div class="pay-icons"><span>QRIS</span><span>VA</span><span>GoPay</span><span>OVO</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal" id="authModal">
+  <div class="modal-content glass">
+    <button class="modal-close" onclick="hideModal('auth')"><i class="fa-solid fa-xmark"></i></button>
+    <div class="auth-head">
+      <div class="brand-mark big"><i class="fa-solid fa-z"></i></div>
+      <h2 id="authTitle">Login</h2>
+      <p id="authSub">Masuk ke akun Z Store kamu</p>
+    </div>
+    <div class="tab-content active" id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" class="form-input">
+      <input type="password" id="loginPass" placeholder="Password" class="form-input">
+      <button class="btn btn-primary full" onclick="doLogin()">Login <i class="fa-solid fa-arrow-right"></i></button>
+      <p class="form-foot">Belum punya akun? <a href="#" onclick="showForm('register');return false">Daftar</a></p>
+    </div>
+    <div class="tab-content" id="registerForm">
+      <input type="text" id="regName" placeholder="Nama lengkap" class="form-input">
+      <input type="email" id="regEmail" placeholder="Email" class="form-input">
+      <input type="password" id="regPass" placeholder="Password (min 6 char)" class="form-input">
+      <button class="btn btn-primary full" onclick="doRegister()">Buat Akun <i class="fa-solid fa-arrow-right"></i></button>
+      <p class="form-foot">Sudah punya akun? <a href="#" onclick="showForm('login');return false">Login</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ SHARED STATE ============
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+const token = localStorage.getItem('zs_token') || '';
+let cart = JSON.parse(localStorage.getItem('zs_cart') || '[]');
+let product = null;
+let relatedProducts = [];
+
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
+
+function goHome(e) { if (e) e.preventDefault(); location.href = '/shop/'; }
+function showModal(name) { document.getElementById(name + 'Modal')?.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function hideModal(name) { document.getElementById(name + 'Modal')?.classList.remove('open'); document.body.style.overflow = ''; }
+function showForm(name) { ['login','register'].forEach(n => document.getElementById(n + 'Form').classList.toggle('active', n === name)); }
+function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.body.style.overflow = ''; }
+function showAccount() { location.href = '/shop/orders.html'; }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+
+function updateCartBadge() {
+  const total = cart.reduce((s, x) => s + x.qty, 0);
+  const b = document.getElementById('cartBadge');
+  if (b) { b.textContent = total; b.style.display = total > 0 ? 'flex' : 'none'; }
+  const cd = document.getElementById('cartDrawerCount');
+  if (cd) cd.textContent = total;
+}
+function saveCart() { localStorage.setItem('zs_cart', JSON.stringify(cart)); updateCartBadge(); renderCartDrawer(); }
+function renderCartDrawer() {
+  const items = document.getElementById('cartItems');
+  const foot = document.getElementById('cartFoot');
+  if (!cart.length) { items.innerHTML = `<div class="cd-empty"><div class="empty-ico"><i class="fa-solid fa-cart-arrow-down"></i></div><p>Keranjang kosong</p><button class="btn btn-ghost btn-sm" onclick="closeCart()">Mulai Belanja</button></div>`; foot.style.display = 'none'; return; }
+  items.innerHTML = cart.map((x, i) => `<div class="cart-item"><img src="${x.image||'/shop/favicon.svg'}" alt=""><div class="ci-info"><b>${x.name}</b><small>${fmtRp(x.price)}</small></div><div class="ci-qty"><button onclick="cart[${i}].qty=Math.max(1,cart[${i}].qty-1);saveCart()">-</button><span>${x.qty}</span><button onclick="cart[${i}].qty++;saveCart()">+</button><button class="ci-rm" onclick="cart.splice(${i},1);saveCart()"><i class="fa-solid fa-trash"></i></button></div></div>`).join('');
+  const sub = cart.reduce((s, x) => s + x.price * x.qty, 0);
+  document.getElementById('cartSubtotal').textContent = fmtRp(sub);
+  document.getElementById('cartTotal').textContent = fmtRp(sub);
+  foot.style.display = 'block';
+}
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!email || !password) return toast('Email + password wajib', 'error');
+  const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  if (r.error) return toast(r.error, 'error');
+  localStorage.setItem('zs_user', JSON.stringify(r.user));
+  localStorage.setItem('zs_token', r.token);
+  toast('Login berhasil', 'success');
+  setTimeout(() => location.reload(), 500);
+}
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
+  if (!email || !password || password.length < 6) return toast('Email + password (min 6 char)', 'error');
+  const r = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role: 'buyer' }) });
+  if (r.error) return toast(r.error, 'error');
+  localStorage.setItem('zs_user', JSON.stringify(r.user));
+  localStorage.setItem('zs_token', r.token);
+  toast('Akun dibuat', 'success');
+  setTimeout(() => location.reload(), 500);
+}
+async function checkout() {
+  const email = document.getElementById('buyerEmail').value.trim();
+  if (!email) return toast('Email wajib untuk delivery', 'error');
+  if (!cart.length) return toast('Keranjang kosong', 'error');
+  const r = await api('/api/orders/checkout', { method: 'POST', body: JSON.stringify({ items: cart.map(x => ({ product_id: x.id, qty: x.qty })), buyer_email: email }) });
+  if (r.error) return toast(r.error, 'error');
+  if (r.snap_token && window.snap) {
+    window.snap.pay(r.snap_token, { onSuccess: () => { toast('Pembayaran sukses!', 'success'); cart = []; saveCart(); closeCart(); }, onPending: () => toast('Menunggu pembayaran', 'info'), onError: () => toast('Pembayaran gagal', 'error') });
+  } else {
+    toast('Order dibuat. Midtrans belum dikonfigurasi (sandbox mode).', 'info');
+  }
+}
+
+// ============ PRODUCT LOAD ============
+async function loadProduct() {
+  const params = new URLSearchParams(location.search);
+  let id = params.get('id');
+  const slug = params.get('slug');
+  try {
+    if (!id && slug) {
+      const r = await api('/api/products/slug/' + encodeURIComponent(slug));
+      if (r.error) throw new Error(r.error);
+      product = r;
+      id = product.id;
+    } else if (id) {
+      const r = await api('/api/products/' + id);
+      if (r.error) throw new Error(r.error);
+      product = r;
+    } else {
+      throw new Error('Produk tidak ditemukan. Buka lewat /shop/ atau gunakan ?id=X / ?slug=X');
+    }
+    document.title = `${product.name} — Z Store`;
+    renderProduct();
+    loadRelated();
+  } catch (e) {
+    document.getElementById('pdpRoot').innerHTML = `<div class="pdp-error"><i class="fa-solid fa-triangle-exclamation"></i><h2>Produk tidak ditemukan</h2><p>${e.message}</p><a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a></div>`;
+    document.title = 'Produk tidak ditemukan — Z Store';
+  }
+}
+
+function renderProduct() {
+  const p = product;
+  const root = document.getElementById('pdpRoot');
+  const slug = slugify(p.name);
+  const discount = p.original_price && p.original_price > p.price ? Math.round((1 - p.price / p.original_price) * 100) : 0;
+  const inStock = (p.available || p.stock || 0) > 0;
+  const emoji = p.emoji && p.emoji.length <= 4 ? p.emoji : '📦';
+
+  // Update canonical + OG
+  const canonical = `https://zcus.biz.id/shop/product.html?slug=${slug}`;
+  setMeta('link[rel=canonical]', 'href', canonical);
+
+  // Update breadcrumb
+  document.getElementById('breadcrumb').innerHTML = `<a href="/shop/">Home</a><span class="sep">/</span><a href="/shop/?cat=${encodeURIComponent(p.category)}">${p.category}</a><span class="sep">/</span><span style="color:var(--text)">${p.name}</span>`;
+
+  root.innerHTML = `
+  <div class="pdp-wrap">
+    <div class="pdp-gallery">
+      <div class="pdp-img-main">
+        <div class="pdp-glow"></div>
+        <span style="position:relative;z-index:1">${emoji}</span>
+      </div>
+      <div class="pdp-thumbs">
+        <div class="pdp-thumb active">${emoji}</div>
+        <div class="pdp-thumb"><i class="fa-solid fa-image"></i></div>
+        <div class="pdp-thumb"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="pdp-thumb"><i class="fa-solid fa-truck-fast"></i></div>
+      </div>
+    </div>
+    <div class="pdp-info">
+      <div class="pdp-cat"><i class="fa-solid fa-tag"></i> ${p.category}</div>
+      <h1>${p.name}</h1>
+      <div class="pdp-rating">
+        <div class="pdp-stars">${'<i class="fa-solid fa-star"></i>'.repeat(Math.round(p.review_avg || 0))}${'<i class="fa-regular fa-star"></i>'.repeat(5 - Math.round(p.review_avg || 0))}</div>
+        <span class="pdp-rating-text">${p.review_avg || '0.0'} (${p.review_count || 0} review)</span>
+        <span class="pdp-rating-text">·</span>
+        <span class="pdp-rating-text">${p.sold || 0} terjual</span>
+      </div>
+
+      <div class="pdp-price-row">
+        <div class="pdp-price">${fmtRp(p.price)}</div>
+        ${p.original_price && p.original_price > p.price ? `<div class="pdp-orig">${fmtRp(p.original_price)}</div><div class="pdp-discount">-${discount}%</div>` : ''}
+      </div>
+
+      <p class="pdp-desc">${(p.description || 'Produk digital premium dari Z Store. Instant delivery, original, bergaransi.')}</p>
+
+      <div class="pdp-meta">
+        <div class="pdp-meta-item"><i class="fa-solid fa-box"></i><div><div class="lbl">Stok</div><div class="val">${p.available || p.stock || 0} tersedia</div></div></div>
+        <div class="pdp-meta-item"><i class="fa-solid fa-truck-fast"></i><div><div class="lbl">Pengiriman</div><div class="val">Instant (email)</div></div></div>
+        <div class="pdp-meta-item"><i class="fa-solid fa-shield-halved"></i><div><div class="lbl">Garansi</div><div class="val">30 hari</div></div></div>
+        <div class="pdp-meta-item"><i class="fa-solid fa-store"></i><div><div class="lbl">Seller</div><div class="val">${p.seller_name || 'Z Store'}</div></div></div>
+      </div>
+
+      <div class="pdp-share-bar">
+        <a class="pdp-share-btn" href="https://wa.me/?text=${encodeURIComponent(p.name + ' ' + canonical)}" target="_blank" title="Share WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        <a class="pdp-share-btn" href="https://t.me/share/url?url=${encodeURIComponent(canonical)}&text=${encodeURIComponent(p.name)}" target="_blank" title="Share Telegram"><i class="fa-brands fa-telegram"></i></a>
+        <a class="pdp-share-btn" href="#" onclick="navigator.clipboard.writeText('${canonical}');toast('Link disalin','success');return false" title="Copy link"><i class="fa-solid fa-link"></i></a>
+      </div>
+
+      <div class="pdp-actions">
+        <button class="btn btn-ghost" onclick="addToCart(${p.id})" ${!inStock ? 'disabled style="opacity:.5"' : ''}>
+          <i class="fa-solid fa-cart-plus"></i> Tambah ke Keranjang
+        </button>
+        <button class="btn btn-primary" onclick="buyNow(${p.id})" ${!inStock ? 'disabled style="opacity:.5"' : ''}>
+          <i class="fa-solid fa-bolt"></i> Beli Sekarang
+        </button>
+      </div>
+
+      <div class="pdp-tabs">
+        <button class="pdp-tab active" onclick="showTab('desc',this)">Deskripsi</button>
+        <button class="pdp-tab" onclick="showTab('reviews',this)">Review (${p.review_count || 0})</button>
+        <button class="pdp-tab" onclick="showTab('policy',this)">Kebijakan</button>
+      </div>
+      <div class="pdp-tab-content active" id="tab-desc">
+        <p>${(p.description || 'Produk digital premium dari Z Store. Instant delivery, original, bergaransi.')}</p>
+        <ul style="padding-left:20px;line-height:2">
+          <li>Akun original / lisensi resmi</li>
+          <li>Instant delivery via email (1-5 menit setelah bayar)</li>
+          <li>Garansi 30 hari (tukar baru jika ada masalah)</li>
+          <li>Support via WhatsApp 24/7</li>
+          <li>Bisa di-refund dalam 7 hari (syarat & ketentuan berlaku)</li>
+        </ul>
+      </div>
+      <div class="pdp-tab-content" id="tab-reviews">
+        <div id="reviewsList" class="pdp-reviews"><div class="loading">Loading review…</div></div>
+        ${user ? `<div style="margin-top:20px;padding:16px;background:var(--glass);border-radius:12px">
+          <h4 style="margin:0 0 12px">Tulis Review</h4>
+          <select id="newRating" style="width:100%;padding:10px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);border-radius:8px;margin-bottom:8px">
+            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+            <option value="4">⭐⭐⭐⭐ (4/5)</option>
+            <option value="3">⭐⭐⭐ (3/5)</option>
+            <option value="2">⭐⭐ (2/5)</option>
+            <option value="1">⭐ (1/5)</option>
+          </select>
+          <textarea id="newText" placeholder="Bagaimana pengalaman kamu?" class="form-input" rows="3" style="resize:vertical"></textarea>
+          <button class="btn btn-primary" style="margin-top:8px" onclick="submitReview()"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
+        </div>` : '<p style="margin-top:16px"><a href="#" onclick="showModal(\'login\');return false">Login</a> dulu untuk tulis review.</p>'}
+      </div>
+      <div class="pdp-tab-content" id="tab-policy">
+        <h4 style="color:var(--text)">Garansi 30 Hari</h4>
+        <p>Produk yang bermasalah dalam 30 hari setelah pembelian akan diganti baru tanpa biaya tambahan. Hubungi CS via WhatsApp dengan menyertakan Order ID.</p>
+        <h4 style="color:var(--text);margin-top:16px">Kebijakan Refund</h4>
+        <p>Refund tersedia dalam 7 hari jika produk tidak dapat digunakan karena kesalahan seller. Dana akan dikembalikan 100% ke metode pembayaran asal.</p>
+        <h4 style="color:var(--text);margin-top:16px">Privasi</h4>
+        <p>Data akun kamu hanya digunakan untuk delivery produk. Kami tidak menyimpan password dalam bentuk plain text di server.</p>
+      </div>
+    </div>
+  </div>`;
+
+  loadReviews();
+  injectProductJSONLD();
+  injectProductOG();
+}
+
+function setMeta(sel, attr, val) {
+  let el = document.head.querySelector(sel);
+  if (!el) { el = document.createElement(sel.includes('link') ? 'link' : 'meta'); if (sel.includes('link')) el.rel = sel.match(/rel=[\"']?([^\"']+)/)[1]; document.head.appendChild(el); }
+  el.setAttribute(attr, val);
+}
+
+function injectProductOG() {
+  const p = product;
+  const url = `https://zcus.biz.id/shop/product.html?slug=${slugify(p.name)}`;
+  const og = [
+    ['og:type', 'product'],
+    ['og:url', url],
+    ['og:title', `${p.name} — Z Store`],
+    ['og:description', p.description || p.name],
+    ['og:image', `https://zcus.biz.id/shop/og-image.svg`],
+    ['product:price:amount', p.price],
+    ['product:price:currency', 'IDR']
+  ];
+  og.forEach(([k, v]) => {
+    let el = document.head.querySelector(`meta[property="${k}"]`);
+    if (!el) { el = document.createElement('meta'); el.setAttribute('property', k); document.head.appendChild(el); }
+    el.content = v;
+  });
+}
+
+function injectProductJSONLD() {
+  const p = product;
+  const url = `https://zcus.biz.id/shop/product.html?slug=${slugify(p.name)}`;
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    description: p.description || p.name,
+    image: `https://zcus.biz.id/shop/og-image.svg`,
+    sku: 'ZSTORE-' + String(p.id).padStart(4, '0'),
+    brand: { '@type': 'Brand', name: 'Z Store' },
+    category: p.category,
+    offers: {
+      '@type': 'Offer',
+      url,
+      priceCurrency: 'IDR',
+      price: p.price,
+      availability: (p.available || p.stock) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: p.seller_name || 'Z Store' }
+    }
+  };
+  if (p.review_count > 0) {
+    data.aggregateRating = { '@type': 'AggregateRating', ratingValue: Number(p.review_avg).toFixed(1), reviewCount: p.review_count };
+  }
+  let s = document.getElementById('productJsonLd');
+  if (!s) { s = document.createElement('script'); s.id = 'productJsonLd'; s.type = 'application/ld+json'; document.head.appendChild(s); }
+  s.textContent = JSON.stringify(data);
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.pdp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pdp-tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+async function loadReviews() {
+  const r = await api('/api/products/' + product.id + '/reviews');
+  const list = document.getElementById('reviewsList');
+  if (!Array.isArray(r) || !r.length) { list.innerHTML = '<p style="color:var(--text-mute)">Belum ada review. Jadi yang pertama!</p>'; return; }
+  list.innerHTML = r.map(rv => `<div class="pdp-review"><div class="pdp-review-head"><div class="pdp-review-name">${rv.name || 'Anonim'}</div><div class="pdp-review-date">${new Date(rv.created_at).toLocaleDateString('id-ID')}</div></div><div class="pdp-stars">${'<i class="fa-solid fa-star"></i>'.repeat(rv.rating)}${'<i class="fa-regular fa-star"></i>'.repeat(5 - rv.rating)}</div><p style="margin:8px 0 0;color:var(--text)">${rv.text || ''}</p></div>`).join('');
+}
+
+async function submitReview() {
+  const rating = parseInt(document.getElementById('newRating').value);
+  const text = document.getElementById('newText').value.trim();
+  const r = await api('/api/products/' + product.id + '/reviews', { method: 'POST', body: JSON.stringify({ rating, text }) });
+  if (r.error) return toast(r.error, 'error');
+  toast('Review terkirim!', 'success');
+  setTimeout(() => loadReviews(), 500);
+}
+
+function addToCart(id) {
+  const p = product;
+  const existing = cart.find(x => x.id === id);
+  if (existing) existing.qty++; else cart.push({ id, name: p.name, price: p.price, qty: 1 });
+  saveCart();
+  toast('Ditambahkan ke keranjang', 'success');
+}
+function buyNow(id) {
+  const existing = cart.findIndex(x => x.id === id);
+  if (existing >= 0) cart[existing].qty++; else cart.push({ id, name: product.name, price: product.price, qty: 1 });
+  saveCart();
+  openCart();
+}
+
+async function loadRelated() {
+  const all = await api('/api/products?category=' + encodeURIComponent(product.category) + '&limit=4');
+  if (!Array.isArray(all)) return;
+  relatedProducts = all.filter(x => x.id !== product.id).slice(0, 4);
+  if (!relatedProducts.length) return;
+  document.getElementById('relatedWrap').style.display = 'block';
+  document.getElementById('relatedGrid').innerHTML = relatedProducts.map(p => `
+    <a href="/shop/product.html?slug=${slugify(p.name)}" style="text-decoration:none;color:inherit">
+      <div class="prod-card glass" style="padding:12px">
+        <div class="pc-img" style="aspect-ratio:1/1;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:flex;align-items:center;justify-content:center;font-size:48px;color:#fff;margin-bottom:8px">${(p.emoji && p.emoji.length <= 4) ? p.emoji : '📦'}</div>
+        <b style="font-size:13px;display:block;line-height:1.3">${p.name}</b>
+        <small style="color:var(--accent);font-weight:700">${fmtRp(p.price)}</small>
+      </div>
+    </a>
+  `).join('');
+}
+
+// Init
+const savedTheme = localStorage.getItem('zs_theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+updateCartBadge();
+renderCartDrawer();
+loadProduct();
+</script>
+<script src="https://app.midtrans.com/snap/snap.js" data-client-key=""></script>
+</body>
+</html>
