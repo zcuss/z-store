@@ -929,10 +929,11 @@ function saveAuth(u, t) {
   document.getElementById('accountIcon').className = 'fa-solid fa-user-check';
 }
 
-function doLogout() {
+async function doLogout() {
+  try { await fetch(API + '/api/auth/logout', { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} }); } catch (e) {}
   user = null; token = null;
-  localStorage.removeItem('zcus_user');
-  localStorage.removeItem('zcus_token');
+  localStorage.removeItem('zs_user');
+  localStorage.removeItem('zs_token');
   document.getElementById('accountIcon').className = 'fa-solid fa-user';
   hideModal('account');
   toast('Logout berhasil', 'info');
