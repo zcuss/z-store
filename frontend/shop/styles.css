@@ -293,6 +293,31 @@ input,textarea,select{font-family:inherit;color:inherit}
 
 /* ===== PRODUCT GRID ===== */
 .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+
+/* Recently viewed — compact horizontal scroll */
+.rv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.rv-mini-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;transition:all .2s;background:var(--glass)}
+.rv-mini-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.rv-mini-img{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,rgba(14,165,233,.2),rgba(168,85,247,.15));display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--accent);flex-shrink:0}
+.rv-mini-info{flex:1;min-width:0}
+.rv-mini-info b{display:block;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rv-mini-info small{font-size:11px;color:var(--accent);font-weight:700}
+
+/* Compare products modal */
+.compare-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;display:none;align-items:center;justify-content:center;padding:24px}
+.compare-overlay.open{display:flex}
+.compare-modal{background:var(--bg-elev);border:1px solid var(--glass-border);border-radius:18px;max-width:1000px;width:100%;max-height:90vh;overflow-y:auto;padding:24px}
+.compare-modal h3{margin:0 0 16px;font-size:20px}
+.compare-grid{display:grid;gap:0;border-radius:12px;overflow:hidden;border:1px solid var(--glass-border)}
+.compare-row{display:contents}
+.compare-cell{padding:12px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--glass-border);font-size:13px;color:var(--text)}
+.compare-cell.label{background:rgba(14,165,233,.08);font-weight:700;color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+.compare-cell img{width:60px;height:60px;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;margin-bottom:6px}
+.compare-cell .pn{font-weight:700;font-size:13px;margin-bottom:4px}
+.compare-cell .pp{color:var(--accent);font-weight:800;font-size:14px}
+.compare-cell.best{background:rgba(34,197,94,.1);color:#22c55e}
+.compare-cell.worst{background:rgba(244,63,94,.05);color:#fb7184}
+.compare-actions{display:flex;gap:8px;margin-top:8px}
 .prod-card{
   border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;
   transition:all .3s;display:flex;flex-direction:column;position:relative;

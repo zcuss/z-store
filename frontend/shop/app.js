@@ -273,6 +273,7 @@ function productCard(p) {
     </div>
     <div class="pc-actions">
       <button class="pc-action-btn" onclick="event.stopPropagation();addToCart(${p.id})"><i class="fa-solid fa-cart-plus"></i> Cart</button>
+      <button class="pc-action-btn" onclick="event.stopPropagation();toggleCompare(${p.id})" id="cmpBtn${p.id}"><i class="fa-solid fa-code-compare"></i> Compare</button>
       <button class="pc-action-btn primary" onclick="event.stopPropagation();viewProduct(${p.id})"><i class="fa-solid fa-bolt"></i> Beli</button>
     </div>
   </div>`;
@@ -465,20 +466,58 @@ function copyShareLink() {
   navigator.clipboard.writeText(link.value).then(() => toast('Link copied!', 'success'));
 }
 
-// ============ RECENTLY VIEWED ============
-function addToRecentlyViewed(id) {
-  if (recentlyViewed.includes(id)) return; // dedupe
-  recentlyViewed = [id, ...recentlyViewed.filter(x => x !== id)].slice(0, 6);
-  localStorage.setItem('zcus_recent', JSON.stringify(recentlyViewed));
+// ============ RECENTLY VIEWED (server-side + local fallback) ============
+let recentlyViewedData = [];
+
+async function loadRecentlyViewed() {
+  // Try server
+  if (user && token) {
+    try {
+      const r = await fetch(API + '/api/users/me/recently-viewed', { headers: { Authorization: 'Bearer ' + token } });
+      if (r.ok) {
+        const d = await r.json();
+        if (d.items && d.items.length) { recentlyViewedData = d.items; return renderRecentlyViewed(); }
+      }
+    } catch (e) { /* fallback */ }
+  }
+  // Local fallback from product list
+  recentlyViewedData = recentlyViewed.map(id => products.find(p => p.id === id)).filter(Boolean);
   renderRecentlyViewed();
 }
 
+function addToRecentlyViewed(id) {
+  if (recentlyViewed.includes(id)) recentlyViewed = recentlyViewed.filter(x => x !== id);
+  recentlyViewed = [id, ...recentlyViewed].slice(0, 8);
+  localStorage.setItem('zcus_recent', JSON.stringify(recentlyViewed));
+  // Update data if loaded
+  const p = products.find(x => x.id === id);
+  if (p) {
+    recentlyViewedData = [p, ...recentlyViewedData.filter(x => x.id !== id)].slice(0, 8);
+    renderRecentlyViewed();
+  }
+}
+
+async function clearRecentlyViewed() {
+  if (user && token) {
+    try { await fetch(API + '/api/users/me/recently-viewed', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } }); } catch (e) {}
+  }
+  recentlyViewed = []; recentlyViewedData = [];
+  localStorage.removeItem('zcus_recent');
+  renderRecentlyViewed();
+  toast('Recently viewed dihapus', 'info');
+}
+
 function renderRecentlyViewed() {
-  if (!recentlyViewed.length) { document.getElementById('recentSection').style.display = 'none'; return; }
-  const items = products.filter(p => recentlyViewed.includes(p.id));
-  if (!items.length) { document.getElementById('recentSection').style.display = 'none'; return; }
+  if (!recentlyViewedData.length) { document.getElementById('recentSection').style.display = 'none'; return; }
   document.getElementById('recentSection').style.display = 'block';
-  document.getElementById('recentGrid').innerHTML = items.map(productCard).join('');
+  // Use better mini-card for recently viewed
+  const fmtIDR2 = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+  document.getElementById('recentGrid').innerHTML = recentlyViewedData.slice(0, 8).map(p => `
+    <div class="rv-mini-card glass" onclick='viewProduct(${p.id})'>
+      <div class="rv-mini-img"><i class="fa-solid ${getCatIcon(p.category)}"></i></div>
+      <div class="rv-mini-info"><b>${p.name}</b><small>${fmtIDR2(p.price)}</small></div>
+    </div>
+  `).join('');
 }
 
 // ============ RECOMMENDED ============
