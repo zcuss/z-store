@@ -4,7 +4,7 @@
 <script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Loading… — Z Store</title>
+<title>Loading... -- Z Store</title>
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#1264a3">
 <meta name="color-scheme" content="light dark">
@@ -93,7 +93,7 @@
   </a>
   <div class="hdr-search">
     <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="search" id="searchInput" placeholder="Cari produk…">
+    <input type="search" id="searchInput" placeholder="Cari produk...">
   </div>
   <div class="hdr-actions">
     <button class="hdr-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
@@ -111,7 +111,7 @@
   <div id="pdpRoot">
     <div class="pdp-loading">
       <i class="fa-solid fa-spinner fa-spin" style="font-size:48px;color:var(--accent)"></i>
-      <p style="color:var(--text-dim)">Memuat produk…</p>
+      <p style="color:var(--text-dim)">Memuat produk...</p>
     </div>
   </div>
 
@@ -169,7 +169,7 @@
     <div class="ftr-meta">
       <span class="status-dot"></span>
       <span>API: <a href="/api/health">live</a></span>
-      <span>·</span>
+      <span>-</span>
       <span>v5.0.0</span>
     </div>
   </div>
@@ -337,7 +337,7 @@ async function loadProduct() {
     } else {
       throw new Error('Produk tidak ditemukan. Buka lewat /shop/ atau gunakan ?id=X / ?slug=X');
     }
-    document.title = `${product.name} — Z Store`;
+    document.title = `${product.name} -- Z Store`;
     renderProduct();
     loadRelated();
   } catch (e) {
@@ -350,13 +350,13 @@ async function loadProduct() {
         emoji: '🤖', seller_name: 'Z Store Official', seller_id: 1,
         review_count: 47, review_avg: 4.9
       };
-      document.title = `${product.name} — Z Store (Preview Mode)`;
+      document.title = `${product.name} -- Z Store (Preview Mode)`;
       renderProduct();
       loadRelated();
       return;
     }
     document.getElementById('pdpRoot').innerHTML = `<div class="pdp-error"><i class="fa-solid fa-triangle-exclamation"></i><h2>Produk tidak ditemukan</h2><p>${e.message}</p><a href="/shop/" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Kembali ke Toko</a></div>`;
-    document.title = 'Produk tidak ditemukan — Z Store';
+    document.title = 'Produk tidak ditemukan -- Z Store';
   }
 }
 
@@ -397,7 +397,7 @@ function renderProduct() {
       <div class="pdp-rating">
         <div class="pdp-stars">${'<i class="fa-solid fa-star"></i>'.repeat(Math.round(p.review_avg || 0))}${'<i class="fa-regular fa-star"></i>'.repeat(5 - Math.round(p.review_avg || 0))}</div>
         <span class="pdp-rating-text">${p.review_avg || '0.0'} (${p.review_count || 0} review)</span>
-        <span class="pdp-rating-text">·</span>
+        <span class="pdp-rating-text">-</span>
         <span class="pdp-rating-text">${p.sold || 0} terjual</span>
       </div>
 
@@ -446,7 +446,7 @@ function renderProduct() {
         </ul>
       </div>
       <div class="pdp-tab-content" id="tab-reviews">
-        <div id="reviewsList" class="pdp-reviews"><div class="loading">Loading review…</div></div>
+        <div id="reviewsList" class="pdp-reviews"><div class="loading">Loading review...</div></div>
         ${user ? `<div style="margin-top:20px;padding:16px;background:var(--glass);border-radius:12px">
           <h4 style="margin:0 0 12px">Tulis Review</h4>
           <select id="newRating" style="width:100%;padding:10px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);border-radius:8px;margin-bottom:8px">
@@ -488,7 +488,7 @@ function injectProductOG() {
   const og = [
     ['og:type', 'product'],
     ['og:url', url],
-    ['og:title', `${p.name} — Z Store`],
+    ['og:title', `${p.name} -- Z Store`],
     ['og:description', p.description || p.name],
     ['og:image', `https://zcus.biz.id/shop/og-image.svg`],
     ['product:price:amount', p.price],

@@ -4,7 +4,7 @@
 <script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Pesanan Saya — Z Store</title>
+<title>Pesanan Saya -- Z Store</title>
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#1264a3">
 <meta name="color-scheme" content="light dark">
@@ -168,7 +168,7 @@ function renderCartDrawer() {
   const items = document.getElementById('cartItems');
   const foot = document.getElementById('cartFoot');
   if (!cart.length) { items.innerHTML = `<div class="cd-empty"><div class="empty-ico"><i class="fa-solid fa-cart-arrow-down"></i></div><p>Keranjang kosong</p></div>`; foot.style.display = 'none'; return; }
-  items.innerHTML = cart.map(x => `<div class="cart-item"><div class="ci-info"><b>${x.name}</b><small>${fmtRp(x.price)} × ${x.qty}</small></div></div>`).join('');
+  items.innerHTML = cart.map(x => `<div class="cart-item"><div class="ci-info"><b>${x.name}</b><small>${fmtRp(x.price)} x ${x.qty}</small></div></div>`).join('');
   document.getElementById('cartTotal').textContent = fmtRp(cart.reduce((s, x) => s + x.price * x.qty, 0));
   foot.style.display = 'block';
 }
@@ -186,7 +186,7 @@ function filterOrders(s, btn) { activeFilter = s; document.querySelectorAll('.or
 async function loadOrders() {
   if (!token || !user) { document.getElementById('ordGuard').style.display = 'block'; document.getElementById('ordContent').style.display = 'none'; return; }
   document.getElementById('ordContent').style.display = 'block';
-  document.getElementById('ordList').innerHTML = '<div class="ord-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>';
+  document.getElementById('ordList').innerHTML = '<div class="ord-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
   const r = await api('/orders/me');
   if (r.error) { document.getElementById('ordList').innerHTML = `<div class="ord-empty">${r.error}</div>`; return; }
   orders = Array.isArray(r) ? r : [];
@@ -202,7 +202,7 @@ function renderList() {
   const filtered = activeFilter ? orders.filter(o => o.status === activeFilter) : orders;
   if (!filtered.length) { list.innerHTML = `<div class="ord-empty"><i class="fa-solid fa-box-open"></i><h3>Tidak ada pesanan</h3><p>${activeFilter ? 'Belum ada pesanan dengan status ' + activeFilter : 'Yuk checkout produk pertama kamu!'}</p><a href="/shop/" class="btn btn-primary" style="margin-top:16px"><i class="fa-solid fa-store"></i> Mulai Belanja</a></div>`; return; }
   list.innerHTML = filtered.map(o => {
-    const escrow = (o.status === 'paid' || o.status === 'delivered') ? `<div class="escrow-bar"><i class="fa-solid fa-clock"></i> <b>Escrow aktif</b> · Dana akan diteruskan ke seller dalam 7 hari setelah delivery.</div>` : '';
+    const escrow = (o.status === 'paid' || o.status === 'delivered') ? `<div class="escrow-bar"><i class="fa-solid fa-clock"></i> <b>Escrow aktif</b> - Dana akan diteruskan ke seller dalam 7 hari setelah delivery.</div>` : '';
     return `<div class="ord-card" onclick="openDetail(${o.id})">
       <div class="ord-card-head">
         <div>
@@ -211,7 +211,7 @@ function renderList() {
         </div>
         <span class="ord-status ${o.status}">${o.status}</span>
       </div>
-      <div class="ord-items">${o.items || '—'}</div>
+      <div class="ord-items">${o.items || '--'}</div>
       ${escrow}
       <div class="ord-foot">
         <div class="ord-total">${fmtRp(o.total)}</div>
@@ -234,9 +234,9 @@ async function openDetail(id) {
     <div class="ord-detail">
       <div class="ord-detail-row"><span class="lbl">Status</span><span class="val"><span class="ord-status ${r.status}">${r.status}</span></span></div>
       <div class="ord-detail-row"><span class="lbl">Total</span><span class="val">${fmtRp(r.total)}</span></div>
-      <div class="ord-detail-row"><span class="lbl">Email Delivery</span><span class="val">${r.buyer_email || '—'}</span></div>
-      <div class="ord-detail-row"><span class="lbl">Midtrans Order ID</span><span class="val"><code>${r.midtrans_order_id || '—'}</code></span></div>
-      <div class="ord-detail-row"><span class="lbl">Payment Type</span><span class="val">${r.payment_type || '—'}</span></div>
+      <div class="ord-detail-row"><span class="lbl">Email Delivery</span><span class="val">${r.buyer_email || '--'}</span></div>
+      <div class="ord-detail-row"><span class="lbl">Midtrans Order ID</span><span class="val"><code>${r.midtrans_order_id || '--'}</code></span></div>
+      <div class="ord-detail-row"><span class="lbl">Payment Type</span><span class="val">${r.payment_type || '--'}</span></div>
       <div class="ord-detail-row"><span class="lbl">Created</span><span class="val">${fmtDate(r.created_at)}</span></div>
       ${r.paid_at ? `<div class="ord-detail-row"><span class="lbl">Paid at</span><span class="val">${fmtDate(r.paid_at)}</span></div>` : ''}
       ${r.delivered_at ? `<div class="ord-detail-row"><span class="lbl">Delivered at</span><span class="val">${fmtDate(r.delivered_at)}</span></div>` : ''}
@@ -245,20 +245,20 @@ async function openDetail(id) {
 
     <h3 style="margin:20px 0 12px"><i class="fa-solid fa-cube"></i> Items</h3>
     <div class="ord-detail">
-      ${(r.items || []).map(it => `<div class="ord-detail-row"><span class="lbl">${it.emoji || '📦'} ${it.name} × ${it.qty}</span><span class="val">${fmtRp(it.price * it.qty)}</span></div>`).join('')}
+      ${(r.items || []).map(it => `<div class="ord-detail-row"><span class="lbl">${it.emoji || '📦'} ${it.name} x ${it.qty}</span><span class="val">${fmtRp(it.price * it.qty)}</span></div>`).join('')}
     </div>
 
     ${(r.status === 'paid' || r.status === 'delivered') ? `<div class="escrow-bar"><i class="fa-solid fa-clock"></i> <b>Escrow aktif.</b> Dana ditahan 7 hari setelah delivery. Konfirmasi sekarang untuk release lebih cepat.</div>` : ''}
 
     ${(r.deliveries && r.deliveries.length) ? `<div class="delivery-info"><i class="fa-solid fa-circle-check"></i> <b>Credentials terkirim!</b> Cek email <code>${r.buyer_email}</code> untuk detail akun.</div>` : ''}
 
-    ${(r.escrow && r.escrow.length) ? `<h3 style="margin:20px 0 12px"><i class="fa-solid fa-hand-holding-dollar"></i> Escrow</h3><div class="ord-detail">${r.escrow.map(e => `<div class="ord-detail-row"><span class="lbl">Seller #${e.seller_id} · ${e.status}</span><span class="val">${fmtRp(e.seller_amount)} <small style="color:var(--text-mute)">/ gross ${fmtRp(e.amount)}</small></span></div>${e.release_at ? `<div class="ord-detail-row"><span class="lbl">Release at</span><span class="val">${fmtDate(e.release_at)}</span></div>` : ''}`).join('')}</div>` : ''}
+    ${(r.escrow && r.escrow.length) ? `<h3 style="margin:20px 0 12px"><i class="fa-solid fa-hand-holding-dollar"></i> Escrow</h3><div class="ord-detail">${r.escrow.map(e => `<div class="ord-detail-row"><span class="lbl">Seller #${e.seller_id} - ${e.status}</span><span class="val">${fmtRp(e.seller_amount)} <small style="color:var(--text-mute)">/ gross ${fmtRp(e.amount)}</small></span></div>${e.release_at ? `<div class="ord-detail-row"><span class="lbl">Release at</span><span class="val">${fmtDate(e.release_at)}</span></div>` : ''}`).join('')}</div>` : ''}
 
     <div class="ord-timeline">
       <div class="timeline-step"><div class="timeline-dot ${['pending','paid','delivered','completed'].includes(r.status) ? 'done' : ''}">1</div><div class="timeline-info"><b>Order dibuat</b><small>${fmtDate(r.created_at)}</small></div></div>
       <div class="timeline-step"><div class="timeline-dot ${['paid','delivered','completed'].includes(r.status) ? 'done' : ''}">2</div><div class="timeline-info"><b>Pembayaran</b><small>${r.paid_at ? fmtDate(r.paid_at) : 'Menunggu pembayaran'}</small></div></div>
       <div class="timeline-step"><div class="timeline-dot ${['delivered','completed'].includes(r.status) ? 'done' : ''}">3</div><div class="timeline-info"><b>Delivery</b><small>${r.delivered_at ? fmtDate(r.delivered_at) : 'Otomatis setelah bayar'}</small></div></div>
-      <div class="timeline-step"><div class="timeline-dot ${r.status === 'completed' ? 'done' : ''}">4</div><div class="timeline-info"><b>Selesai</b><small>${r.confirmed_at ? fmtDate(r.confirmed_at) : (r.status === 'delivered' ? 'Konfirmasi untuk selesaikan' : '—')}</small></div></div>
+      <div class="timeline-step"><div class="timeline-dot ${r.status === 'completed' ? 'done' : ''}">4</div><div class="timeline-info"><b>Selesai</b><small>${r.confirmed_at ? fmtDate(r.confirmed_at) : (r.status === 'delivered' ? 'Konfirmasi untuk selesaikan' : '--')}</small></div></div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:16px">
@@ -338,9 +338,9 @@ setInterval(() => { if (document.visibilityState === 'visible' && token) loadOrd
     <div class="ftr-meta">
       <span class="status-dot"></span>
       <span>API: <a href="/api/health">live</a></span>
-      <span>·</span>
+      <span>-</span>
       <span>v3.0.0</span>
-      <span>·</span>
+      <span>-</span>
       <a href="/shop/preview/"><i class="fa-solid fa-images"></i> Design Preview</a>
     </div>
   </div>

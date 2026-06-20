@@ -4,7 +4,7 @@
 <script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Admin Panel — Z Store</title>
+<title>Admin Panel -- Z Store</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1264a3">
 <meta name="color-scheme" content="light dark">
@@ -84,7 +84,7 @@
 <main id="main" class="admin-wrap">
   <div class="admin-head">
     <h1><i class="fa-solid fa-gauge-high"></i> Admin Panel</h1>
-    <div style="color:var(--text-dim);font-size:13px" id="adminInfo">Loading…</div>
+    <div style="color:var(--text-dim);font-size:13px" id="adminInfo">Loading...</div>
   </div>
 
   <div id="adminGuard" class="admin-guard" style="display:none">
@@ -235,7 +235,7 @@ async function checkAuth() {
   document.getElementById('adminGuard').style.display = 'none';
   document.getElementById('loginCard').style.display = 'none';
   document.getElementById('adminContent').style.display = 'block';
-  document.getElementById('adminInfo').textContent = `Logged in as ${user.email} · ${user.role}`;
+  document.getElementById('adminInfo').textContent = `Logged in as ${user.email} - ${user.role}`;
   showTab('overview');
 }
 
@@ -243,9 +243,9 @@ async function loadStats() {
   const r = await api('/admin/stats');
   if (r.error) return toast(r.error, 'error');
   const cards = [
-    { ico: 'fa-users', label: 'Total Users', val: r.users.total || 0, sub: `${r.users.buyers||0} buyer · ${r.users.sellers||0} seller` },
+    { ico: 'fa-users', label: 'Total Users', val: r.users.total || 0, sub: `${r.users.buyers||0} buyer - ${r.users.sellers||0} seller` },
     { ico: 'fa-cube', label: 'Total Products', val: r.products.total || 0, sub: `${r.products.in_stock||0} ready stock` },
-    { ico: 'fa-box', label: 'Total Orders', val: r.orders.total || 0, sub: `${r.orders.paid||0} paid · ${r.orders.delivered||0} delivered · ${r.orders.completed||0} done` },
+    { ico: 'fa-box', label: 'Total Orders', val: r.orders.total || 0, sub: `${r.orders.paid||0} paid - ${r.orders.delivered||0} delivered - ${r.orders.completed||0} done` },
     { ico: 'fa-coins', label: 'Total Revenue', val: fmtRp(r.orders.revenue || 0), sub: `30d: ${fmtRp(r.month.revenue_30d || 0)}` },
     { ico: 'fa-chart-line', label: 'Orders (30d)', val: r.month.orders_30d || 0, sub: '' },
     { ico: 'fa-money-bill-transfer', label: 'Pending Withdrawals', val: r.withdrawals?.pending || 0, sub: fmtRp(r.withdrawals?.amount_pending || 0) },
@@ -262,14 +262,14 @@ function filterWd(s, btn) { wdFilter = s; document.querySelectorAll('#wdFilters 
 
 async function loadOrders() {
   const tbody = document.querySelector('#ordersTable tbody');
-  tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
   const r = await api('/admin/orders' + (orderFilter ? '?status=' + orderFilter : ''));
   if (r.error) { tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">${r.error}</td></tr>`; return; }
   if (!r.length) { tbody.innerHTML = '<tr><td colspan="7" class="admin-empty"><i class="fa-solid fa-box-open"></i>Tidak ada order</td></tr>'; return; }
   tbody.innerHTML = r.map(o => `<tr>
     <td><b>#${o.id}</b></td>
-    <td>${o.buyer_name || '—'}<br><small style="color:var(--text-mute)">${o.buyer_email || ''}</small></td>
-    <td><small>${(o.items || '').slice(0, 60)}${(o.items || '').length > 60 ? '…' : ''}</small></td>
+    <td>${o.buyer_name || '--'}<br><small style="color:var(--text-mute)">${o.buyer_email || ''}</small></td>
+    <td><small>${(o.items || '').slice(0, 60)}${(o.items || '').length > 60 ? '...' : ''}</small></td>
     <td><b>${fmtRp(o.total)}</b></td>
     <td><span class="status-pill ${o.status}">${o.status}</span></td>
     <td><small>${fmtDate(o.created_at)}</small></td>
@@ -279,7 +279,7 @@ async function loadOrders() {
 
 async function loadProducts() {
   const tbody = document.querySelector('#productsTable tbody');
-  tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
   const search = document.getElementById('prodSearch').value;
   const status = document.getElementById('prodStatus').value;
   const params = new URLSearchParams();
@@ -291,7 +291,7 @@ async function loadProducts() {
   tbody.innerHTML = r.map(p => `<tr>
     <td>#${p.id}</td>
     <td><a href="/shop/product.html?slug=${slugify(p.name)}" style="color:var(--text);text-decoration:none"><b>${p.name}</b></a><br><small style="color:var(--text-mute)">${p.category}</small></td>
-    <td>${p.seller_name || '—'}</td>
+    <td>${p.seller_name || '--'}</td>
     <td><b>${fmtRp(p.price)}</b></td>
     <td>${p.stock || 0}</td>
     <td>${p.sold || 0}</td>
@@ -313,7 +313,7 @@ async function toggleProductStatus(id, current) {
 
 async function loadUsers() {
   const tbody = document.querySelector('#usersTable tbody');
-  tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
   const search = document.getElementById('userSearch').value;
   const role = document.getElementById('userRole').value;
   const params = new URLSearchParams();
@@ -330,9 +330,9 @@ async function loadUsers() {
     return `<tr>
       <td>#${u.id}</td>
       <td>${u.email}</td>
-      <td>${u.name || '—'}</td>
+      <td>${u.name || '--'}</td>
       <td><span class="role-pill ${u.role}">${u.role}</span></td>
-      <td>${linked.join(' ') || '—'}</td>
+      <td>${linked.join(' ') || '--'}</td>
       <td><small>${fmtDate(u.created_at)}</small></td>
       <td>
         <select class="role-select" onchange="changeRole(${u.id},this.value)" style="background:var(--glass);border:1px solid var(--glass-border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
@@ -361,19 +361,19 @@ async function deleteUser(id, email) {
 
 async function loadWithdrawals() {
   const tbody = document.querySelector('#wdTable tbody');
-  tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>';
   const r = await api('/admin/withdrawals' + (wdFilter ? '?status=' + wdFilter : ''));
   if (r.error) { tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">${r.error}</td></tr>`; return; }
   if (!r.length) { tbody.innerHTML = '<tr><td colspan="8" class="admin-empty"><i class="fa-solid fa-money-bill-transfer"></i>Tidak ada withdrawal</td></tr>'; return; }
   tbody.innerHTML = r.map(w => `<tr>
     <td>#${w.id}</td>
-    <td>${w.user_name || '—'}<br><small style="color:var(--text-mute)">${w.user_email || ''}</small></td>
+    <td>${w.user_name || '--'}<br><small style="color:var(--text-mute)">${w.user_email || ''}</small></td>
     <td><b>${fmtRp(w.amount)}</b><br><small style="color:var(--text-mute)">fee: ${fmtRp(w.fee)}</small></td>
     <td>${w.method}${w.bank_code ? '<br><small style="color:var(--text-mute)">' + w.bank_code + '</small>' : ''}</td>
     <td><small>${w.destination}<br>${w.destination_name || ''}</small></td>
     <td><span class="status-pill ${w.status}">${w.status}</span></td>
     <td><small>${fmtDate(w.created_at)}</small></td>
-    <td>${w.status === 'pending' ? `<button class="btn-icon" onclick="approveWd(${w.id})" title="Approve" style="color:#22c55e"><i class="fa-solid fa-check"></i></button><button class="btn-icon danger" onclick="rejectWd(${w.id})" title="Reject"><i class="fa-solid fa-xmark"></i></button>` : '<small style="color:var(--text-mute)">—</small>'}</td>
+    <td>${w.status === 'pending' ? `<button class="btn-icon" onclick="approveWd(${w.id})" title="Approve" style="color:#22c55e"><i class="fa-solid fa-check"></i></button><button class="btn-icon danger" onclick="rejectWd(${w.id})" title="Reject"><i class="fa-solid fa-xmark"></i></button>` : '<small style="color:var(--text-mute)">--</small>'}</td>
   </tr>`).join('');
 }
 
@@ -457,9 +457,9 @@ checkAuth();
     <div class="ftr-meta">
       <span class="status-dot"></span>
       <span>API: <a href="/api/health">live</a></span>
-      <span>·</span>
+      <span>-</span>
       <span>v3.0.0</span>
-      <span>·</span>
+      <span>-</span>
       <a href="/shop/preview/"><i class="fa-solid fa-images"></i> Design Preview</a>
     </div>
   </div>

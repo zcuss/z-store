@@ -1,5 +1,5 @@
-const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
-const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+var _lsJSON = _lsJSON || ((k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } });
+var _lsStr = _lsStr || ((k) => { try { return localStorage.getItem(k); } catch (e) { return null; } });
 // Zcus Store -- main script
 let cart = _lsJSON('zcus_cart', '[]');
 

@@ -4,7 +4,7 @@
 <script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Notifikasi — Z Store</title>
+<title>Notifikasi -- Z Store</title>
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#1264a3">
 <meta name="color-scheme" content="light dark">
@@ -159,7 +159,7 @@ function render() {
       <div class="notif-content">
         <b>${n.title}</b>
         <p>${n.body}</p>
-        <small><i class="fa-regular fa-clock"></i> ${fmtRel(n.created_at)} · ${fmtDate(n.created_at)}</small>
+        <small><i class="fa-regular fa-clock"></i> ${fmtRel(n.created_at)} - ${fmtDate(n.created_at)}</small>
       </div>
       <div class="notif-actions-inline">
         ${isUnread ? '<button title="Tandai dibaca" onclick="event.stopPropagation();markRead(' + n.id + ')"><i class="fa-solid fa-check"></i></button>' : ''}
@@ -250,9 +250,9 @@ loadNotifs();
     <div class="ftr-meta">
       <span class="status-dot"></span>
       <span>API: <a href="/api/health">live</a></span>
-      <span>·</span>
+      <span>-</span>
       <span>v3.0.0</span>
-      <span>·</span>
+      <span>-</span>
       <a href="/shop/preview/"><i class="fa-solid fa-images"></i> Design Preview</a>
     </div>
   </div>

@@ -21,9 +21,13 @@ if (typeof window !== 'undefined') {
 // Local alias for convenience (this DOES re-declare `const API` which would conflict, so use function)
 const _api = () => window.API;
 window.products = window.products || [];
-// Safe localStorage helpers -- corrupt value must never kill the whole script
-const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
-const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+// Safe localStorage helpers -- must be `var` (not const) because index.html,
+// product.html, etc. each declare their own copy in inline <script> blocks.
+// Same global scope -> `const` would throw "Identifier already declared"
+// SyntaxError that kills every handler in this file.
+// Defined as no-op if already present so inline-script copies win.
+var _lsJSON = _lsJSON || ((k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } });
+var _lsStr = _lsStr || ((k) => { try { return localStorage.getItem(k); } catch (e) { return null; } });
 window.cart = _lsJSON('zcus_cart', []);
 window.wishlist = _lsJSON('zcus_wishlist', []);
 window.recentlyViewed = _lsJSON('zcus_recent', []);

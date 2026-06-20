@@ -4,7 +4,7 @@
 <script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seller Dashboard — Zcus Store</title>
+<title>Seller Dashboard -- Zcus Store</title>
 <link rel="icon" type="image/svg+xml" href="/shop/favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/shop/styles.css?v=8">
@@ -83,14 +83,14 @@
         <div class="dash-panel-head">
           <h3><i class="fa-solid fa-trophy"></i> Top Products</h3>
         </div>
-        <div id="topProducts" class="dash-list"><div class="loading">Loading…</div></div>
+        <div id="topProducts" class="dash-list"><div class="loading">Loading...</div></div>
       </div>
 
       <div class="dash-panel glass">
         <div class="dash-panel-head">
           <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Orders</h3>
         </div>
-        <div id="recentOrders" class="dash-list"><div class="loading">Loading…</div></div>
+        <div id="recentOrders" class="dash-list"><div class="loading">Loading...</div></div>
       </div>
     </div>
   </section>
@@ -102,7 +102,7 @@
         <h3><i class="fa-solid fa-boxes-stacked"></i> Your Products</h3>
         <button class="btn btn-primary btn-sm" onclick="showAddProduct()"><i class="fa-solid fa-plus"></i> Add Product</button>
       </div>
-      <div id="sellerProducts" class="prod-list"><div class="loading">Loading…</div></div>
+      <div id="sellerProducts" class="prod-list"><div class="loading">Loading...</div></div>
     </div>
   </section>
 
@@ -112,7 +112,7 @@
       <div class="dash-panel-head">
         <h3><i class="fa-solid fa-receipt"></i> Customer Orders</h3>
       </div>
-      <div id="sellerOrders" class="dash-list"><div class="loading">Loading…</div></div>
+      <div id="sellerOrders" class="dash-list"><div class="loading">Loading...</div></div>
     </div>
   </section>
 
@@ -257,7 +257,7 @@
     <b>Notifications</b>
     <button onclick="markAllRead()">Mark all read</button>
   </div>
-  <div id="notifList"><div class="loading">Loading…</div></div>
+  <div id="notifList"><div class="loading">Loading...</div></div>
 </div>
 
 <script>
@@ -354,7 +354,7 @@ async function loadSellerProducts() {
         <div class="pl-img"><i class="fa-solid ${p.type === 'digital' ? 'fa-floppy-disk' : 'fa-box'}"></i></div>
         <div class="pl-info">
           <b>${p.name}</b>
-          <span>${p.category} · Stock: ${p.stock} · Sold: ${p.sold || 0}</span>
+          <span>${p.category} - Stock: ${p.stock} - Sold: ${p.sold || 0}</span>
         </div>
         <div class="pl-price">Rp ${Number(p.price).toLocaleString('id-ID')}</div>
         <div class="pl-actions">
@@ -534,7 +534,7 @@ async function connectWhatsapp() {
 
 async function saveSettings() {
   // For demo, just toast
-  toast('Settings saved (UI only — backend API menyusul)', 'success');
+  toast('Settings saved (UI only -- backend API menyusul)', 'success');
 }
 
 async function linkAccount(platform) {
@@ -740,9 +740,9 @@ function toast(msg, type='info') {
     <div class="ftr-meta">
       <span class="status-dot"></span>
       <span>API: <a href="/api/health">live</a></span>
-      <span>·</span>
+      <span>-</span>
       <span>v3.0.0</span>
-      <span>·</span>
+      <span>-</span>
       <a href="/shop/preview/"><i class="fa-solid fa-images"></i> Design Preview</a>
     </div>
   </div>
