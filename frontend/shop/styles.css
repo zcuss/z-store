@@ -1112,3 +1112,27 @@ img{-webkit-backface-visibility:hidden;backface-visibility:hidden}
   .mobile-bottom-nav{display:flex!important}
   .sidebar{display:none!important}
 }
+
+/* ===== EMPTY STATE (global) ===== */
+.empty-state{padding:48px 24px;text-align:center;color:var(--text-dim)}
+.empty-state .empty-ico{font-size:48px;color:var(--text-mute);opacity:.5;margin-bottom:12px;display:block}
+.empty-state h3{margin:0 0 6px;color:var(--text);font-size:16px;font-weight:700}
+.empty-state p{margin:0;font-size:13px;line-height:1.5}
+
+/* ===== COOKIE BANNER ===== */
+.cookie-banner{position:fixed;bottom:20px;left:20px;z-index:200;max-width:420px;background:var(--bg-elev);border:1px solid var(--glass-border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:cookieIn .4s ease-out}
+@keyframes cookieIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.cookie-banner i.cookie-bite{font-size:24px;color:var(--accent);flex-shrink:0}
+.cookie-banner .cookie-content{flex:1;min-width:0}
+.cookie-banner .cookie-content b{display:block;font-size:13px;color:var(--text);font-weight:700;margin-bottom:2px}
+.cookie-banner .cookie-content p{margin:0;font-size:12px;color:var(--text-dim);line-height:1.5}
+.cookie-banner .cookie-content p a{color:var(--accent)}
+.cookie-banner .cookie-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.cookie-banner .cookie-accept,.cookie-banner .cookie-deny{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.cookie-banner .cookie-accept{background:var(--accent);color:#000}
+.cookie-banner .cookie-accept:hover{background:#0ea5e9}
+.cookie-banner .cookie-deny{background:transparent;color:var(--text-dim);border:1px solid var(--glass-border)}
+.cookie-banner .cookie-deny:hover{color:var(--text);border-color:var(--glass-border-hover)}
+.cookie-banner .cookie-close{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:var(--bg-soft);color:var(--text-dim);font-size:11px;border:none;cursor:pointer}
+.cookie-banner .cookie-close:hover{color:var(--text)}
+@media(max-width:600px){.cookie-banner{max-width:calc(100vw - 32px);flex-direction:column;align-items:flex-start}.cookie-banner .cookie-actions{flex-direction:row;width:100%}.cookie-banner .cookie-accept,.cookie-banner .cookie-deny{flex:1}}

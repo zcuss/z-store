@@ -1,0 +1,27 @@
+{
+  "name": "z-store-backend-v2",
+  "version": "2.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "@fastify/cors": "^9.0.1",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/jwt": "^8.0.1",
+    "@fastify/rate-limit": "^9.1.0",
+    "@fastify/cookie": "^9.3.1",
+    "@fastify/formbody": "^7.0.2",
+    "bcryptjs": "^2.4.3",
+    "knex": "^3.1.0",
+    "mysql2": "^3.11.3",
+    "pg": "^8.13.0",
+    "better-sqlite3": "^11.3.0",
+    "nodemailer": "^6.9.15",
+    "axios": "^1.7.7",
+    "zod": "^3.23.8"
+  }
+}

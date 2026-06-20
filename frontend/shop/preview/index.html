@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Z Store — Preview Gallery</title>
+<meta name="description" content="Visual tour of all Z Store features. Home, products, checkout, dashboard, admin, seller, settings, docs.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../tw-components.css?v=1">
+<link rel="stylesheet" href="../styles.css?v=28">
+<style>
+.preview-wrap{max-width:1280px;margin:0 auto;padding:48px 24px 80px}
+.preview-hero{text-align:center;margin-bottom:56px;padding:48px 24px;background:var(--bg-soft);border:1px solid var(--border);border-radius:12px}
+.preview-hero h1{font-size:clamp(36px,6vw,56px);font-weight:800;letter-spacing:-1.5px;margin-bottom:12px;background:linear-gradient(135deg,#fafafa,#a1a1aa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.preview-hero p{font-size:16px;color:var(--text-2);max-width:640px;margin:0 auto;line-height:1.6}
+.preview-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:20px;text-transform:uppercase}
+.preview-section{margin-bottom:64px}
+.preview-section h2{font-size:24px;font-weight:700;color:var(--text);margin:0 0 8px;display:flex;align-items:center;gap:10px}
+.preview-section h2 i{color:var(--accent);font-size:20px}
+.preview-section .preview-sub{margin:0 0 20px;color:var(--text-dim);font-size:13px}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.preview-card{background:var(--bg-soft);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s}
+.preview-card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.preview-thumb{aspect-ratio:16/10;background:var(--bg-elev);display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:1px solid var(--border)}
+.preview-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
+.preview-thumb-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-mute);font-size:48px;background:linear-gradient(135deg,var(--bg-soft),var(--bg-elev))}
+.preview-body{padding:18px}
+.preview-body h3{margin:0 0 4px;font-size:15px;font-weight:700;color:var(--text)}
+.preview-body p{margin:0 0 12px;font-size:12px;color:var(--text-dim);line-height:1.5}
+.preview-body .preview-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.preview-body .preview-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent);text-decoration:none;font-weight:600}
+.preview-body .preview-link:hover{text-decoration:underline}
+.preview-body .preview-link i{font-size:10px}
+.feature-checklist{list-style:none;padding:0;margin:12px 0 0;font-size:12px;color:var(--text-2);line-height:1.8}
+.feature-checklist li{padding-left:18px;position:relative}
+.feature-checklist li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:700}
+.preview-toc{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:40px}
+.preview-toc a{padding:6px 14px;background:var(--bg-soft);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;color:var(--text-dim);text-decoration:none;transition:all .15s}
+.preview-toc a:hover{background:var(--bg-hover);color:var(--text);border-color:var(--border-hover)}
+.preview-stack{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="hdr glass">
+  <a href="../shop/" class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-z"></i></div>
+    <div class="brand-text">
+      <div class="brand-name">Z<span>Store</span></div>
+      <div class="brand-tag">PREVIEW GALLERY</div>
+    </div>
+  </a>
+  <div style="flex:1"></div>
+  <div class="hdr-right">
+    <a href="../shop/" class="hdr-btn"><i class="fa-solid fa-arrow-left"></i> <span class="hdr-label">Kembali ke Toko</span></a>
+    <button class="hdr-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke" id="themeIcon"></i></button>
+  </div>
+</header>
+
+<main id="main" class="preview-wrap">
+  <div class="preview-hero">
+    <div class="preview-tag"><i class="fa-solid fa-images"></i> VISUAL TOUR · June 2026</div>
+    <h1>Z Store — Preview Gallery</h1>
+    <p>Semua fitur Z Store dalam satu halaman. Klik card untuk lihat detail / akses langsung.</p>
+  </div>
+
+  <nav class="preview-toc">
+    <a href="#core">Core E-commerce</a>
+    <a href="#auth">Auth & Account</a>
+    <a href="#buyer">Buyer Flow</a>
+    <a href="#seller">Seller Flow</a>
+    <a href="#admin">Admin Panel</a>
+    <a href="#docs">Documentation</a>
+    <a href="#integrations">Multi-Platform</a>
+  </nav>
+
+  <!-- =================== CORE E-COMMERCE =================== -->
+  <section id="core" class="preview-section">
+    <h2><i class="fa-solid fa-store"></i> Core E-commerce</h2>
+    <p class="preview-sub">Marketplace UI — product listing, detail, payment, fulfillment.</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/?bust=preview-home" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-house"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Homepage</h3>
+          <p>Hero, kategori, flash sale, trust strip, product grid 4-kolom, sidebar filter, footer.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">20 products</span>
+            <span class="badge badge-success">4-col grid</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Sleek dark theme, hairline borders</li>
+            <li>Live stock counter + flash sale countdown</li>
+            <li>Category sidebar dengan live counts</li>
+            <li>Sort + price range + promo filter</li>
+            <li>Cart drawer + wishlist (localStorage)</li>
+          </ul>
+          <a href="../shop/" target="_blank" class="preview-link">Lihat Homepage <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/product.html?slug=claude-pro-annual-license&bust=preview-pd" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-box"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Product Detail</h3>
+          <p>Halaman detail 1 produk dengan gallery, deskripsi, reviews, related products.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">Reviews</span>
+            <span class="badge badge-accent">Share buttons</span>
+            <span class="badge badge-warn">Stock live</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Hero image + emoji/icon fallback</li>
+            <li>Stock counter live dari DB</li>
+            <li>Add to cart / Buy now CTA</li>
+            <li>Share ke WhatsApp / Telegram / copy link</li>
+            <li>Tabs: Deskripsi / Review / Kebijakan</li>
+            <li>Related products grid</li>
+          </ul>
+          <a href="../shop/product.html?slug=claude-pro-annual-license" target="_blank" class="preview-link">Lihat Product Detail <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/payment/?bust=preview-pay" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-credit-card"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Checkout (Midtrans Snap)</h3>
+          <p>3-step checkout — kontak, promo, pilih metode pembayaran (QRIS/VA/GoPay/ShopeePay/CC).</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Midtrans</span>
+            <span class="badge badge-accent">Sandbox</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Step 1: Email + nama + phone</li>
+            <li>Step 2: Kode promo (WELCOME50 = Rp 50k off)</li>
+            <li>Step 3: Pilih payment method</li>
+            <li>Midtrans Snap popup (QRIS scan, dll)</li>
+            <li>Order summary realtime</li>
+            <li>Countdown 15 menit untuk bayar</li>
+          </ul>
+          <a href="../shop/payment/" target="_blank" class="preview-link">Lihat Checkout <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/order-success/?bust=preview-success" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-circle-check"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Order Success + Delivery</h3>
+          <p>Halaman sukses setelah bayar + auto-delivery kredensial ke email + linked platforms.</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Auto-deliver</span>
+            <span class="badge badge-accent">Multi-channel</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Order ID + Midtrans transaction ID</li>
+            <li>Kredensial akun dikirim ke email</li>
+            <li>Mirror ke WhatsApp / Telegram (kalau linked)</li>
+            <li>Download invoice PDF</li>
+            <li>Konfirmasi terima → escrow release</li>
+            <li>Auto-redirect ke order detail</li>
+          </ul>
+          <a href="../shop/order-success/" target="_blank" class="preview-link">Lihat Order Success <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== AUTH & ACCOUNT =================== -->
+  <section id="auth" class="preview-section">
+    <h2><i class="fa-solid fa-user-shield"></i> Auth & Account</h2>
+    <p class="preview-sub">Multi-platform login: email+password, OTP, magic link, OAuth (Google/Telegram/Discord/WhatsApp).</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/?bust=preview-login" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-right-to-bracket"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Login / Register Modal</h3>
+          <p>Tabs: Password | OTP | Daftar. Multi-OAuth buttons (Google, Telegram, Discord, WhatsApp).</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">5 ways</span>
+            <span class="badge badge-warn">OTP wajib</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Tab 1: Email + password (bcrypt 12 rounds)</li>
+            <li>Tab 2: Login via OTP (email/WA/TG)</li>
+            <li>Tab 3: Register → auto-send OTP</li>
+            <li>OAuth buttons: Google / TG / DC / WA</li>
+            <li>Forgot password via magic link</li>
+            <li>Email_verified wajib untuk checkout</li>
+          </ul>
+          <a href="../shop/?bust=preview-login" target="_blank" class="preview-link">Lihat Login <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/settings/?bust=preview-settings" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-gear"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Settings / Account Sync</h3>
+          <p>6 tab: Profile, Security, Platform Sync, Preferences, Notifications, Danger Zone.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">6 tabs</span>
+            <span class="badge badge-success">Multi-OAuth</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Profile: edit nama/phone/bio/avatar</li>
+            <li>Security: 2FA (TOTP), password change</li>
+            <li>Platform Sync: link Telegram/Discord/WhatsApp</li>
+            <li>Preferences: theme, locale, notif</li>
+            <li>Notifications: in-app + email matrix</li>
+            <li>Danger Zone: delete account + export</li>
+          </ul>
+          <a href="../shop/settings/" target="_blank" class="preview-link">Lihat Settings <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/orders/?bust=preview-orders" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-box-archive"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>My Orders</h3>
+          <p>Riwayat order + filter by status + timeline escrow + delivery details.</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Escrow 7d</span>
+            <span class="badge badge-warn">Auto-release</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Tabs: Semua / Pending / Paid / Delivered / Completed / Cancelled</li>
+            <li>Timeline: order → paid → delivered → completed</li>
+            <li>Konfirmasi terima → release escrow ke seller</li>
+            <li>Garansi 30 hari (replacement / refund)</li>
+            <li>Invoice PDF download</li>
+            <li>Komplain / dispute dengan admin</li>
+          </ul>
+          <a href="../shop/orders/" target="_blank" class="preview-link">Lihat My Orders <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/wishlist/?bust=preview-wishlist" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-heart"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Wishlist</h3>
+          <p>Save favorit + share wishlist via link publik.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">localStorage</span>
+            <span class="badge badge-success">Share link</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Heart icon di setiap product card</li>
+            <li>localStorage + server sync (kalau login)</li>
+            <li>Share wishlist via public link</li>
+            <li>Move all to cart</li>
+            <li>Price drop notification (kalau sync)</li>
+          </ul>
+          <a href="../shop/wishlist/" target="_blank" class="preview-link">Lihat Wishlist <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== BUYER FLOW =================== -->
+  <section id="buyer" class="preview-section">
+    <h2><i class="fa-solid fa-bag-shopping"></i> Buyer Flow</h2>
+    <p class="preview-sub">Discovery → Cart → Checkout → Delivery → Support.</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/?bust=preview-search" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-magnifying-glass"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Live Search</h3>
+          <p>Search dropdown dengan real-time suggestion + recent + popular.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">Real-time</span>
+            <span class="badge badge-success">Server-side</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Debounced 300ms input</li>
+            <li>Top 8 product matches</li>
+            <li>Recent searches (localStorage)</li>
+            <li>Popular categories quick links</li>
+            <li>Enter → full search results page</li>
+          </ul>
+          <a href="../shop/?bust=preview-search" target="_blank" class="preview-link">Coba Search <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/support/?bust=preview-support" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-headset"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Bantuan / Support Tickets</h3>
+          <p>Multi-channel support: live chat (humanized), tiket, FAQ self-service.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">Live chat</span>
+            <span class="badge badge-success">Tiket</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Live chat widget (non-bot feel)</li>
+            <li>Buka tiket (kategori: order / akun / pembayaran / lainnya)</li>
+            <li>FAQ searchable</li>
+            <li>Status tiket + balasan admin</li>
+            <li>WhatsApp CS fallback</li>
+          </ul>
+          <a href="../shop/support/" target="_blank" class="preview-link">Lihat Support <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/notifications/?bust=preview-notif" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-bell"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Notifications</h3>
+          <p>In-app notification center + real-time badge di header.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">Real-time</span>
+            <span class="badge badge-success">Multi-channel</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Order updates: paid / delivered / completed</li>
+            <li>Withdraw status</li>
+            <li>Platform sync events</li>
+            <li>Promo announcements</li>
+            <li>Mark as read / mark all</li>
+          </ul>
+          <a href="../shop/notifications/" target="_blank" class="preview-link">Lihat Notifikasi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== SELLER FLOW =================== -->
+  <section id="seller" class="preview-section">
+    <h2><i class="fa-solid fa-shop"></i> Seller Flow</h2>
+    <p class="preview-sub">Upload produk → manage inventory → track sales → withdraw saldo.</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/seller/?bust=preview-seller" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-chart-line"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Seller Dashboard</h3>
+          <p>Dashboard dengan stats + recent orders + balance + escrow holds.</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Real-time</span>
+            <span class="badge badge-accent">Multi-product</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Stats: revenue, sold, conversion</li>
+            <li>Saldo: available / pending / total</li>
+            <li>Escrow holds (7-day auto-release)</li>
+            <li>Recent orders dengan quick action</li>
+            <li>Top products ranking</li>
+          </ul>
+          <a href="../shop/seller/" target="_blank" class="preview-link">Lihat Seller Dashboard <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/seller/?tab=products&bust=preview-upload" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-upload"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Upload Product + Inventory</h3>
+            <p>Form tambah produk + bulk upload inventory items.</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Auto-validate</span>
+            <span class="badge badge-accent">Bulk upload</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Form: nama, kategori, harga, original, deskripsi</li>
+            <li>Auto-generate slug dari nama</li>
+            <li>Bulk inventory upload (CSV / paste)</li>
+            <li>Auto-detect product type (digital/joki/api)</li>
+            <li>Schedule flash sale</li>
+          </ul>
+          <a href="../shop/seller/" target="_blank" class="preview-link">Coba Upload <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/seller/?tab=withdraw&bust=preview-withdraw" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-money-bill-wave"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Withdraw Saldo</h3>
+          <p>Withdraw ke bank / e-wallet / crypto dengan payout settings.</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Multi-method</span>
+            <span class="badge badge-warn">Min Rp 50k</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Bank: BCA / BNI / Mandiri / BRI</li>
+            <li>E-wallet: GoPay / OVO / DANA</li>
+            <li>Crypto: USDT (TRC20/ERC20)</li>
+            <li>Fee Rp 5.000 / withdraw</li>
+            <li>Min Rp 50.000, Max Rp 50.000.000 / hari</li>
+            <li>Status: pending → processing → completed</li>
+          </ul>
+          <a href="../shop/seller/" target="_blank" class="preview-link">Lihat Withdraw <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== ADMIN =================== -->
+  <section id="admin" class="preview-section">
+    <h2><i class="fa-solid fa-shield-halved"></i> Admin Panel</h2>
+    <p class="preview-sub">RBAC: admin sub-roles (CS / Marketing / Tech / Service) + dev view-as-role.</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/admin/?bust=preview-admin" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-users-gear"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Admin Dashboard</h3>
+          <p>Overview stats + moderation queue + recent activity.</p>
+          <div class="preview-meta">
+            <span class="badge badge-danger">admin only</span>
+            <span class="badge badge-warn">RBAC</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Stats: users / orders / revenue / GMV</li>
+            <li>User moderation (ban, role change)</li>
+            <li>Order disputes queue</li>
+            <li>Withdrawal approval queue</li>
+            <li>Audit log search</li>
+            <li>Sub-role: CS / Marketing / Tech / Service</li>
+          </ul>
+          <a href="../shop/admin/" target="_blank" class="preview-link">Lihat Admin <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/admin/?tab=withdrawals&bust=preview-approve" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-money-check"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Approve Withdrawals</h3>
+          <p>Manual approval flow untuk keamanan seller payouts.</p>
+          <div class="preview-meta">
+            <span class="badge badge-success">Auto-balance</span>
+            <span class="badge badge-warn">Audit log</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>List pending withdrawals</li>
+            <li>One-click approve / reject</li>
+            <li>Auto-refund saldo kalau reject</li>
+            <li>Notes untuk audit trail</li>
+            <li>Filter by date / seller / amount</li>
+          </ul>
+          <a href="../shop/admin/?tab=withdrawals" target="_blank" class="preview-link">Lihat Approval <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== DOCS =================== -->
+  <section id="docs" class="preview-section">
+    <h2><i class="fa-solid fa-book-open"></i> Documentation</h2>
+    <p class="preview-sub">Complete guides: cara order, garansi, refund, terms, about, affiliate, bantuan.</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/cara-order/?bust=preview-co" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-book"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Cara Order</h3>
+          <p>5-step order guide + payment methods + escrow + garansi.</p>
+          <ul class="feature-checklist">
+            <li>5 langkah order (Daftar → Pilih → Cart → Bayar → Terima)</li>
+            <li>Metode pembayaran (QRIS / VA / GoPay / dll)</li>
+            <li>Delivery & akses produk</li>
+            <li>Sistem escrow 7 hari</li>
+            <li>Garansi 30 hari</li>
+            <li>FAQ singkat</li>
+          </ul>
+          <a href="../shop/cara-order/" target="_blank" class="preview-link">Lihat Cara Order <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/garansi/?bust=preview-gr" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-shield-halved"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Garansi 30 Hari</h3>
+          <p>Jaminan replacement atau refund jika produk rusak.</p>
+          <ul class="feature-checklist">
+            <li>Apa yang dijamin (tabel)</li>
+            <li>Syarat klaim</li>
+            <li>Yang TIDAK dijamin</li>
+            <li>Proses klaim step-by-step</li>
+          </ul>
+          <a href="../shop/garansi/" target="_blank" class="preview-link">Lihat Garansi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/refund-policy/?bust=preview-rp" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-rotate-left"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Refund Policy</h3>
+          <p>Refund window + biaya admin + proses.</p>
+          <ul class="feature-checklist">
+            <li>Window refund (24 jam vs 7 hari vs 30 hari)</li>
+            <li>Yang bisa / tidak bisa di-refund</li>
+            <li>Proses refund 3-7 hari kerja</li>
+            <li>Biaya admin payment gateway</li>
+          </ul>
+          <a href="../shop/refund-policy/" target="_blank" class="preview-link">Lihat Refund Policy <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/about/?bust=preview-about" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-circle-info"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Tentang Kami</h3>
+          <p>Cerita, misi, visi Z Store.</p>
+          <ul class="feature-checklist">
+            <li>Sejarah &amp; misi</li>
+            <li>Value proposition</li>
+            <li>Tim</li>
+            <li>Kontak</li>
+          </ul>
+          <a href="../shop/about/" target="_blank" class="preview-link">Lihat About <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/affiliate/?bust=preview-aff" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-solid fa-coins"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Afiliasi</h3>
+          <p>Program afiliasi dengan komisi 10% per referral.</p>
+          <ul class="feature-checklist">
+            <li>Daftar afiliasi</li>
+            <li>Link referral unik</li>
+            <li>Dashboard stats (clicks / signups / sales)</li>
+            <li>Komisi 10% per transaksi</li>
+            <li>Payout bulanan via withdraw</li>
+          </ul>
+          <a href="../shop/affiliate/" target="_blank" class="preview-link">Lihat Afiliasi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =================== MULTI-PLATFORM =================== -->
+  <section id="integrations" class="preview-section">
+    <h2><i class="fa-solid fa-share-nodes"></i> Multi-Platform Sync</h2>
+    <p class="preview-sub">Catalog & order sync ke Telegram, Discord, WhatsApp. Auto-deliver kredensial via all linked platforms.</p>
+    <div class="preview-grid">
+
+      <div class="preview-card">
+        <a href="../shop/settings/?tab=platforms&bust=preview-platforms" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-brands fa-telegram"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Telegram Bot Integration</h3>
+          <p>Hubungkan akun Telegram via Login Widget + Bot API.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">Login Widget</span>
+            <span class="badge badge-success">Bot API</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Link via Telegram Login Widget</li>
+            <li>Atau pakai @BotFather token</li>
+            <li>Inline keyboard buttons di chat</li>
+            <li>Catalog sync ke channel / group</li>
+            <li>Auto-deliver kredensial via bot DM</li>
+          </ul>
+          <a href="../shop/settings/?tab=platforms" target="_blank" class="preview-link">Lihat Platform Settings <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/settings/?tab=platforms&bust=preview-dc" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-brands fa-discord"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>Discord Bot Integration</h3>
+          <p>Hubungkan Discord via OAuth2 + Bot token.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">OAuth2</span>
+            <span class="badge badge-success">Slash Commands</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Link via Discord OAuth2</li>
+            <li>Embed messages ke channel</li>
+            <li>Slash command /catalog, /order</li>
+            <li>Webhook untuk catalog sync</li>
+            <li>Auto-deliver via DM bot</li>
+          </ul>
+          <a href="../shop/settings/?tab=platforms" target="_blank" class="preview-link">Lihat Discord Setup <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <a href="../shop/settings/?tab=platforms&bust=preview-wa" target="_blank" class="preview-thumb">
+          <div class="preview-thumb-fallback"><i class="fa-brands fa-whatsapp"></i></div>
+        </a>
+        <div class="preview-body">
+          <h3>WhatsApp Business Integration</h3>
+          <p>Hubungkan WhatsApp Business via Meta Cloud API.</p>
+          <div class="preview-meta">
+            <span class="badge badge-accent">Cloud API</span>
+            <span class="badge badge-success">Catalog sync</span>
+          </div>
+          <ul class="feature-checklist">
+            <li>Embedded signup via Meta</li>
+            <li>Catalog sync (Meta Commerce)</li>
+            <li>Auto-reply templates (WA-approved)</li>
+            <li>Auto-deliver kredensial</li>
+            <li>Humanized CS templates</li>
+          </ul>
+          <a href="../shop/settings/?tab=platforms" target="_blank" class="preview-link">Lihat WA Setup <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div style="text-align:center;margin-top:64px;padding:32px;background:var(--bg-soft);border:1px solid var(--border);border-radius:12px">
+    <h3 style="margin:0 0 8px;font-size:18px">Selesai Tour?</h3>
+    <p style="margin:0 0 16px;color:var(--text-dim);font-size:13px">Mulai belanja atau buka dashboard seller.</p>
+    <div class="preview-stack" style="justify-content:center">
+      <a href="../shop/" class="btn btn-primary"><i class="fa-solid fa-bag-shopping"></i> Belanja Sekarang</a>
+      <a href="../shop/seller/" class="btn btn-secondary"><i class="fa-solid fa-shop"></i> Jadi Seller</a>
+      <a href="../docs/" class="btn btn-ghost"><i class="fa-solid fa-book"></i> Baca Docs</a>
+    </div>
+  </div>
+
+</main>
+
+<script src="../products.js?v=26"></script>
+<script src="../app.js?v=28"></script>
+</body>
+</html>
