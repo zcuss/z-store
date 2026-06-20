@@ -182,7 +182,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 </div>
 
 <script>
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-';
 let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
@@ -339,6 +339,5 @@ loadInvoice();
     </div>
   </div>
 </footer>
-<script src="app.js" defer></script>
 </body>
 </html>

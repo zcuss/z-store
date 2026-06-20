@@ -439,7 +439,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
 let token = localStorage.getItem('zs_token') || '';
 let platforms = {};
@@ -887,6 +887,5 @@ checkAuth();
     </div>
   </div>
 </footer>
-<script src="app.js" defer></script>
 </body>
 </html>

@@ -79,7 +79,7 @@
 </main>
 
 <script>
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
 function fmtDate(d) { return d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'; }
 
@@ -210,6 +210,5 @@ if (initialId) {
     </div>
   </div>
 </footer>
-<script src="app.js" defer></script>
 </body>
 </html>

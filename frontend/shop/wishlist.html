@@ -106,7 +106,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
 let wishlist = JSON.parse(localStorage.getItem('zs_wishlist') || '[]');
@@ -280,6 +280,5 @@ loadProducts();
     </div>
   </div>
 </footer>
-<script src="app.js" defer></script>
 </body>
 </html>

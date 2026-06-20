@@ -33,7 +33,7 @@
 </div>
 
 <script>
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 
 async function verify() {
   const params = new URLSearchParams(location.search);
@@ -124,6 +124,5 @@ verify();
     </div>
   </div>
 </footer>
-<script src="app.js" defer></script>
 </body>
 </html>

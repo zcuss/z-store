@@ -233,7 +233,7 @@
 
 <script>
 // ============ SHARED STATE ============
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://127.0.0.1:3002' : '/shop-app';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const user = JSON.parse(localStorage.getItem('zs_user') || 'null');
 const token = localStorage.getItem('zs_token') || '';
 let cart = JSON.parse(localStorage.getItem('zs_cart') || '[]');
@@ -628,6 +628,5 @@ renderCartDrawer();
 loadProduct();
 </script>
 <script src="https://app.midtrans.com/snap/snap.js" data-client-key=""></script>
-<script src="app.js" defer></script>
 </body>
 </html>

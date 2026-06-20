@@ -4,9 +4,18 @@
 // Without this isolation, both `let user` declarations collide → SyntaxError
 // halts entire app.js, breaking cart/wishlist/theme on every page.
 // API base — always same-origin relative /api (works on localhost, 5.zcus.biz.id tunnel, zcus.biz.id cPanel, etc.)
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') 
-  ? location.origin + '/api' 
-  : '/api';
+// IMPORTANT: Do NOT declare `const API` or `var API` at top level here. Subpages (orders.html, settings.html, etc.)
+// each declare their own `const API = ...` in inline <script> blocks. Re-declaring the same
+// name in a separate classic script throws SyntaxError ("Identifier 'API' has already been declared"),
+// which silently kills all event handlers in app.js (theme toggle, cart badge, loadProducts).
+// Use window.API getter — set by subpage inline script first (correct path), or computed here as fallback.
+if (typeof window !== 'undefined' && !window.API) {
+  window.API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? location.origin + '/api'
+    : '/api';
+}
+// Local alias for convenience (this DOES re-declare `const API` which would conflict, so use function)
+const _api = () => window.API;
 window.products = window.products || [];
 window.cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 window.wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
@@ -129,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function pollNotificationBadge() {
   if (!token) return;
   try {
-    const r = await fetch(API + '/api/notifications', { headers: { Authorization: 'Bearer ' + token } });
+    const r = await fetch(_api() + '/api/notifications', { headers: { Authorization: 'Bearer ' + token } });
     if (r.ok) {
       const d = await r.json();
       const unread = (d.notifications || []).filter(n => !n.read_at).length;
@@ -183,7 +192,7 @@ function startFlashCountdown() {
 async function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = 'Bearer ' + token;
-  const res = await fetch(API + path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } });
+  const res = await fetch(_api() + path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || res.statusText);
@@ -519,7 +528,7 @@ async function loadRecentlyViewed() {
   // Try server
   if (user && token) {
     try {
-      const r = await fetch(API + '/api/users/me/recently-viewed', { headers: { Authorization: 'Bearer ' + token } });
+      const r = await fetch(_api() + '/api/users/me/recently-viewed', { headers: { Authorization: 'Bearer ' + token } });
       if (r.ok) {
         const d = await r.json();
         if (d.items && d.items.length) { recentlyViewedData = d.items; return renderRecentlyViewed(); }
@@ -545,7 +554,7 @@ function addToRecentlyViewed(id) {
 
 async function clearRecentlyViewed() {
   if (user && token) {
-    try { await fetch(API + '/api/users/me/recently-viewed', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } }); } catch (e) {}
+    try { await fetch(_api() + '/api/users/me/recently-viewed', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } }); } catch (e) {}
   }
   recentlyViewed = []; recentlyViewedData = [];
   localStorage.removeItem('zcus_recent');
@@ -961,7 +970,7 @@ function saveAuth(u, t) {
 }
 
 async function doLogout() {
-  try { await fetch(API + '/api/auth/logout', { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} }); } catch (e) {}
+  try { await fetch(_api() + '/api/auth/logout', { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} }); } catch (e) {}
   user = null; token = null;
   localStorage.removeItem('zs_user');
   localStorage.removeItem('zs_token');
