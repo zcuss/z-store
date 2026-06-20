@@ -21,6 +21,11 @@ import { integrationRoutes } from './routes/integrations.js';
 import { userRoutes } from './routes/users.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import { publicRoutes } from './routes/public.js';
+import { sellerRoutes } from './routes/seller.js';
+import { affiliateRoutes } from './routes/affiliate.js';
+import { supportRoutes } from './routes/support.js';
+import { notificationRoutes } from './routes/notifications.js';
+import { trackRoutes } from './routes/track.js';
 
 const PORT = parseInt(process.env.PORT || '3001');
 const HOST = process.env.HOST || '0.0.0.0';
@@ -239,6 +244,11 @@ await app.register(adminRoutes, { prefix: '/api/admin' });
 await app.register(integrationRoutes, { prefix: '/api/integrations' });
 await app.register(webhookRoutes, { prefix: '/api/webhooks' });
 await app.register(publicRoutes, { prefix: '/api' });
+await app.register(sellerRoutes, { prefix: '/api/seller' });
+await app.register(affiliateRoutes, { prefix: '/api/affiliate' });
+await app.register(supportRoutes, { prefix: '/api/support' });
+await app.register(notificationRoutes, { prefix: '/api/notifications' });
+await app.register(trackRoutes, { prefix: '/api/track' });
 
 // ============ Error handler ============
 app.setErrorHandler((err, req, reply) => {

@@ -239,6 +239,101 @@ const SCHEMA = [
     },
   },
   {
+    name: '003_affiliate_support_views',
+    up: async (db) => {
+      // Affiliate program
+      if (!(await db.schema.hasTable('affiliate_codes'))) {
+        await db.schema.createTable('affiliate_codes', (t) => {
+          t.increments('id').primary();
+          t.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+          t.string('code', 50).unique().notNullable();
+          t.timestamp('created_at').defaultTo(db.fn.now());
+        });
+      }
+      if (!(await db.schema.hasTable('affiliate_clicks'))) {
+        await db.schema.createTable('affiliate_clicks', (t) => {
+          t.increments('id').primary();
+          t.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+          t.string('code', 50);
+          t.string('source', 100);
+          t.timestamp('created_at').defaultTo(db.fn.now());
+        });
+      }
+      if (!(await db.schema.hasTable('affiliate_referrals'))) {
+        await db.schema.createTable('affiliate_referrals', (t) => {
+          t.increments('id').primary();
+          t.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+          t.integer('referred_user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+          t.integer('order_id').unsigned().nullable();
+          t.decimal('commission', 12, 2).defaultTo(0);
+          t.enu('status', ['pending', 'converted', 'paid', 'cancelled']).defaultTo('pending');
+          t.boolean('paid').defaultTo(false);
+          t.timestamp('created_at').defaultTo(db.fn.now());
+        });
+      }
+      // Support tickets
+      if (!(await db.schema.hasTable('support_tickets'))) {
+        await db.schema.createTable('support_tickets', (t) => {
+          t.increments('id').primary();
+          t.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+          t.string('subject', 200);
+          t.enu('status', ['open', 'pending', 'closed']).defaultTo('open');
+          t.enu('priority', ['low', 'normal', 'high', 'urgent']).defaultTo('normal');
+          t.timestamp('created_at').defaultTo(db.fn.now());
+          t.timestamp('updated_at').defaultTo(db.fn.now());
+        });
+      }
+      if (!(await db.schema.hasTable('support_messages'))) {
+        await db.schema.createTable('support_messages', (t) => {
+          t.increments('id').primary();
+          t.integer('ticket_id').unsigned().references('id').inTable('support_tickets').onDelete('CASCADE');
+          t.integer('user_id').unsigned().references('id').inTable('users');
+          t.text('message');
+          t.enu('from', ['user', 'admin', 'system']).defaultTo('user');
+          t.timestamp('created_at').defaultTo(db.fn.now());
+        });
+      }
+      // Product views (for recently-viewed feature)
+      if (!(await db.schema.hasTable('product_views'))) {
+        await db.schema.createTable('product_views', (t) => {
+          t.increments('id').primary();
+          t.integer('product_id').unsigned().references('id').inTable('products').onDelete('CASCADE');
+          t.integer('user_id').unsigned().nullable().references('id').inTable('users').onDelete('CASCADE');
+          t.string('source', 50);
+          t.timestamp('created_at').defaultTo(db.fn.now());
+        });
+      }
+      // Payout settings (for seller withdrawals)
+      if (!(await db.schema.hasTable('payout_settings'))) {
+        await db.schema.createTable('payout_settings', (t) => {
+          t.integer('user_id').unsigned().primary().references('id').inTable('users').onDelete('CASCADE');
+          t.string('bank_name', 100).nullable();
+          t.string('account_number', 50).nullable();
+          t.string('account_name', 100).nullable();
+          t.string('ewallet_type', 50).nullable();
+          t.string('ewallet_number', 50).nullable();
+          t.timestamp('updated_at').defaultTo(db.fn.now());
+        });
+      }
+    },
+  },
+  {
+    name: '004_payout_settings',
+    up: async (db) => {
+      if (!(await db.schema.hasTable('payout_settings'))) {
+        await db.schema.createTable('payout_settings', (t) => {
+          t.integer('user_id').unsigned().primary().references('id').inTable('users').onDelete('CASCADE');
+          t.string('bank_name', 100).nullable();
+          t.string('account_number', 50).nullable();
+          t.string('account_name', 100).nullable();
+          t.string('ewallet_type', 50).nullable();
+          t.string('ewallet_number', 50).nullable();
+          t.timestamp('updated_at').defaultTo(db.fn.now());
+        });
+      }
+    },
+  },
+  {
     name: '002_dev_view_as_role',
     up: async (db) => {
       // No schema change; placeholder for future permission override
