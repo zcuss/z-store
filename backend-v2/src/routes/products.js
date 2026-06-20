@@ -1,11 +1,5 @@
 // Products + categories + reviews + inventory
 export async function productRoutes(app) {
-  // List categories (public)
-  app.get('/categories', async () => {
-    const cats = await app.db('categories').orderBy('sort_order').select('*');
-    return cats;
-  });
-
   // List products (public, supports filtering)
   app.get('/', async (req) => {
     const { category, search, min, max, sort = 'newest', limit = 50, offset = 0 } = req.query;
@@ -14,12 +8,16 @@ export async function productRoutes(app) {
     if (search) q = q.where('name', 'like', `%${search}%`);
     if (min) q = q.where('price', '>=', min);
     if (max) q = q.where('price', '<=', max);
-    const orderMap = {
-      newest: [['created_at', 'desc']],
-      'price-asc': [['price', 'asc']], 'price-desc': [['price', 'desc']],
-      sold: [['sold', 'desc']], rating: [['rating', 'desc']],
+    // Sort: Knex orderBy takes (col, dir) or array of [col, dir] pairs (not nested array)
+    const sortMap = {
+      newest: ['created_at', 'desc'],
+      'price-asc': ['price', 'asc'],
+      'price-desc': ['price', 'desc'],
+      sold: ['sold', 'desc'],
+      rating: ['rating', 'desc'],
     };
-    const rows = await q.orderBy(orderMap[sort] || orderMap.newest).limit(limit).offset(offset);
+    const [col, dir] = sortMap[sort] || sortMap.newest;
+    const rows = await q.orderBy(col, dir).limit(parseInt(limit)).offset(parseInt(offset));
     return rows;
   });
 

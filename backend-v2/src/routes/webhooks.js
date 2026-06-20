@@ -52,12 +52,11 @@ export async function webhookRoutes(app) {
                 platform_fee: row.price * row.qty * 0.05, payment_fee: 0,
                 status: 'held', release_at: releaseAt,
               });
-              await app.db.raw(`INSERT INTO seller_balances (user_id, pending, total_earned) VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE pending = pending + VALUES(pending), total_earned = total_earned + VALUES(total_earned)`, [row.seller_id, sellerAmount, sellerAmount]);
-              // Try PG insert
-              await app.db('seller_balances').insert({ user_id: row.seller_id, pending: sellerAmount, total_earned: sellerAmount })
-                .onConflict(['user_id']).merge({ pending: app.db.raw('seller_balances.pending + ?', [sellerAmount]), total_earned: app.db.raw('seller_balances.total_earned + ?', [sellerAmount]) })
-                .catch(() => {});
+              // Upsert seller_balances — portable across MySQL/Postgres/Cockroach/SQLite
+              await app.db('seller_balances')
+                .insert({ user_id: row.seller_id, pending: sellerAmount, total_earned: sellerAmount, available: 0 })
+                .onConflict('user_id')
+                .merge({ pending: app.db.raw('pending + ?', [sellerAmount]), total_earned: app.db.raw('total_earned + ?', [sellerAmount]) });
               await app.db('transactions').insert({
                 user_id: row.seller_id, type: 'sale', amount: sellerAmount,
                 reference_type: 'order', reference_id: order.id, description: `Order #${order.id}`,

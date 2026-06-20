@@ -1,4 +1,5 @@
 // Fastify server — z-store v2 with multi-driver DB, multi-OAuth, RBAC
+// Env loaded via Node's native --env-file=.env flag in npm scripts.
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -12,12 +13,14 @@ import crypto from 'node:crypto';
 import { db } from './db/index.js';
 import { migrate } from './db/migrations.js';
 import { authRoutes } from './routes/auth.js';
+import { authExtrasRoutes } from './routes/auth-extras.js';
 import { productRoutes } from './routes/products.js';
 import { orderRoutes } from './routes/orders.js';
 import { adminRoutes } from './routes/admin.js';
 import { integrationRoutes } from './routes/integrations.js';
 import { userRoutes } from './routes/users.js';
 import { webhookRoutes } from './routes/webhooks.js';
+import { publicRoutes } from './routes/public.js';
 
 const PORT = parseInt(process.env.PORT || '3001');
 const HOST = process.env.HOST || '0.0.0.0';
@@ -38,8 +41,8 @@ await app.register(helmet, {
   crossOriginEmbedderPolicy: false,
 });
 await app.register(cors, {
-  origin: (origin) => {
-    if (!origin) return true;
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
     const allowed = [
       /^https?:\/\/(.+\.)?zcus\.biz\.id$/,
       /^https?:\/\/(.+\.)?zcus\.my\.id$/,
@@ -47,7 +50,8 @@ await app.register(cors, {
       /^http:\/\/localhost(:\d+)?$/,
       /^http:\/\/127\.0\.0\.1(:\d+)?$/,
     ];
-    return allowed.some((re) => re.test(origin));
+    if (allowed.some((re) => re.test(origin))) return cb(null, true);
+    return cb(null, false);
   },
   credentials: true,
 });
@@ -76,20 +80,43 @@ export const mailer = nodemailer.createTransport({
 });
 
 // ============ Decorators ============
-app.decorate('db', db);
+app.decorate('db', db());
 app.decorate('mailer', mailer);
 app.decorate('authenticate', async (req, reply) => {
-  try { await req.jwtVerify(); }
-  catch (err) { reply.code(401).send({ error: 'unauthorized' }); }
+  try {
+    await req.jwtVerify();
+  } catch (err) {
+    reply.code(401).send({ error: 'unauthorized' });
+    return reply;
+  }
+  // Re-fetch user from DB to get current email_verified/role/2fa status
+  // (JWT may be stale; DB is source of truth for security decisions)
+  try {
+    const u = await app.db('users').where({ id: req.user.id }).first();
+    if (!u) {
+      reply.code(401).send({ error: 'user_not_found' });
+      return reply;
+    }
+    req.user = {
+      id: u.id, email: u.email, name: u.name, role: u.role,
+      email_verified: !!u.email_verified, totp_enabled: !!u.totp_enabled,
+      admin_subrole: u.admin_subrole || null,
+    };
+  } catch (e) {
+    req.log.error('auth db lookup failed:', e);
+    reply.code(500).send({ error: 'auth_lookup_failed' });
+    return reply;
+  }
 });
 app.decorate('requireRole', (...roles) => async (req, reply) => {
-  if (!req.user) return reply.code(401).send({ error: 'unauthorized' });
-  if (!roles.includes(req.user.role)) return reply.code(403).send({ error: 'forbidden' });
+  if (!req.user) { reply.code(401).send({ error: 'unauthorized' }); return reply; }
+  if (!roles.includes(req.user.role)) { reply.code(403).send({ error: 'forbidden' }); return reply; }
 });
 app.decorate('requireEmailVerified', async (req, reply) => {
-  if (!req.user) return reply.code(401).send({ error: 'unauthorized' });
+  if (!req.user) { reply.code(401).send({ error: 'unauthorized' }); return reply; }
   if (!req.user.email_verified && req.user.role !== 'dev') {
-    return reply.code(403).send({ error: 'email_verified required', verify_url: '/shop/settings' });
+    reply.code(403).send({ error: 'email_verified required', verify_url: '/shop/settings' });
+    return reply;
   }
 });
 
@@ -118,13 +145,17 @@ const setAuthCookie = (reply, token) => {
   });
 };
 
-// ============ Static frontend serving (mount at /shop) ============
+// ============ Static frontend serving (mount at /shop/*) ============
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIR = path.resolve(__dirname, '../../frontend/shop');
 if (fs.existsSync(FRONTEND_DIR)) {
+  // Serve static at /shop/* (HTML/CSS/JS/images).
+  // Root path / redirects to /shop/.
+  app.get('/', async (_req, reply) => reply.redirect('/shop/'));
+  app.get('/shop', async (_req, reply) => reply.redirect('/shop/'));
   app.register(async (instance) => {
     instance.get('/shop/*', async (req, reply) => {
       let urlPath = req.url.split('?')[0];
@@ -141,25 +172,34 @@ if (fs.existsSync(FRONTEND_DIR)) {
           return reply.type(mime).send(fs.createReadStream(fpath));
         }
       } catch (e) { /* fallthrough */ }
-      // SPA fallback
-      if (!path.extname(rel)) return reply.type('text/html').send(fs.createReadStream(path.join(FRONTEND_DIR, 'index.html')));
+      // SPA fallback: try .html, then /index.html
+      if (!path.extname(rel)) {
+        const htmlPath = path.join(FRONTEND_DIR, rel + '.html');
+        if (fs.existsSync(htmlPath)) {
+          return reply.type('text/html').send(fs.createReadStream(htmlPath));
+        }
+        const dirIndex = path.join(FRONTEND_DIR, rel, 'index.html');
+        if (fs.existsSync(dirIndex)) {
+          return reply.type('text/html').send(fs.createReadStream(dirIndex));
+        }
+        return reply.type('text/html').send(fs.createReadStream(path.join(FRONTEND_DIR, 'index.html')));
+      }
       return reply.code(404).send('Not Found');
     });
   });
+  console.log('[static] serving frontend at /shop/* from', FRONTEND_DIR);
 }
 
 // ============ Health + Meta ============
-app.get('/api/health', async (req) => {
-  console.log('[health] called');
+app.get('/api/health', async (req, reply) => {
+  app.log.info('[health] called');
   try {
     const dbi = app.db;
-    console.log('[health] db:', dbi.driver);
     const r = await dbi.raw('SELECT 1 as ok');
-    console.log('[health] raw result:', r);
     return { status: 'ok', db: true, driver: app.db.driver, node: process.version, time: new Date().toISOString() };
   } catch (e) {
-    console.error('[health] err:', e);
-    return { status: 'degraded', db: false, error: e.message };
+    app.log.error({ err: e }, '[health] err');
+    return reply.code(500).send({ status: 'degraded', db: false, error: e.message });
   }
 });
 
@@ -191,12 +231,14 @@ app.get('/api', async () => ({
 
 // ============ Mount routes ============
 await app.register(authRoutes, { prefix: '/api/auth', rate });
+await app.register(authExtrasRoutes, { prefix: '/api/auth' });
 await app.register(userRoutes, { prefix: '/api/users' });
 await app.register(productRoutes, { prefix: '/api/products' });
 await app.register(orderRoutes, { prefix: '/api/orders' });
 await app.register(adminRoutes, { prefix: '/api/admin' });
 await app.register(integrationRoutes, { prefix: '/api/integrations' });
 await app.register(webhookRoutes, { prefix: '/api/webhooks' });
+await app.register(publicRoutes, { prefix: '/api' });
 
 // ============ Error handler ============
 app.setErrorHandler((err, req, reply) => {

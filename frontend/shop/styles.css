@@ -1,53 +1,67 @@
 /* ============================================================
-   Zcus Store — Professional · Minimal · Modern · Compact
-   Refined dark, hairline borders, sharp type, no glass blur
+   Z Store — Slack Professional Minimalism (light by default)
+   Off-white canvas, hairline borders, sharp type, compact spacing
    ============================================================ */
 
 :root{
-  --bg:#0a0a0b;
-  --bg-soft:#131316;
-  --bg-elev:#1c1c1f;
-  --bg-hover:#222226;
+  /* Canvas */
+  --bg:#ffffff;
+  --bg-soft:#f8f8f7;
+  --bg-elev:#ffffff;
+  --bg-hover:#f1f1ef;
+  --bg-active:#e8e8e6;
+  --glass:rgba(0,0,0,0.02);
+  --glass-hover:rgba(0,0,0,0.04);
+  --glass-border:#e8e8e6;
+  --glass-border-hover:#d1d1cf;
+
+  /* Text — Slack-style slate */
+  --text:#1d1c1b;
+  --text-2:#616061;
+  --text-dim:#868686;
+  --text-mute:#a1a1a1;
+
+  /* Accent — Z Store sky (Slack link blue #1264a3 inspired) */
+  --accent:#1264a3;
+  --accent-2:#0b4d80;
+  --accent-dark:#0a3d66;
+  --accent-soft:rgba(18,100,163,0.08);
+
+  /* Status — Slack palette */
+  --warn:#ecb22e;
+  --danger:#e01e5a;
+  --success:#007a5a;
+  --star:#ecb22e;
+  --info:#1264a3;
+
+  /* Shape */
+  --radius:6px;
+  --radius-lg:8px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.08);
+}
+
+/* Dark mode opt-in (was default in v1) */
+[data-theme="dark"]{
+  --bg:#191919;
+  --bg-soft:#232323;
+  --bg-elev:#2c2c2c;
+  --bg-hover:#343434;
+  --bg-active:#3d3d3d;
   --glass:rgba(255,255,255,0.03);
   --glass-hover:rgba(255,255,255,0.06);
   --glass-border:rgba(255,255,255,0.08);
   --glass-border-hover:rgba(255,255,255,0.16);
-
-  --text:#fafafa;
-  --text-2:#a1a1aa;
-  --text-dim:#71717a;
-  --text-mute:#52525b;
-
-  --accent:#38bdf8;
-  --accent-2:#7dd3fc;
-  --accent-dark:#0284c7;
-  --accent-soft:rgba(56,189,248,0.1);
-
-  --warn:#f59e0b;
-  --danger:#ef4444;
-  --success:#10b981;
-  --star:#fbbf24;
-
-  --radius:8px;
-  --radius-lg:10px;
-  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-}
-
-/* Light theme override */
-[data-theme="light"]{
-  --bg:#fafafa;
-  --bg-soft:#f4f4f5;
-  --bg-elev:#ffffff;
-  --bg-hover:#e4e4e7;
-  --glass:rgba(0,0,0,0.02);
-  --glass-hover:rgba(0,0,0,0.04);
-  --glass-border:rgba(0,0,0,0.08);
-  --glass-border-hover:rgba(0,0,0,0.16);
-  --text:#18181b;
-  --text-2:#52525b;
-  --text-dim:#71717a;
-  --text-mute:#a1a1aa;
-  --accent-soft:rgba(14,165,233,0.08);
+  --text:#f1f1ef;
+  --text-2:#d1d1cf;
+  --text-dim:#a4a4a4;
+  --text-mute:#7a7a7a;
+  --accent-soft:rgba(18,100,163,0.18);
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.6);
 }
 
 /* ===== RESET ===== */

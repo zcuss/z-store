@@ -478,11 +478,13 @@ async function handleOAuthLink(app, reply, { platform, externalId, email, name, 
     const [id] = await app.db('users').insert(insertData);
     user = await app.db('users').where({ id }).first();
     isNew = true;
-    // Save default platform integration
-    await app.db('platform_integrations').insert({
-      owner_id: id, platform, enabled: true, status: 'connected',
-      config: JSON.stringify({ username: telegramUsername || externalId }),
-    }).on('query-error').catch(() => {});
+    // Save default platform integration (silently ignore if table missing)
+    try {
+      await app.db('platform_integrations').insert({
+        owner_id: id, platform, enabled: true, status: 'connected',
+        config: JSON.stringify({ username: telegramUsername || externalId }),
+      }).onConflict(['owner_id', 'platform']).ignore();
+    } catch (e) { /* table may not have unique constraint, ignore */ }
   }
 
   const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });

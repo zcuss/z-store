@@ -1,44 +1,49 @@
-/* Tailwind-style component library — Slack professional minimalism
+/* Tailwind-style component library — Slack professional minimalism (light default)
    shadcn/ui inspired. Use alongside styles.css as transition layer. */
 
-/* ===== DESIGN TOKENS (override via [data-theme]) ===== */
+/* ===== DESIGN TOKENS ===== */
 :root {
-  --bg: #0a0a0b;
-  --bg-soft: #131316;
-  --bg-elev: #1c1c1f;
-  --bg-hover: #222226;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.16);
-  --text: #fafafa;
-  --text-2: #a1a1aa;
-  --text-dim: #71717a;
-  --text-mute: #52525b;
-  --accent: #38bdf8;
-  --accent-2: #7dd3fc;
-  --accent-dark: #0284c7;
-  --accent-soft: rgba(56, 189, 248, 0.1);
-  --success: #10b981;
-  --warn: #f59e0b;
-  --danger: #ef4444;
+  --bg: #ffffff;
+  --bg-soft: #f8f8f7;
+  --bg-elev: #ffffff;
+  --bg-hover: #f1f1ef;
+  --border: #e8e8e6;
+  --border-hover: #d1d1cf;
+  --text: #1d1c1b;
+  --text-2: #616061;
+  --text-dim: #868686;
+  --text-mute: #a1a1a1;
+  --accent: #1264a3;
+  --accent-2: #0b4d80;
+  --accent-dark: #0a3d66;
+  --accent-soft: rgba(18,100,163,0.08);
+  --success: #007a5a;
+  --warn: #ecb22e;
+  --danger: #e01e5a;
+  --info: #1264a3;
   --radius: 6px;
   --radius-lg: 8px;
-  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-[data-theme='light'] {
-  --bg: #fafafa;
-  --bg-soft: #f4f4f5;
-  --bg-elev: #ffffff;
-  --bg-hover: #e4e4e7;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.16);
-  --text: #18181b;
-  --text-2: #52525b;
-  --text-dim: #71717a;
-  --text-mute: #a1a1aa;
+[data-theme='dark'] {
+  --bg: #191919;
+  --bg-soft: #232323;
+  --bg-elev: #2c2c2c;
+  --bg-hover: #343434;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --text: #f1f1ef;
+  --text-2: #d1d1cf;
+  --text-dim: #a4a4a4;
+  --text-mute: #7a7a7a;
+  --accent-soft: rgba(18,100,163,0.18);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
 /* ===== RESET ===== */

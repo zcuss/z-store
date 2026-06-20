@@ -138,7 +138,7 @@ async function pollNotificationBadge() {
 }
 
 function initTheme() {
-  const saved = localStorage.getItem('zcus_theme') || 'dark';
+  const saved = localStorage.getItem('zcus_theme') || 'light';
   document.documentElement.setAttribute('data-theme', saved);
   const ti = document.getElementById('themeIcon');
   if (ti) ti.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';

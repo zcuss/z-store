@@ -1,0 +1,156 @@
+[
+  {
+    "name": "01-home",
+    "url": "/shop/",
+    "desc": "Homepage",
+    "file": "01-home.png",
+    "size": 922296
+  },
+  {
+    "name": "02-product",
+    "url": "/shop/product.html?slug=claude-pro-1-bulan",
+    "desc": "Product Detail",
+    "file": "02-product.png",
+    "size": 491909
+  },
+  {
+    "name": "03-orders",
+    "url": "/shop/orders.html",
+    "desc": "My Orders",
+    "file": "03-orders.png",
+    "size": 63265
+  },
+  {
+    "name": "04-payment",
+    "url": "/shop/payment.html",
+    "desc": "Checkout / Payment",
+    "file": "04-payment.png",
+    "size": 224062
+  },
+  {
+    "name": "05-order-success",
+    "url": "/shop/order-success.html",
+    "desc": "Order Success",
+    "file": "05-order-success.png",
+    "size": 167705
+  },
+  {
+    "name": "06-notifications",
+    "url": "/shop/notifications.html",
+    "desc": "Notifications",
+    "file": "06-notifications.png",
+    "size": 73753
+  },
+  {
+    "name": "07-settings",
+    "url": "/shop/settings.html",
+    "desc": "Settings & Security",
+    "file": "07-settings.png",
+    "size": 64166
+  },
+  {
+    "name": "08-admin",
+    "url": "/shop/admin.html",
+    "desc": "Admin Dashboard",
+    "file": "08-admin.png",
+    "size": 66383
+  },
+  {
+    "name": "09-seller",
+    "url": "/shop/seller.html",
+    "desc": "Seller Dashboard",
+    "file": "09-seller.png",
+    "size": 908405
+  },
+  {
+    "name": "10-affiliate",
+    "url": "/shop/affiliate.html",
+    "desc": "Affiliate Program",
+    "file": "10-affiliate.png",
+    "size": 63368
+  },
+  {
+    "name": "11-wishlist",
+    "url": "/shop/wishlist.html",
+    "desc": "Wishlist",
+    "file": "11-wishlist.png",
+    "size": 74096
+  },
+  {
+    "name": "12-cara-order",
+    "url": "/shop/cara-order.html",
+    "desc": "Cara Order",
+    "file": "12-cara-order.png",
+    "size": 464856
+  },
+  {
+    "name": "13-faq",
+    "url": "/shop/faq.html",
+    "desc": "FAQ",
+    "file": "13-faq.png",
+    "size": 164486
+  },
+  {
+    "name": "14-about",
+    "url": "/shop/about.html",
+    "desc": "About Us",
+    "file": "14-about.png",
+    "size": 183070
+  },
+  {
+    "name": "15-garansi",
+    "url": "/shop/garansi.html",
+    "desc": "Garansi",
+    "file": "15-garansi.png",
+    "size": 180977
+  },
+  {
+    "name": "16-track",
+    "url": "/shop/track.html",
+    "desc": "Order Tracking",
+    "file": "16-track.png",
+    "size": 72846
+  },
+  {
+    "name": "17-support",
+    "url": "/shop/support.html",
+    "desc": "Support",
+    "file": "17-support.png",
+    "size": 157978
+  },
+  {
+    "name": "18-verify-email",
+    "url": "/shop/verify-email.html",
+    "desc": "Verify Email",
+    "file": "18-verify-email.png",
+    "size": 75223
+  },
+  {
+    "name": "19-terms",
+    "url": "/shop/terms.html",
+    "desc": "Terms",
+    "file": "19-terms.png",
+    "size": 256577
+  },
+  {
+    "name": "20-refund",
+    "url": "/shop/refund-policy.html",
+    "desc": "Refund Policy",
+    "file": "20-refund.png",
+    "size": 207948
+  },
+  {
+    "name": "21-invoice",
+    "url": "/shop/invoice.html",
+    "desc": "Invoice",
+    "file": "21-invoice.png",
+    "size": 66831
+  },
+  {
+    "name": "22-404",
+    "url": "/shop/404.html",
+    "desc": "404 Page",
+    "file": "22-404.png",
+    "size": 111101
+  }
+]
