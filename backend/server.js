@@ -87,6 +87,9 @@ if (fs.existsSync(FRONTEND_DIR)) {
         return next();
       }
       res.setHeader('Cache-Control', /\.(css|js|woff2?|svg|png|jpg|webp)$/i.test(cleanRel) ? 'public, max-age=31536000, immutable' : 'public, max-age=3600');
+      // Force UTF-8 charset on JS/CSS/HTML — application/javascript without charset defaults to US-ASCII
+      // per RFC 4329, which breaks parsing of any non-ASCII char (e.g. em-dash in comments)
+      if (/\.(js|css|html?)$/i.test(cleanRel)) res.setHeader('Content-Type', (res.getHeader('Content-Type') || 'text/plain') + '; charset=utf-8');
       res.sendFile(fpath);
     });
   });

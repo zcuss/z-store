@@ -1,9 +1,9 @@
-// Zcus Store v3 — Glassmorphism + FontAwesome + Extra Features
+// Zcus Store v3 -- Glassmorphism + FontAwesome + Extra Features
 // Top-level vars use `window.X` to coexist with other inline scripts on subpages
 // (orders.html, settings.html, etc. each declare their own `let user/token`).
-// Without this isolation, both `let user` declarations collide → SyntaxError
+// Without this isolation, both `let user` declarations collide -> SyntaxError
 // halts entire app.js, breaking cart/wishlist/theme on every page.
-// API base — always same-origin relative /api (works on localhost, 5.zcus.biz.id tunnel, zcus.biz.id cPanel, etc.)
+// API base -- always same-origin relative /api (works on localhost, 5.zcus.biz.id tunnel, zcus.biz.id cPanel, etc.)
 // IMPORTANT: Do NOT declare `const API` or `var API` at top level here. Subpages (orders.html, settings.html, etc.)
 // each declare their own `const API = ...` in inline <script> blocks. Re-declaring the same
 // name in a separate classic script throws SyntaxError ("Identifier 'API' has already been declared"),
@@ -21,7 +21,7 @@ if (typeof window !== 'undefined') {
 // Local alias for convenience (this DOES re-declare `const API` which would conflict, so use function)
 const _api = () => window.API;
 window.products = window.products || [];
-// Safe localStorage helpers — corrupt value must never kill the whole script
+// Safe localStorage helpers -- corrupt value must never kill the whole script
 const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
 const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 window.cart = _lsJSON('zcus_cart', []);
@@ -118,7 +118,7 @@ applyPromo = function() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // null-safe DOM lookups — pages may not have all elements
+  // null-safe DOM lookups -- pages may not have all elements
   const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
   const $$ = sel => { try { return document.querySelector(sel); } catch (e) { return null; } };
 
@@ -326,7 +326,7 @@ function productCard(p) {
         ${p.review_count > 0
           ? `<i class="fa-solid fa-star star"></i><b>${p.review_avg}</b><span class="pc-rev-count">(${p.review_count})</span>`
           : (p.sold > 50 ? `<i class="fa-solid fa-fire star"></i><b>Hot</b>` : `<span class="pc-new-badge">NEW</span>`)}
-        ${p.sold > 0 ? `<span class="pc-sold"><span class="dot">·</span> ${p.sold} sold</span>` : ''}
+        ${p.sold > 0 ? `<span class="pc-sold"><span class="dot">-</span> ${p.sold} sold</span>` : ''}
       </div>
       <div class="pc-price">${fmtIDR(p.price)}${p.original_price ? `<span class="pc-old">${fmtIDR(p.original_price)}</span>` : ''}</div>
       <div class="pc-stock ${stockClass}">
@@ -377,9 +377,9 @@ async function showProduct(id) {
           <h2>${p.name}</h2>
           <div class="pd-rating-row" onclick="showReviews(${p.id})" style="cursor:pointer">
             ${renderStars(avgRating)}
-            <span style="color:var(--text-dim);font-size:13px;margin-left:8px">${avgRating} · ${reviews.length} reviews · <u>Lihat semua</u></span>
+            <span style="color:var(--text-dim);font-size:13px;margin-left:8px">${avgRating} - ${reviews.length} reviews - <u>Lihat semua</u></span>
           </div>
-          <p>${p.description || '—'}</p>
+          <p>${p.description || '--'}</p>
           <div class="pd-price">${fmtIDR(p.price)}${p.original_price ? `<span class="pc-old" style="font-size:16px;margin-left:8px">${fmtIDR(p.original_price)}</span><span style="background:rgba(239,68,68,.9);color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;margin-left:8px">-${d}%</span>` : ''}</div>
           <div class="pd-meta glass">
             <div class="pd-meta-item"><span>STOK</span><b>${p.available || p.stock}</b></div>
@@ -434,7 +434,7 @@ function showReviews(productId) {
   const counts = [5,4,3,2,1].map(s => reviews.filter(r => Math.round(r.rating) === s).length);
 
   document.getElementById('reviewsContent').innerHTML = `
-    <h2><i class="fa-solid fa-star"></i> Reviews — ${product?.name || 'Product'}</h2>
+    <h2><i class="fa-solid fa-star"></i> Reviews -- ${product?.name || 'Product'}</h2>
     <div class="review-summary glass">
       <div class="review-avg">
         <div class="review-avg-num">${avg}</div>
@@ -457,7 +457,7 @@ function showReviews(productId) {
           <div class="review-avatar">${r.name.charAt(0)}</div>
           <div>
             <b>${r.name}</b>
-            <div class="review-meta">${renderStars(r.rating)} · <span>${r.date}</span></div>
+            <div class="review-meta">${renderStars(r.rating)} - <span>${r.date}</span></div>
           </div>
         </div>
         <p>${r.text}</p>
@@ -503,7 +503,7 @@ function shareProduct(productId) {
   const p = products.find(x => x.id === productId);
   if (!p) return;
   const url = `${location.origin}/shop/?ref=share&p=${productId}`;
-  const text = `Cek ${p.name} di Zcus Store — ${fmtIDR(p.price)} ${p.original_price ? `(diskon ${disc(p)}%)` : ''}`;
+  const text = `Cek ${p.name} di Zcus Store -- ${fmtIDR(p.price)} ${p.original_price ? `(diskon ${disc(p)}%)` : ''}`;
   document.getElementById('shareLink').value = url;
   document.getElementById('shareButtons').innerHTML = `
     <a class="share-btn whatsapp" target="_blank" href="https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}">
@@ -679,7 +679,7 @@ function runSearch(q) {
   if (matches.length) {
     dd.innerHTML = `<div class="sd-section"><div class="sd-section-title"><i class="fa-solid fa-magnifying-glass"></i> ${matches.length} hasil untuk "${q}"</div>${matches.map(p => `<div class="sd-item" onclick='saveSearch("${q}"); viewProduct(${p.id})'>
         <div class="sd-ico"><i class="fa-solid ${getCatIcon(p.category)}"></i></div>
-        <div class="sd-info"><div class="sd-name">${highlightMatch(p.name, q)}</div><div class="sd-cat">${p.category}${p.review_count ? ` · ⭐ ${p.review_avg} (${p.review_count})` : ''}</div></div>
+        <div class="sd-info"><div class="sd-name">${highlightMatch(p.name, q)}</div><div class="sd-cat">${p.category}${p.review_count ? ` - ⭐ ${p.review_avg} (${p.review_count})` : ''}</div></div>
         <div class="sd-price">${fmtIDR(p.price)}</div>
       </div>`).join('')}</div>
       <div class="sd-section"><button class="sd-view-all" onclick='saveSearch("${q}"); currentFilter.search="${q.replace(/'/g, "\\'")}"; applyFilterLocal(); document.getElementById(\"searchDropdown\").classList.remove(\"show\")'><i class="fa-solid fa-th"></i> Lihat semua hasil di grid</button></div>`;
@@ -722,7 +722,7 @@ function clearSearch() {
   applyFilterLocal();
 }
 
-// Search input focus → show suggestions
+// Search input focus -> show suggestions
 document.addEventListener('focusin', e => {
   if (e.target.id === 'searchInput' && !e.target.value) showSearchSuggestions();
 });
@@ -731,7 +731,7 @@ document.addEventListener('click', e => {
     document.getElementById('searchDropdown')?.classList.remove('show');
   }
 });
-// Enter key → save & navigate
+// Enter key -> save & navigate
 document.addEventListener('keydown', e => {
   if (e.target.id === 'searchInput' && e.key === 'Enter') {
     saveSearch(e.target.value);
@@ -991,7 +991,7 @@ async function showOrders() {
   if (!user) { showModal('login'); return toast('Login dulu', 'error'); }
   showModal('orders');
   const list = document.getElementById('ordersList');
-  list.innerHTML = '<div class="loading">Loading…</div>';
+  list.innerHTML = '<div class="loading">Loading...</div>';
   try {
     const orders = await api('/orders/me');
     if (!orders.length) { list.innerHTML = '<div class="empty-state"><div class="empty-ico"><i class="fa-solid fa-box-open"></i></div><h3>Belum ada pesanan</h3><p>Yuk checkout produk pertama kamu!</p></div>'; return; }
@@ -1001,7 +1001,7 @@ async function showOrders() {
           <span class="oc-id">#${o.id}</span>
           <span class="oc-status oc-${o.status}">${o.status}</span>
         </div>
-        <div class="oc-body">${o.items || '—'}</div>
+        <div class="oc-body">${o.items || '--'}</div>
         <div class="oc-foot">
           <span><b style="color:var(--accent)">${fmtIDR(o.total)}</b></span>
           <span>${new Date(o.created_at).toLocaleString('id-ID')}</span>
