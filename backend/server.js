@@ -78,6 +78,9 @@ if (fs.existsSync(FRONTEND_DIR)) {
         if (!path.extname(cleanRel)) {
           const htmlPath = path.join(FRONTEND_DIR, cleanRel + '.html');
           if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
+          // Try directory index.html (e.g. /preview/ → preview/index.html)
+          const dirIndexPath = path.join(FRONTEND_DIR, cleanRel, 'index.html');
+          if (fs.existsSync(dirIndexPath)) return res.sendFile(dirIndexPath);
         }
         // Last resort: SPA fallback for paths with no extension
         if (!path.extname(cleanRel)) return res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
