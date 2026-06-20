@@ -4,14 +4,14 @@
     "url": "/shop/",
     "desc": "Homepage",
     "file": "01-home.png",
-    "size": 922296
+    "size": 908119
   },
   {
     "name": "02-product",
     "url": "/shop/product.html?slug=claude-pro-1-bulan",
     "desc": "Product Detail",
     "file": "02-product.png",
-    "size": 491909
+    "size": 496165
   },
   {
     "name": "03-orders",
@@ -32,7 +32,7 @@
     "url": "/shop/order-success.html",
     "desc": "Order Success",
     "file": "05-order-success.png",
-    "size": 167705
+    "size": 167717
   },
   {
     "name": "06-notifications",
@@ -60,7 +60,7 @@
     "url": "/shop/seller.html",
     "desc": "Seller Dashboard",
     "file": "09-seller.png",
-    "size": 908405
+    "size": 908394
   },
   {
     "name": "10-affiliate",
@@ -109,7 +109,7 @@
     "url": "/shop/track.html",
     "desc": "Order Tracking",
     "file": "16-track.png",
-    "size": 72846
+    "size": 72855
   },
   {
     "name": "17-support",

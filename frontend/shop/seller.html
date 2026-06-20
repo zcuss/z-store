@@ -261,7 +261,7 @@
 
 <script>
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
-const API = 'https://zcus.biz.id/shop-app/api';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 let token = localStorage.getItem('zcus_token') || null;
 let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
 let currentTab = 'overview';
@@ -736,7 +736,7 @@ function toast(msg, type='info') {
     <div>© 2026 Z Store. All rights reserved.</div>
     <div class="ftr-meta">
       <span class="status-dot"></span>
-      <span>API: <a href="/shop-app/api/health">live</a></span>
+      <span>API: <a href="/api/health">live</a></span>
       <span>·</span>
       <span>v3.0.0</span>
       <span>·</span>
