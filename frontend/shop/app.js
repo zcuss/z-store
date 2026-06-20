@@ -624,7 +624,7 @@ function resetFilter() {
 }
 
 // ===== SEARCH V2 =====
-let recentSearches = JSON.parse(localStorage.getItem('zs_recent_searches') || '[]');
+let recentSearches = JSON.parse(localStorage.getItem('zcus_recent_searches') || '[]');
 let trendingSearches = ['Claude Pro', 'Netflix Premium', 'ChatGPT Plus', 'Capcut Pro', 'Hosting cPanel', 'Voucher Spotify'];
 let searchDebounce = null;
 
@@ -696,13 +696,13 @@ function highlightMatch(text, q) {
 function saveSearch(q) {
   if (!q || q.length < 2) return;
   recentSearches = [q, ...recentSearches.filter(x => x !== q)].slice(0, 10);
-  localStorage.setItem('zs_recent_searches', JSON.stringify(recentSearches));
+  localStorage.setItem('zcus_recent_searches', JSON.stringify(recentSearches));
 }
 
 function clearRecentSearches(e) {
   e.stopPropagation();
   recentSearches = [];
-  localStorage.removeItem('zs_recent_searches');
+  localStorage.removeItem('zcus_recent_searches');
   showSearchSuggestions();
   toast('Pencarian terakhir dihapus', 'info');
 }
@@ -972,8 +972,8 @@ function saveAuth(u, t) {
 async function doLogout() {
   try { await fetch(_api() + '/api/auth/logout', { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} }); } catch (e) {}
   user = null; token = null;
-  localStorage.removeItem('zs_user');
-  localStorage.removeItem('zs_token');
+  localStorage.removeItem('zcus_user');
+  localStorage.removeItem('zcus_token');
   document.getElementById('accountIcon').className = 'fa-solid fa-user';
   hideModal('account');
   toast('Logout berhasil', 'info');

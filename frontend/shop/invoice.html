@@ -6,7 +6,7 @@
 <title>Invoice — Z Store</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -185,8 +185,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-';
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-let token = localStorage.getItem('zs_token') || '';
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let token = localStorage.getItem('zcus_token') || '';
 let invoiceData = null;
 
 async function loadInvoice() {
@@ -204,7 +204,7 @@ async function loadInvoice() {
   } catch (e) { /* dev mode */ }
   // Dev fallback
   let local = null;
-  try { const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]'); local = orders.find(o => String(o.id) === String(id)); } catch (e) {}
+  try { const orders = JSON.parse(localStorage.getItem('zcus_orders') || '[]'); local = orders.find(o => String(o.id) === String(id)); } catch (e) {}
   if (local) {
     invoiceData = {
       number: 'INV-' + new Date(local.created_at || Date.now()).getFullYear() + '-' + String(local.id).padStart(5, '0'),

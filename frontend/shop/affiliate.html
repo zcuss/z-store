@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .aff-wrap{max-width:1200px;margin:0 auto;padding:24px}
 .aff-hero{background:linear-gradient(135deg,#0ea5e9,#6366f1,#a855f7);padding:40px 32px;border-radius:20px;color:#fff;text-align:center;position:relative;overflow:hidden;margin-bottom:24px}
@@ -175,13 +175,13 @@
 <script>
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-let token = localStorage.getItem('zs_token') || '';
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let token = localStorage.getItem('zcus_token') || '';
 let affData = null;
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
-function logout() { localStorage.removeItem('zs_user'); localStorage.removeItem('zs_token'); location.href = '/shop/'; }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
+function logout() { localStorage.removeItem('zcus_user'); localStorage.removeItem('zcus_token'); location.href = '/shop/'; }
 function copyLink() { const l = document.getElementById('affLink').textContent; navigator.clipboard.writeText(l).then(() => toast('Link disalin!', 'success')); }
 function copyCode() { const c = document.getElementById('affCode').textContent; navigator.clipboard.writeText(c).then(() => toast('Kode disalin!', 'success')); }
 function shareWA(e) { e.preventDefault(); const l = encodeURIComponent(document.getElementById('affLink').textContent); window.open('https://wa.me/?text=' + encodeURIComponent('Order produk digital murah meriah di Z Store lewat link aku ya: ' + l), '_blank'); }
@@ -288,7 +288,7 @@ async function checkAuth() {
   loadLeaderboard();
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 checkAuth();
 </script>

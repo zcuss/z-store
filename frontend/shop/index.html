@@ -16,7 +16,7 @@
 <link rel="manifest" href="/shop/manifest.json">
 <link rel="canonical" href="https://zcus.biz.id/shop/">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-<link rel="stylesheet" href="tw-components.css?v=1">
+<link rel="stylesheet" href="tw-components.css?v=36">
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Open Graph / Facebook -->
@@ -64,7 +64,7 @@
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XXXXXXXXXXXX"></script>
 <script>
 // Block zoom + horizontal scroll on mobile
@@ -1038,7 +1038,7 @@ function sendLiveChat() {
 </script>
 
 <script src="products.js?v=29"></script>
-<script src="app.js?v=35"></script>
+<script src="app.js?v=36"></script>
 <script>
 // Service worker registration for PWA
 if ('serviceWorker' in navigator) {
@@ -1109,8 +1109,8 @@ async function doLogin() {
   if (!email || !password) return toast('Email + password wajib diisi', 'error');
   const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
   if (r.error) return toast(r.error, 'error');
-  localStorage.setItem('zs_user', JSON.stringify(r.user));
-  localStorage.setItem('zs_token', r.token);
+  localStorage.setItem('zcus_user', JSON.stringify(r.user));
+  localStorage.setItem('zcus_token', r.token);
   toast('Login berhasil!', 'success');
   setTimeout(() => location.reload(), 600);
 }
@@ -1127,8 +1127,8 @@ async function doRegister() {
   if (!tos) return toast('Kamu harus setuju Syarat & Ketentuan', 'error');
   const r = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role }) });
   if (r.error) return toast(r.error, 'error');
-  localStorage.setItem('zs_user', JSON.stringify(r.user));
-  localStorage.setItem('zs_token', r.token);
+  localStorage.setItem('zcus_user', JSON.stringify(r.user));
+  localStorage.setItem('zcus_token', r.token);
   toast(`Selamat datang, ${r.user.name}! Akun berhasil dibuat.`, 'success');
   setTimeout(() => location.reload(), 600);
 }
@@ -1157,8 +1157,8 @@ function doGoogleDevFallback() {
   api('/api/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'dev_' + Date.now(), email, name, avatar_url: null }) })
     .then(r => {
       if (r.error) return toast(r.error, 'error');
-      localStorage.setItem('zs_user', JSON.stringify(r.user));
-      localStorage.setItem('zs_token', r.token);
+      localStorage.setItem('zcus_user', JSON.stringify(r.user));
+      localStorage.setItem('zcus_token', r.token);
       toast(r.isNew ? `Akun baru dibuat via Google: ${r.user.name}` : `Login Google berhasil: ${r.user.name}`, 'success');
       setTimeout(() => location.reload(), 600);
     })
@@ -1188,8 +1188,8 @@ async function verifyOtp() {
   if (!email || !otp) return toast('Email + OTP wajib diisi', 'error');
   const r = await api('/api/auth/otp/verify', { method: 'POST', body: JSON.stringify({ email, otp, purpose: 'login' }) });
   if (r.error) return toast(r.error, 'error');
-  localStorage.setItem('zs_user', JSON.stringify(r.user));
-  localStorage.setItem('zs_token', r.token);
+  localStorage.setItem('zcus_user', JSON.stringify(r.user));
+  localStorage.setItem('zcus_token', r.token);
   toast('Login OTP berhasil!', 'success');
   setTimeout(() => location.reload(), 600);
 }
@@ -1259,9 +1259,9 @@ function subscribeNewsletter(e){
   fetch(API + '/api/newsletter/subscribe', { method: 'POST', body: JSON.stringify({ email, source: 'homepage' }) })
     .then(r => r.json()).then(d => toast(d.message || 'Terima kasih! Kode WELCOME10 sudah dikirim.', 'success'))
     .catch(() => toast('Terima kasih! Kode diskon 10% sudah dikirim ke ' + email, 'success'));
-  const list = JSON.parse(localStorage.getItem('zs_newsletter') || '[]');
+  const list = JSON.parse(localStorage.getItem('zcus_newsletter') || '[]');
   if (!list.includes(email)) list.push(email);
-  localStorage.setItem('zs_newsletter', JSON.stringify(list));
+  localStorage.setItem('zcus_newsletter', JSON.stringify(list));
   document.getElementById('newsletterEmail').value = '';
   return false;
 }
@@ -1271,7 +1271,7 @@ function doSpin() {
   const btn = document.getElementById('swSpinBtn');
   if (btn.disabled) return;
   // Cooldown check
-  const last = localStorage.getItem('zs_last_spin');
+  const last = localStorage.getItem('zcus_last_spin');
   if (last && Date.now() - parseInt(last) < 24 * 3600 * 1000) {
     const remain = 24 * 3600 * 1000 - (Date.now() - parseInt(last));
     toast(`Coba lagi dalam ${Math.ceil(remain / 3600000)} jam`, 'info');
@@ -1316,11 +1316,11 @@ function showSpinResult(prize) {
   document.getElementById('swResultCode').textContent = prize.label === 'ZONK' ? '-' : code;
   document.getElementById('swResultCode').style.display = prize.label === 'ZONK' ? 'none' : 'block';
   if (prize.label !== 'ZONK') {
-    const promos = JSON.parse(localStorage.getItem('zs_promos') || '{}');
+    const promos = JSON.parse(localStorage.getItem('zcus_promos') || '{}');
     promos[code] = { ...prize, expires: Date.now() + 7 * 86400000 };
-    localStorage.setItem('zs_promos', JSON.stringify(promos));
+    localStorage.setItem('zcus_promos', JSON.stringify(promos));
   }
-  localStorage.setItem('zs_last_spin', Date.now().toString());
+  localStorage.setItem('zcus_last_spin', Date.now().toString());
   const btn = document.getElementById('swSpinBtn');
   btn.disabled = false; btn.innerHTML = 'SPIN';
   startCooldown(24 * 3600 * 1000);
@@ -1332,7 +1332,7 @@ function startCooldown(remain) {
   const el = document.getElementById('swCooldown');
   el.style.display = 'inline-flex';
   function tick() {
-    const r = remain - (Date.now() - parseInt(localStorage.getItem('zs_last_spin') || Date.now()));
+    const r = remain - (Date.now() - parseInt(localStorage.getItem('zcus_last_spin') || Date.now()));
     if (r <= 0) { el.style.display = 'none'; return; }
     const h = String(Math.floor(r / 3600000)).padStart(2, '0');
     const m = String(Math.floor((r % 3600000) / 60000)).padStart(2, '0');
@@ -1344,7 +1344,7 @@ function startCooldown(remain) {
 }
 // Init cooldown on load
 (function initSwCooldown() {
-  const last = localStorage.getItem('zs_last_spin');
+  const last = localStorage.getItem('zcus_last_spin');
   if (last) {
     const remain = 24 * 3600 * 1000 - (Date.now() - parseInt(last));
     if (remain > 0) startCooldown(remain);
@@ -1467,7 +1467,7 @@ function showSkeleton(container, count = 6) {
 }
 
 // ===== COMPARE PRODUCTS =====
-let compareList = JSON.parse(localStorage.getItem('zs_compare') || '[]');
+let compareList = JSON.parse(localStorage.getItem('zcus_compare') || '[]');
 function toggleCompare(id) {
   const idx = compareList.indexOf(id);
   if (idx >= 0) compareList.splice(idx, 1);
@@ -1475,7 +1475,7 @@ function toggleCompare(id) {
     if (compareList.length >= 4) { toast('Maksimal 4 produk untuk compare', 'info'); return; }
     compareList.push(id);
   }
-  localStorage.setItem('zs_compare', JSON.stringify(compareList));
+  localStorage.setItem('zcus_compare', JSON.stringify(compareList));
   // Update button visual
   const btn = document.getElementById('cmpBtn' + id);
   if (btn) btn.classList.toggle('active', idx < 0);
@@ -1493,7 +1493,7 @@ async function showCompare() {
   if (!products.length) {
     // Dev fallback — load from existing product list
     products = [];
-    const all = JSON.parse(localStorage.getItem('zs_products_cache') || '[]');
+    const all = JSON.parse(localStorage.getItem('zcus_products_cache') || '[]');
     compareList.forEach(id => { const p = all.find(x => x.id === id); if (p) products.push(p); });
     if (!products.length) {
       // Try from rendered DOM — fallback use cart-style mock
@@ -1844,10 +1844,10 @@ window.addEventListener('unhandledrejection', function(e){
   }, { passive: true });
   // Update badges
   const updateBadges = () => {
-    const c = JSON.parse(localStorage.getItem('zs_cart') || '[]').reduce((s, x) => s + x.qty, 0);
+    const c = JSON.parse(localStorage.getItem('zcus_cart') || '[]').reduce((s, x) => s + x.qty, 0);
     const cb = document.getElementById('mbnCartBadge');
     if (cb) { cb.textContent = c; cb.classList.toggle('show', c > 0); }
-    const w = JSON.parse(localStorage.getItem('zs_wishlist') || '[]').length;
+    const w = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]').length;
     const wb = document.getElementById('mbnWishBadge');
     if (wb) { wb.textContent = w; wb.classList.toggle('show', w > 0); }
   };

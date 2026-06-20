@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://app.midtrans.com" crossorigin>
 <style>
@@ -234,9 +234,9 @@
 <script>
 // ============ SHARED STATE ============
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
-const user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-const token = localStorage.getItem('zs_token') || '';
-let cart = JSON.parse(localStorage.getItem('zs_cart') || '[]');
+const user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+const token = localStorage.getItem('zcus_token') || '';
+let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 let product = null;
 let relatedProducts = [];
 
@@ -250,7 +250,7 @@ function showForm(name) { ['login','register'].forEach(n => document.getElementB
 function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.body.style.overflow = ''; }
 function showAccount() { location.href = '/shop/orders.html'; }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 
 function updateCartBadge() {
@@ -260,7 +260,7 @@ function updateCartBadge() {
   const cd = document.getElementById('cartDrawerCount');
   if (cd) cd.textContent = total;
 }
-function saveCart() { localStorage.setItem('zs_cart', JSON.stringify(cart)); updateCartBadge(); renderCartDrawer(); }
+function saveCart() { localStorage.setItem('zcus_cart', JSON.stringify(cart)); updateCartBadge(); renderCartDrawer(); }
 function renderCartDrawer() {
   const items = document.getElementById('cartItems');
   const foot = document.getElementById('cartFoot');
@@ -286,8 +286,8 @@ async function doLogin() {
   if (!email || !password) return toast('Email + password wajib', 'error');
   const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
   if (r.error) return toast(r.error, 'error');
-  localStorage.setItem('zs_user', JSON.stringify(r.user));
-  localStorage.setItem('zs_token', r.token);
+  localStorage.setItem('zcus_user', JSON.stringify(r.user));
+  localStorage.setItem('zcus_token', r.token);
   toast('Login berhasil', 'success');
   setTimeout(() => location.reload(), 500);
 }
@@ -298,8 +298,8 @@ async function doRegister() {
   if (!email || !password || password.length < 6) return toast('Email + password (min 6 char)', 'error');
   const r = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role: 'buyer' }) });
   if (r.error) return toast(r.error, 'error');
-  localStorage.setItem('zs_user', JSON.stringify(r.user));
-  localStorage.setItem('zs_token', r.token);
+  localStorage.setItem('zcus_user', JSON.stringify(r.user));
+  localStorage.setItem('zcus_token', r.token);
   toast('Akun dibuat', 'success');
   setTimeout(() => location.reload(), 500);
 }
@@ -621,7 +621,7 @@ async function loadRelated() {
 }
 
 // Init
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 updateCartBadge();
 renderCartDrawer();

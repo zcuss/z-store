@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .success-wrap{max-width:720px;margin:0 auto;padding:48px 24px;text-align:center}
 .success-icon{width:120px;height:120px;margin:0 auto 24px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.2),transparent 70%);display:flex;align-items:center;justify-content:center;position:relative;animation:successPop .6s cubic-bezier(.34,1.56,.64,1)}
@@ -179,11 +179,11 @@
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
 let orderData = null;
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 
 function copyOrderId() {
   const id = document.getElementById('orderId').textContent;
@@ -207,20 +207,20 @@ async function loadOrder() {
   let id = params.get('id');
   // Get from session if no id
   if (!id) {
-    const last = JSON.parse(localStorage.getItem('zs_last_order') || 'null');
+    const last = JSON.parse(localStorage.getItem('zcus_last_order') || 'null');
     if (last) orderData = last;
   }
   if (id) {
     // Fetch from API or local mock
     try {
-      const r = await fetch(API + '/api/orders/' + id, { headers: { Authorization: 'Bearer ' + (localStorage.getItem('zs_token') || '') } });
+      const r = await fetch(API + '/api/orders/' + id, { headers: { Authorization: 'Bearer ' + (localStorage.getItem('zcus_token') || '') } });
       if (r.ok) orderData = await r.json();
     } catch (e) { /* dev mode */ }
   }
   if (!orderData) {
     // Dev fallback: read from localStorage orders OR use built-in mock
     try {
-      const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('zcus_orders') || '[]');
       orderData = orders[0] || null;
     } catch (e) { orderData = null; }
     if (!orderData) {
@@ -274,7 +274,7 @@ function renderOrder() {
   invBtn.href = '/shop/invoice.html?id=' + o.id;
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 loadOrder();
 </script>

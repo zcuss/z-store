@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .set-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:240px 1fr;gap:32px}
 @media(max-width:900px){.set-wrap{grid-template-columns:1fr;gap:16px;padding:16px}}
@@ -440,20 +440,20 @@
 
 <script>
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-let token = localStorage.getItem('zs_token') || '';
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let token = localStorage.getItem('zcus_token') || '';
 let platforms = {};
 let linkPlatformTarget = '';
-let prefs = JSON.parse(localStorage.getItem('zs_prefs') || '{"email":true,"whatsapp":false,"telegram":true}');
+let prefs = JSON.parse(localStorage.getItem('zcus_prefs') || '{"email":true,"whatsapp":false,"telegram":true}');
 
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); updateThemeBtns(); }
-function setTheme(t) { document.documentElement.dataset.theme = t; localStorage.setItem('zs_theme', t); updateThemeBtns(); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); updateThemeBtns(); }
+function setTheme(t) { document.documentElement.dataset.theme = t; localStorage.setItem('zcus_theme', t); updateThemeBtns(); }
 function updateThemeBtns() { const cur = document.documentElement.dataset.theme; document.getElementById('themeDarkBtn').classList.toggle('btn-primary', cur === 'dark'); document.getElementById('themeLightBtn').classList.toggle('btn-primary', cur === 'light'); }
-function logout() { localStorage.removeItem('zs_user'); localStorage.removeItem('zs_token'); location.href = '/shop/'; }
+function logout() { localStorage.removeItem('zcus_user'); localStorage.removeItem('zcus_token'); location.href = '/shop/'; }
 function logoutAll() { if (confirm('Logout dari semua device?')) { logout(); } }
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -502,7 +502,7 @@ async function checkAuth() {
     document.getElementById('setGuard').style.display = 'block'; return;
   }
   if (r.error || !r.user) { document.getElementById('setGuard').style.display = 'block'; return; }
-  user = r.user; localStorage.setItem('zs_user', JSON.stringify(user));
+  user = r.user; localStorage.setItem('zcus_user', JSON.stringify(user));
   if (user.role === 'admin') { const al = document.getElementById('adminLink'); if (al) al.style.display = 'flex'; }
   document.getElementById('setContent').style.display = 'grid';
   loadProfile();
@@ -544,7 +544,7 @@ async function saveProfile() {
   if (!name) return toast('Nama wajib diisi', 'error');
   const r = await api('/api/auth/profile', { method: 'PUT', body: JSON.stringify({ name, phone, bio }) });
   if (r.error) return toast(r.error, 'error');
-  user = r.user; localStorage.setItem('zs_user', JSON.stringify(user));
+  user = r.user; localStorage.setItem('zcus_user', JSON.stringify(user));
   toast('Profil berhasil disimpan', 'success');
   loadProfile();
 }
@@ -682,14 +682,14 @@ async function linkGoogle() {
   const r = await api('/api/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'sim_' + Date.now(), email, name: email.split('@')[0] }) });
   if (r.error) return toast(r.error, 'error');
   toast('Google account ter-link!', 'success');
-  user = r.user; localStorage.setItem('zs_user', JSON.stringify(user));
+  user = r.user; localStorage.setItem('zcus_user', JSON.stringify(user));
   loadPlatforms();
 }
 
 function togglePref(key, el) {
   prefs[key] = !prefs[key];
   el.classList.toggle('on', prefs[key]);
-  localStorage.setItem('zs_prefs', JSON.stringify(prefs));
+  localStorage.setItem('zcus_prefs', JSON.stringify(prefs));
   toast(`${key} notifications ${prefs[key] ? 'ON' : 'OFF'}`, 'info');
 }
 
@@ -821,11 +821,11 @@ async function logoutAllDevices() {
   const r = await api('/api/auth/logout-all', { method: 'POST' });
   if (r.error && !r.error.includes('API offline')) toast(r.error, 'error');
   toast('Semua device logout', 'success');
-  localStorage.removeItem('zs_user'); localStorage.removeItem('zs_token');
+  localStorage.removeItem('zcus_user'); localStorage.removeItem('zcus_token');
   setTimeout(() => location.href = '/shop/', 1200);
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 applyPrefs();
 checkAuth();

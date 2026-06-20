@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .pay-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
 @media(max-width:900px){.pay-wrap{grid-template-columns:1fr;padding:16px;gap:16px}}
@@ -215,15 +215,15 @@
 <script>
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-let token = localStorage.getItem('zs_token') || '';
-let cart = JSON.parse(localStorage.getItem('zs_cart') || '[]');
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let token = localStorage.getItem('zcus_token') || '';
+let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 let selectedMethod = 'qris';
 let appliedVoucher = null;
 let payTimer = 15 * 60;
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 function selectMethod(m, el) { selectedMethod = m; document.querySelectorAll('.pay-method').forEach(x => x.classList.remove('selected')); el.classList.add('selected'); }
 
 function applyVoucher() {
@@ -300,7 +300,7 @@ async function processPayment() {
 
   if (!user) {
     // Save intent and prompt login
-    localStorage.setItem('zs_pay_intent', JSON.stringify({ email, name, cart, voucher: appliedVoucher, method: selectedMethod }));
+    localStorage.setItem('zcus_pay_intent', JSON.stringify({ email, name, cart, voucher: appliedVoucher, method: selectedMethod }));
     toast('Login dulu untuk checkout', 'info');
     setTimeout(() => location.href = '/shop/?login=1', 800);
     return;
@@ -326,10 +326,10 @@ async function processPayment() {
         toast('Dev mode: order simulated. Buka Orders.html untuk lihat.', 'success');
         setTimeout(() => {
           const mockOrder = { id: Math.floor(Math.random() * 10000), buyer_email: email, total: Math.max(0, cart.reduce((s, x) => s + x.price * x.qty, 0) - calcDiscount()), status: 'pending', created_at: new Date().toISOString(), items: cart.map(x => x.name + ' × ' + x.qty).join(', ') };
-          const orders = JSON.parse(localStorage.getItem('zs_orders') || '[]');
+          const orders = JSON.parse(localStorage.getItem('zcus_orders') || '[]');
           orders.unshift(mockOrder);
-          localStorage.setItem('zs_orders', JSON.stringify(orders));
-          cart = []; localStorage.setItem('zs_cart', '[]');
+          localStorage.setItem('zcus_orders', JSON.stringify(orders));
+          cart = []; localStorage.setItem('zcus_cart', '[]');
           location.href = '/shop/order-success.html?id=' + (mockOrder.id || '');
         }, 1500);
         return;
@@ -339,7 +339,7 @@ async function processPayment() {
     // Real Midtrans Snap
     if (window.snap && r.snap_token) {
       window.snap.pay(r.snap_token, {
-        onSuccess: () => { toast('Pembayaran sukses!', 'success'); cart = []; localStorage.setItem('zs_cart', '[]'); setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1000); },
+        onSuccess: () => { toast('Pembayaran sukses!', 'success'); cart = []; localStorage.setItem('zcus_cart', '[]'); setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1000); },
         onPending: () => { toast('Menuju halaman sukses', 'info'); setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1500); },
         onError: () => { toast('Pembayaran gagal', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang'; },
         onClose: () => { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Bayar Sekarang'; }
@@ -347,7 +347,7 @@ async function processPayment() {
     } else {
       // Fallback: direct redirect to orders
       toast('Order dibuat #' + r.order_id, 'success');
-      cart = []; localStorage.setItem('zs_cart', '[]');
+      cart = []; localStorage.setItem('zcus_cart', '[]');
       setTimeout(() => location.href = '/shop/order-success.html?id=' + r.order_id, 1000);
     }
   } catch (e) {
@@ -364,7 +364,7 @@ async function api(path, opts = {}) {
   try { return JSON.parse(text); } catch { return { error: text || 'invalid response' }; }
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 
 // Prefill from logged-in user
@@ -375,13 +375,13 @@ if (user) {
 }
 
 // Prefill from intent (after login redirect)
-const intent = JSON.parse(localStorage.getItem('zs_pay_intent') || 'null');
+const intent = JSON.parse(localStorage.getItem('zcus_pay_intent') || 'null');
 if (intent) {
   document.getElementById('payEmail').value = intent.email || '';
   document.getElementById('payName').value = intent.name || '';
   if (intent.voucher) { appliedVoucher = intent.voucher; document.getElementById('payVoucher').value = intent.voucher.label; }
   if (intent.method) selectMethod(intent.method, document.querySelector(`[data-method="${intent.method}"]`));
-  localStorage.removeItem('zs_pay_intent');
+  localStorage.removeItem('zcus_pay_intent');
 }
 
 renderSummary();

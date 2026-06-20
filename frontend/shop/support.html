@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .sup-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
 @media(max-width:900px){.sup-wrap{grid-template-columns:1fr;padding:16px;gap:16px}}
@@ -222,13 +222,13 @@
 
 <script>
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-let token = localStorage.getItem('zs_token') || '';
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let token = localStorage.getItem('zcus_token') || '';
 let selectedCat = 'order';
 let chatOpen = false;
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 function selectCat(cat, el) { selectedCat = cat; document.querySelectorAll('.sup-cat').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); }
 function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
 function openChat() { document.getElementById('chatWidget').style.display = 'flex'; chatOpen = true; setTimeout(() => document.getElementById('chatInput').focus(), 200); }
@@ -282,9 +282,9 @@ async function submitTicket() {
   if (r.error) {
     // Dev fallback
     const ticketId = r.ticket_id || ('TKT-' + Date.now().toString(36).toUpperCase());
-    const list = JSON.parse(localStorage.getItem('zs_tickets') || '[]');
+    const list = JSON.parse(localStorage.getItem('zcus_tickets') || '[]');
     list.unshift({ ticket_id: ticketId, subject, message, category: selectedCat, priority, status: 'open', created_at: new Date().toISOString() });
-    localStorage.setItem('zs_tickets', JSON.stringify(list));
+    localStorage.setItem('zcus_tickets', JSON.stringify(list));
     toast('Tiket dibuat! Tim CS akan balas via email.', 'success');
     document.getElementById('ticketSubject').value = '';
     document.getElementById('ticketMessage').value = '';
@@ -305,7 +305,7 @@ function loadTickets() {
       const tickets = d.tickets || [];
       renderTickets(tickets);
     }).catch(() => {
-      const tickets = JSON.parse(localStorage.getItem('zs_tickets') || '[]');
+      const tickets = JSON.parse(localStorage.getItem('zcus_tickets') || '[]');
       renderTickets(tickets);
     });
 }
@@ -324,7 +324,7 @@ function renderTickets(tickets) {
   document.getElementById('statOpen').textContent = tickets.filter(t => t.status === 'open').length;
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 loadTickets();
 </script>

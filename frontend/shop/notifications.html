@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .notif-wrap{max-width:760px;margin:0 auto;padding:24px}
 .notif-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
@@ -96,13 +96,13 @@ const fmtRel = d => {
   if (s < 604800) return Math.floor(s/86400) + ' hari lalu';
   return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 };
-let user = JSON.parse(localStorage.getItem('zs_user') || 'null');
-let token = localStorage.getItem('zs_token') || '';
+let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let token = localStorage.getItem('zcus_token') || '';
 let allNotifs = [];
 let activeTab = 'all';
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 function switchNotifTab(tab, btn) { activeTab = tab; document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
 function typeIcon(t) { const m = { order: 'fa-box', escrow: 'fa-hand-holding-dollar', platform: 'fa-link', welcome: 'fa-sparkles', withdraw: 'fa-money-bill-transfer' }; return m[t] || 'fa-bell'; }
 
@@ -192,7 +192,7 @@ function clearAll() {
   toast('Semua notifikasi dihapus', 'info');
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 loadNotifs();
 </script>

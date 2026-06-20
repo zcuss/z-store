@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=36">
 <style>
 .wl-wrap{max-width:1200px;margin:0 auto;padding:24px}
 .wl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
@@ -109,12 +109,12 @@
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
-let wishlist = JSON.parse(localStorage.getItem('zs_wishlist') || '[]');
-let cart = JSON.parse(localStorage.getItem('zs_cart') || '[]');
+let wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
+let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 let products = [];
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zs_theme', t); }
+function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 function getCatIcon(cat) {
   const m = { 'AI Tools': 'fa-robot', 'Voucher': 'fa-ticket', 'Digital Goods': 'fa-cube', 'Merchandise': 'fa-shirt', 'Software': 'fa-microchip', 'Hosting': 'fa-server', 'Game': 'fa-gamepad' };
   return m[cat] || 'fa-cube';
@@ -170,14 +170,14 @@ function render() {
 
 function removeFromWishlist(id) {
   wishlist = wishlist.filter(x => x !== id);
-  localStorage.setItem('zs_wishlist', JSON.stringify(wishlist));
+  localStorage.setItem('zcus_wishlist', JSON.stringify(wishlist));
   toast('Dihapus dari wishlist', 'info');
   render();
 }
 
 function clearAll() {
   if (!confirm('Hapus semua produk dari wishlist?')) return;
-  wishlist = []; localStorage.setItem('zs_wishlist', '[]');
+  wishlist = []; localStorage.setItem('zcus_wishlist', '[]');
   toast('Wishlist dikosongkan', 'info');
   render();
 }
@@ -188,7 +188,7 @@ function moveToCart(id) {
   const existing = cart.find(x => x.id === id);
   if (existing) existing.qty++;
   else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
-  localStorage.setItem('zs_cart', JSON.stringify(cart));
+  localStorage.setItem('zcus_cart', JSON.stringify(cart));
   toast(`${p.name} ditambahkan ke cart`, 'success');
 }
 
@@ -200,7 +200,7 @@ function addAllToCart() {
     if (existing) existing.qty++;
     else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
   });
-  localStorage.setItem('zs_cart', JSON.stringify(cart));
+  localStorage.setItem('zcus_cart', JSON.stringify(cart));
   toast(`${wishlist.length} produk ditambahkan ke cart`, 'success');
   setTimeout(() => location.href = '/shop/payment.html', 800);
 }
@@ -219,7 +219,7 @@ function copyShareLink() {
   navigator.clipboard.writeText(url).then(() => toast('Link disalin!', 'success'));
 }
 
-const savedTheme = localStorage.getItem('zs_theme');
+const savedTheme = localStorage.getItem('zcus_theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 loadProducts();
 </script>
