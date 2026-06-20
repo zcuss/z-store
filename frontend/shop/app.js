@@ -8,11 +8,15 @@
 // each declare their own `const API = ...` in inline <script> blocks. Re-declaring the same
 // name in a separate classic script throws SyntaxError ("Identifier 'API' has already been declared"),
 // which silently kills all event handlers in app.js (theme toggle, cart badge, loadProducts).
-// Use window.API getter — set by subpage inline script first (correct path), or computed here as fallback.
-if (typeof window !== 'undefined' && !window.API) {
-  window.API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-    ? location.origin + '/api'
-    : '/api';
+// Cross-origin: if running on cPanel zcus.biz.id, use absolute URL to 5.zcus.biz.id (backend host).
+if (typeof window !== 'undefined') {
+  window.API = window.API || (
+    (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? location.origin + '/api'
+      : (location.hostname === 'zcus.biz.id' || location.hostname === 'www.zcus.biz.id')
+        ? 'https://5.zcus.biz.id/api'
+        : '/api'
+  );
 }
 // Local alias for convenience (this DOES re-declare `const API` which would conflict, so use function)
 const _api = () => window.API;
