@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <style>
 .aff-wrap{max-width:1200px;margin:0 auto;padding:24px}
 .aff-hero{background:linear-gradient(135deg,#0ea5e9,#6366f1,#a855f7);padding:40px 32px;border-radius:20px;color:#fff;text-align:center;position:relative;overflow:hidden;margin-bottom:24px}
@@ -199,8 +199,8 @@ async function api(path, opts = {}) {
 async function loadAff() {
   let codeR, statsR;
   try {
-    codeR = await api('/api/affiliate/code');
-    statsR = await api('/api/affiliate/stats');
+    codeR = await api('/affiliate/code');
+    statsR = await api('/affiliate/stats');
   } catch (e) { /* dev mode */ }
   // Dev fallback
   if (!codeR || codeR.error) {
@@ -249,7 +249,7 @@ async function loadAff() {
 
 async function loadLeaderboard() {
   let r;
-  try { r = await api('/api/affiliate/leaderboard'); } catch (e) { /* dev */ }
+  try { r = await api('/affiliate/leaderboard'); } catch (e) { /* dev */ }
   const lb = r?.leaderboard || [];
   if (!lb.length) {
     // Dev mock
@@ -270,7 +270,7 @@ async function loadLeaderboard() {
 async function checkAuth() {
   if (!token || !user) { document.getElementById('affGuard').style.display = 'block'; return; }
   let r;
-  try { r = await api('/api/auth/me'); } catch (e) { r = { error: e.message }; }
+  try { r = await api('/auth/me'); } catch (e) { r = { error: e.message }; }
   if (r.error && (r.error.includes('API offline') || r.error.includes('Network') || r.error.includes('503'))) {
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
       document.getElementById('affContent').style.display = 'block';

@@ -16,7 +16,7 @@
 <link rel="manifest" href="/shop/manifest.json">
 <link rel="canonical" href="https://zcus.biz.id/shop/">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-<link rel="stylesheet" href="tw-components.css?v=36">
+<link rel="stylesheet" href="tw-components.css?v=38">
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Open Graph / Facebook -->
@@ -64,7 +64,7 @@
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XXXXXXXXXXXX"></script>
 <script>
 // Block zoom + horizontal scroll on mobile
@@ -1038,7 +1038,7 @@ function sendLiveChat() {
 </script>
 
 <script src="products.js?v=29"></script>
-<script src="app.js?v=36"></script>
+<script src="app.js?v=41"></script>
 <script>
 // Service worker registration for PWA
 if ('serviceWorker' in navigator) {
@@ -1107,7 +1107,7 @@ async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPass').value;
   if (!email || !password) return toast('Email + password wajib diisi', 'error');
-  const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  const r = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
   if (r.error) return toast(r.error, 'error');
   localStorage.setItem('zcus_user', JSON.stringify(r.user));
   localStorage.setItem('zcus_token', r.token);
@@ -1125,7 +1125,7 @@ async function doRegister() {
   if (!email) return toast('Email wajib diisi', 'error');
   if (!password || password.length < 6) return toast('Password minimal 6 karakter', 'error');
   if (!tos) return toast('Kamu harus setuju Syarat & Ketentuan', 'error');
-  const r = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role }) });
+  const r = await api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role }) });
   if (r.error) return toast(r.error, 'error');
   localStorage.setItem('zcus_user', JSON.stringify(r.user));
   localStorage.setItem('zcus_token', r.token);
@@ -1154,7 +1154,7 @@ function doGoogleDevFallback() {
   const email = prompt('Email Google kamu (dev mode):', 'user@gmail.com');
   if (!email) return;
   const name = prompt('Nama kamu:', email.split('@')[0]) || email.split('@')[0];
-  api('/api/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'dev_' + Date.now(), email, name, avatar_url: null }) })
+  api('/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'dev_' + Date.now(), email, name, avatar_url: null }) })
     .then(r => {
       if (r.error) return toast(r.error, 'error');
       localStorage.setItem('zcus_user', JSON.stringify(r.user));
@@ -1170,7 +1170,7 @@ async function sendOtp() {
   if (!email) return toast('Email wajib diisi', 'error');
   const btn = document.getElementById('otpSendBtn');
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
-  const r = await api('/api/auth/otp/request', { method: 'POST', body: JSON.stringify({ email, purpose: 'login' }) });
+  const r = await api('/auth/otp/request', { method: 'POST', body: JSON.stringify({ email, purpose: 'login' }) });
   btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Ulang Kode OTP';
   if (r.error) return toast(r.error, 'error');
   toast(r.message || 'OTP terkirim', 'success');
@@ -1186,7 +1186,7 @@ async function verifyOtp() {
   const email = document.getElementById('otpEmail').value.trim();
   const otp = document.getElementById('otpCode').value.trim();
   if (!email || !otp) return toast('Email + OTP wajib diisi', 'error');
-  const r = await api('/api/auth/otp/verify', { method: 'POST', body: JSON.stringify({ email, otp, purpose: 'login' }) });
+  const r = await api('/auth/otp/verify', { method: 'POST', body: JSON.stringify({ email, otp, purpose: 'login' }) });
   if (r.error) return toast(r.error, 'error');
   localStorage.setItem('zcus_user', JSON.stringify(r.user));
   localStorage.setItem('zcus_token', r.token);
@@ -1205,7 +1205,7 @@ async function sendForgotOtp() {
   if (!email) return toast('Email wajib diisi', 'error');
   const btn = document.getElementById('forgotSendBtn');
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
-  const r = await api('/api/auth/otp/request', { method: 'POST', body: JSON.stringify({ email, purpose: 'reset' }) });
+  const r = await api('/auth/otp/request', { method: 'POST', body: JSON.stringify({ email, purpose: 'reset' }) });
   btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Ulang Kode';
   if (r.error) return toast(r.error, 'error');
   toast('Kode reset terkirim', 'success');
@@ -1222,7 +1222,7 @@ async function resetPassword() {
   const new_password = document.getElementById('forgotNewPass').value;
   if (!email || !otp || !new_password) return toast('Semua field wajib diisi', 'error');
   if (new_password.length < 6) return toast('Password baru minimal 6 karakter', 'error');
-  const r = await api('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ email, otp, new_password }) });
+  const r = await api('/auth/reset-password', { method: 'POST', body: JSON.stringify({ email, otp, new_password }) });
   if (r.error) return toast(r.error, 'error');
   toast('Password berhasil direset. Silakan login.', 'success');
   setTimeout(() => switchAuthMode('password', document.querySelector('.auth-tab[data-mode=password]')), 1000);
@@ -1256,7 +1256,7 @@ function subscribeNewsletter(e){
   e.preventDefault();
   const email = document.getElementById('newsletterEmail').value.trim();
   if (!email) return false;
-  fetch(API + '/api/newsletter/subscribe', { method: 'POST', body: JSON.stringify({ email, source: 'homepage' }) })
+  fetch(API + '/newsletter/subscribe', { method: 'POST', body: JSON.stringify({ email, source: 'homepage' }) })
     .then(r => r.json()).then(d => toast(d.message || 'Terima kasih! Kode WELCOME10 sudah dikirim.', 'success'))
     .catch(() => toast('Terima kasih! Kode diskon 10% sudah dikirim ke ' + email, 'success'));
   const list = JSON.parse(localStorage.getItem('zcus_newsletter') || '[]');
@@ -1281,7 +1281,7 @@ function doSpin() {
   btn.disabled = true;
   btn.innerHTML = '...';
   // Call API for random prize (dev fallback if offline)
-  fetch(API + '/api/spin-wheel', { method: 'POST' })
+  fetch(API + '/spin-wheel', { method: 'POST' })
     .then(r => r.json()).then(d => {
       const prize = d.prize || randomPrizeDev();
       spinTo(prize);
@@ -1487,7 +1487,7 @@ async function showCompare() {
   if (compareList.length < 2) return;
   let products = [];
   try {
-    const r = await fetch(API + '/api/products/compare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: compareList }) });
+    const r = await fetch(API + '/products/compare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: compareList }) });
     if (r.ok) { const d = await r.json(); products = d.products; }
   } catch (e) {}
   if (!products.length) {

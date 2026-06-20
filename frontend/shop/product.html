@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://app.midtrans.com" crossorigin>
 <style>
@@ -284,7 +284,7 @@ async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPass').value;
   if (!email || !password) return toast('Email + password wajib', 'error');
-  const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  const r = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
   if (r.error) return toast(r.error, 'error');
   localStorage.setItem('zcus_user', JSON.stringify(r.user));
   localStorage.setItem('zcus_token', r.token);
@@ -296,7 +296,7 @@ async function doRegister() {
   const email = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPass').value;
   if (!email || !password || password.length < 6) return toast('Email + password (min 6 char)', 'error');
-  const r = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role: 'buyer' }) });
+  const r = await api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role: 'buyer' }) });
   if (r.error) return toast(r.error, 'error');
   localStorage.setItem('zcus_user', JSON.stringify(r.user));
   localStorage.setItem('zcus_token', r.token);
@@ -307,7 +307,7 @@ async function checkout() {
   const email = document.getElementById('buyerEmail').value.trim();
   if (!email) return toast('Email wajib untuk delivery', 'error');
   if (!cart.length) return toast('Keranjang kosong', 'error');
-  const r = await api('/api/orders/checkout', { method: 'POST', body: JSON.stringify({ items: cart.map(x => ({ product_id: x.id, qty: x.qty })), buyer_email: email }) });
+  const r = await api('/orders/checkout', { method: 'POST', body: JSON.stringify({ items: cart.map(x => ({ product_id: x.id, qty: x.qty })), buyer_email: email }) });
   if (r.error) return toast(r.error, 'error');
   if (r.snap_token && window.snap) {
     window.snap.pay(r.snap_token, { onSuccess: () => { toast('Pembayaran sukses!', 'success'); cart = []; saveCart(); closeCart(); }, onPending: () => toast('Menunggu pembayaran', 'info'), onError: () => toast('Pembayaran gagal', 'error') });
@@ -323,12 +323,12 @@ async function loadProduct() {
   const slug = params.get('slug');
   try {
     if (!id && slug) {
-      const r = await api('/api/products/slug/' + encodeURIComponent(slug));
+      const r = await api('/products/slug/' + encodeURIComponent(slug));
       if (r.error) throw new Error(r.error);
       product = r;
       id = product.id;
     } else if (id) {
-      const r = await api('/api/products/' + id);
+      const r = await api('/products/' + id);
       if (r.error) throw new Error(r.error);
       product = r;
     } else {
@@ -558,7 +558,7 @@ document.addEventListener('click', e => {
 });
 
 async function loadReviews() {
-  const r = await api('/api/products/' + product.id + '/reviews');
+  const r = await api('/products/' + product.id + '/reviews');
   const list = document.getElementById('reviewsList');
   if (!Array.isArray(r) || !r.length) { list.innerHTML = '<p style="color:var(--text-mute)">Belum ada review. Jadi yang pertama!</p>'; return; }
   list.innerHTML = r.map(rv => `<div class="pdp-review"><div class="pdp-review-head"><div class="pdp-review-name">${rv.name || 'Anonim'}</div><div class="pdp-review-date">${new Date(rv.created_at).toLocaleDateString('id-ID')}</div></div><div class="pdp-stars">${'<i class="fa-solid fa-star"></i>'.repeat(rv.rating)}${'<i class="fa-regular fa-star"></i>'.repeat(5 - rv.rating)}</div><p style="margin:8px 0 0;color:var(--text)">${rv.text || ''}</p></div>`).join('');
@@ -567,7 +567,7 @@ async function loadReviews() {
 async function submitReview() {
   const rating = parseInt(document.getElementById('newRating').value);
   const text = document.getElementById('newText').value.trim();
-  const r = await api('/api/products/' + product.id + '/reviews', { method: 'POST', body: JSON.stringify({ rating, text }) });
+  const r = await api('/products/' + product.id + '/reviews', { method: 'POST', body: JSON.stringify({ rating, text }) });
   if (r.error) return toast(r.error, 'error');
   toast('Review terkirim!', 'success');
   setTimeout(() => loadReviews(), 500);
@@ -590,7 +590,7 @@ function buyNow(id) {
 async function loadRelated() {
   let all;
   try {
-    const r = await fetch(API + '/api/products?category=' + encodeURIComponent(product.category) + '&limit=8');
+    const r = await fetch(API + '/products?category=' + encodeURIComponent(product.category) + '&limit=8');
     if (r.ok) all = await r.json();
   } catch (e) {}
   if (!Array.isArray(all) || !all.length) {

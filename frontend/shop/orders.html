@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <style>
 .ord-wrap{max-width:1100px;margin:0 auto;padding:24px}
 .ord-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
@@ -183,7 +183,7 @@ async function loadOrders() {
   if (!token || !user) { document.getElementById('ordGuard').style.display = 'block'; document.getElementById('ordContent').style.display = 'none'; return; }
   document.getElementById('ordContent').style.display = 'block';
   document.getElementById('ordList').innerHTML = '<div class="ord-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>';
-  const r = await api('/api/orders/me');
+  const r = await api('/orders/me');
   if (r.error) { document.getElementById('ordList').innerHTML = `<div class="ord-empty">${r.error}</div>`; return; }
   orders = Array.isArray(r) ? r : [];
   // Update counts
@@ -223,7 +223,7 @@ function renderList() {
 }
 
 async function openDetail(id) {
-  const r = await api('/api/orders/' + id);
+  const r = await api('/orders/' + id);
   if (r.error) return toast(r.error, 'error');
   document.getElementById('detailBody').innerHTML = `
     <h2 style="margin:0 0 16px"><i class="fa-solid fa-receipt"></i> Order #${r.id}</h2>
@@ -269,7 +269,7 @@ function closeDetail() { document.getElementById('detailModal').classList.remove
 
 async function confirmDelivery(id) {
   if (!confirm('Konfirmasi order ini? Dana escrow akan diteruskan ke seller.')) return;
-  const r = await api('/api/orders/' + id + '/confirm-delivery', { method: 'POST' });
+  const r = await api('/orders/' + id + '/confirm-delivery', { method: 'POST' });
   if (r.error) return toast(r.error, 'error');
   toast('Order dikonfirmasi! Saldo seller sudah di-release.', 'success');
   loadOrders();

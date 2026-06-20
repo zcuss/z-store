@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <style>
 .notif-wrap{max-width:760px;margin:0 auto;padding:24px}
 .notif-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
@@ -116,7 +116,7 @@ async function api(path, opts = {}) {
 
 async function loadNotifs() {
   let r;
-  try { r = await api('/api/notifications'); } catch (e) { r = { error: e.message }; }
+  try { r = await api('/notifications'); } catch (e) { r = { error: e.message }; }
   allNotifs = r.notifications || [];
   if (!allNotifs.length && location.hostname === 'localhost') {
     // Dev mock
@@ -166,14 +166,14 @@ function render() {
 }
 
 async function markRead(id) {
-  if (token) await api('/api/notifications/' + id + '/read', { method: 'POST' }).catch(() => {});
+  if (token) await api('/notifications/' + id + '/read', { method: 'POST' }).catch(() => {});
   const n = allNotifs.find(x => x.id === id);
   if (n) n.read_at = new Date().toISOString();
   updateCounts(); render();
 }
 
 async function markAllRead() {
-  if (token) await api('/api/notifications/read-all', { method: 'POST' }).catch(() => {});
+  if (token) await api('/notifications/read-all', { method: 'POST' }).catch(() => {});
   allNotifs.forEach(n => n.read_at = new Date().toISOString());
   updateCounts(); render();
   toast('Semua notifikasi ditandai dibaca', 'success');

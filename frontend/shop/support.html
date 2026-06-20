@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <style>
 .sup-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
 @media(max-width:900px){.sup-wrap{grid-template-columns:1fr;padding:16px;gap:16px}}
@@ -273,7 +273,7 @@ async function submitTicket() {
   if (!subject || !message) return toast('Subjek + pesan wajib diisi', 'error');
   if (!user) { return toast('Login dulu untuk membuat tiket', 'error'); }
   const btn = event.target; btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
-  const r = await fetch(API + '/api/support/tickets', {
+  const r = await fetch(API + '/support/tickets', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
     body: JSON.stringify({ subject, message, category: selectedCat, priority })
@@ -300,7 +300,7 @@ async function submitTicket() {
 
 function loadTickets() {
   // Try API
-  fetch(API + '/api/support/tickets', { headers: { Authorization: 'Bearer ' + token } })
+  fetch(API + '/support/tickets', { headers: { Authorization: 'Bearer ' + token } })
     .then(r => r.json()).then(d => {
       const tickets = d.tickets || [];
       renderTickets(tickets);

@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function pollNotificationBadge() {
   if (!token) return;
   try {
-    const r = await fetch(_api() + '/api/notifications', { headers: { Authorization: 'Bearer ' + token } });
+    const r = await fetch(_api() + '/notifications', { headers: { Authorization: 'Bearer ' + token } });
     if (r.ok) {
       const d = await r.json();
       const unread = (d.notifications || []).filter(n => !n.read_at).length;
@@ -528,7 +528,7 @@ async function loadRecentlyViewed() {
   // Try server
   if (user && token) {
     try {
-      const r = await fetch(_api() + '/api/users/me/recently-viewed', { headers: { Authorization: 'Bearer ' + token } });
+      const r = await fetch(_api() + '/users/me/recently-viewed', { headers: { Authorization: 'Bearer ' + token } });
       if (r.ok) {
         const d = await r.json();
         if (d.items && d.items.length) { recentlyViewedData = d.items; return renderRecentlyViewed(); }
@@ -554,7 +554,7 @@ function addToRecentlyViewed(id) {
 
 async function clearRecentlyViewed() {
   if (user && token) {
-    try { await fetch(_api() + '/api/users/me/recently-viewed', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } }); } catch (e) {}
+    try { await fetch(_api() + '/users/me/recently-viewed', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } }); } catch (e) {}
   }
   recentlyViewed = []; recentlyViewedData = [];
   localStorage.removeItem('zcus_recent');
@@ -970,7 +970,7 @@ function saveAuth(u, t) {
 }
 
 async function doLogout() {
-  try { await fetch(_api() + '/api/auth/logout', { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} }); } catch (e) {}
+  try { await fetch(_api() + '/auth/logout', { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} }); } catch (e) {}
   user = null; token = null;
   localStorage.removeItem('zcus_user');
   localStorage.removeItem('zcus_token');

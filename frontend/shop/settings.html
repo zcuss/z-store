@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <style>
 .set-wrap{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:240px 1fr;gap:32px}
 @media(max-width:900px){.set-wrap{grid-template-columns:1fr;gap:16px;padding:16px}}
@@ -479,7 +479,7 @@ async function api(path, opts = {}) {
 async function checkAuth() {
   if (!token || !user) { document.getElementById('setGuard').style.display = 'block'; return; }
   let r;
-  try { r = await api('/api/auth/me'); } catch (e) { r = { error: e.message }; }
+  try { r = await api('/auth/me'); } catch (e) { r = { error: e.message }; }
   // Dev mode: API offline → use mock data
   if (r.error && (r.error.includes('API offline') || r.error.includes('Network') || r.error.includes('Failed') || r.error.includes('503'))) {
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
@@ -526,7 +526,7 @@ function loadProfile() {
   }
   document.getElementById('activeSession').textContent = navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Browser ini';
   // Pwd status
-  fetch(API + '/api/auth/platforms', { headers: { Authorization: 'Bearer ' + token } })
+  fetch(API + '/auth/platforms', { headers: { Authorization: 'Bearer ' + token } })
     .then(r => r.json()).then(d => {
       const ps = document.getElementById('pwdStatus');
       if (d.platforms && d.platforms.web) {
@@ -542,7 +542,7 @@ async function saveProfile() {
   const phone = document.getElementById('setPhone').value.trim();
   const bio = document.getElementById('setBio').value.trim();
   if (!name) return toast('Nama wajib diisi', 'error');
-  const r = await api('/api/auth/profile', { method: 'PUT', body: JSON.stringify({ name, phone, bio }) });
+  const r = await api('/auth/profile', { method: 'PUT', body: JSON.stringify({ name, phone, bio }) });
   if (r.error) return toast(r.error, 'error');
   user = r.user; localStorage.setItem('zcus_user', JSON.stringify(user));
   toast('Profil berhasil disimpan', 'success');
@@ -557,7 +557,7 @@ function uploadAvatar(e) {
   reader.onload = async () => {
     const avatar_url = reader.result;
     document.getElementById('avatarPreview').innerHTML = `<img src="${avatar_url}"><div class="set-avatar-edit"><i class="fa-solid fa-camera"></i></div>`;
-    const r = await api('/api/auth/profile', { method: 'PUT', body: JSON.stringify({ avatar_url }) });
+    const r = await api('/auth/profile', { method: 'PUT', body: JSON.stringify({ avatar_url }) });
     if (r.error) return toast(r.error, 'error');
     toast('Avatar diperbarui', 'success');
   };
@@ -578,7 +578,7 @@ async function changePassword() {
   if (!old_pwd || !new_pwd) return toast('Semua field wajib diisi', 'error');
   if (new_pwd.length < 6) return toast('Password baru minimal 6 karakter', 'error');
   if (new_pwd !== confirm) return toast('Konfirmasi password tidak cocok', 'error');
-  const r = await api('/api/auth/password', { method: 'PUT', body: JSON.stringify({ current_password: old_pwd, new_password: new_pwd }) });
+  const r = await api('/auth/password', { method: 'PUT', body: JSON.stringify({ current_password: old_pwd, new_password: new_pwd }) });
   if (r.error) return toast(r.error, 'error');
   toast('Password berhasil diubah. Silakan login ulang.', 'success');
   closeModal('modalChangePwd');
@@ -586,7 +586,7 @@ async function changePassword() {
 }
 
 async function loadPlatforms() {
-  const r = await api('/api/auth/platforms');
+  const r = await api('/auth/platforms');
   if (r.error) return;
   platforms = r.platforms || {};
   // Email
@@ -628,7 +628,7 @@ async function linkPlatform(name) {
   // Check if already linked → unlink instead
   if (platforms[name]?.linked) {
     if (!confirm(`Putuskan ${name} dari akun kamu?`)) return;
-    const r = await api('/api/auth/unlink', { method: 'POST', body: JSON.stringify({ platform: name }) });
+    const r = await api('/auth/unlink', { method: 'POST', body: JSON.stringify({ platform: name }) });
     if (r.error) return toast(r.error, 'error');
     toast(`${name} berhasil di-unlink`, 'success');
     return loadPlatforms();
@@ -651,7 +651,7 @@ async function linkPlatform(name) {
 }
 
 async function requestLinkCode() {
-  const r = await api('/api/auth/link/request', { method: 'POST', body: JSON.stringify({ platform: linkPlatformTarget }) });
+  const r = await api('/auth/link/request', { method: 'POST', body: JSON.stringify({ platform: linkPlatformTarget }) });
   if (r.error) return toast(r.error, 'error');
   document.getElementById('linkCode').textContent = r.code;
   document.getElementById('linkInstruction').innerHTML = `<i class="fa-solid fa-circle-info"></i> ${r.instruction}`;
@@ -664,7 +664,7 @@ async function requestLinkCode() {
 async function confirmLinkCode() {
   const code = document.getElementById('linkCode').textContent;
   const identifier = document.getElementById('linkManualId').value.trim();
-  const r = await api('/api/auth/link/confirm', { method: 'POST', body: JSON.stringify({ platform: linkPlatformTarget, code, identifier: identifier || undefined }) });
+  const r = await api('/auth/link/confirm', { method: 'POST', body: JSON.stringify({ platform: linkPlatformTarget, code, identifier: identifier || undefined }) });
   if (r.error) return toast(r.error, 'error');
   toast(`${linkPlatformTarget} berhasil di-link!`, 'success');
   closeModal('modalLinkPlatform');
@@ -679,7 +679,7 @@ async function linkGoogle() {
   // Simulate linking
   const email = prompt('Email Google kamu:');
   if (!email) return;
-  const r = await api('/api/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'sim_' + Date.now(), email, name: email.split('@')[0] }) });
+  const r = await api('/auth/google', { method: 'POST', body: JSON.stringify({ google_id: 'sim_' + Date.now(), email, name: email.split('@')[0] }) });
   if (r.error) return toast(r.error, 'error');
   toast('Google account ter-link!', 'success');
   user = r.user; localStorage.setItem('zcus_user', JSON.stringify(user));
@@ -703,7 +703,7 @@ function applyPrefs() {
 async function loadNotifications() {
   const list = document.getElementById('notifList');
   list.innerHTML = '<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
-  const r = await api('/api/notifications');
+  const r = await api('/notifications');
   if (r.error) { list.innerHTML = `<div class="empty">${r.error}</div>`; return; }
   const items = r.notifications || [];
   if (!items.length) { list.innerHTML = '<div class="empty-state" style="padding:40px;text-align:center;color:var(--text-dim)"><i class="fa-solid fa-bell-slash" style="font-size:32px;display:block;margin-bottom:8px;opacity:.5"></i>Belum ada notifikasi</div>'; return; }
@@ -723,7 +723,7 @@ async function loadNotifications() {
 }
 
 async function markRead(id) {
-  await api('/api/notifications/' + id + '/read', { method: 'POST' });
+  await api('/notifications/' + id + '/read', { method: 'POST' });
   loadNotifications();
 }
 
@@ -736,7 +736,7 @@ function deleteAccount() {
 // ============ SECURITY STATUS & 2FA ============
 async function loadSecurityStatus() {
   let s;
-  try { s = await api('/api/auth/security-status'); } catch (e) { /* dev */ }
+  try { s = await api('/auth/security-status'); } catch (e) { /* dev */ }
   if (!s || s.error) {
     s = { has_password: true, has_google: false, totp_enabled: false, email_verified: user?.email_verified || false, security_score: user?.email_verified ? 50 : 25 };
   }
@@ -764,7 +764,7 @@ async function loadSecurityStatus() {
 }
 
 async function open2FA() {
-  const r = await api('/api/auth/2fa/setup', { method: 'POST' });
+  const r = await api('/auth/2fa/setup', { method: 'POST' });
   if (r.error) {
     if (r.error.includes('API offline') || r.error.includes('503')) {
       // Dev mode — show demo
@@ -784,7 +784,7 @@ async function open2FA() {
 async function verify2FA() {
   const code = document.getElementById('twofaCode').value.trim();
   if (!code) return toast('Masukkan kode 6 digit', 'error');
-  const r = await api('/api/auth/2fa/enable', { method: 'POST', body: JSON.stringify({ code }) });
+  const r = await api('/auth/2fa/enable', { method: 'POST', body: JSON.stringify({ code }) });
   if (r.error) {
     if (r.error.includes('API offline') || r.error.includes('503')) { closeModal('modal2FA'); toast('Dev mode: 2FA diaktifkan (simulasi)', 'success'); loadSecurityStatus(); return; }
     return toast(r.error, 'error');
@@ -797,7 +797,7 @@ async function verify2FA() {
 async function disable2FA() {
   const pw = prompt('Konfirmasi password kamu untuk disable 2FA:');
   if (!pw) return;
-  const r = await api('/api/auth/2fa/disable', { method: 'POST', body: JSON.stringify({ password: pw }) });
+  const r = await api('/auth/2fa/disable', { method: 'POST', body: JSON.stringify({ password: pw }) });
   if (r.error) {
     if (r.error.includes('API offline') || r.error.includes('503')) { toast('Dev mode: 2FA dimatikan (simulasi)', 'success'); loadSecurityStatus(); return; }
     return toast(r.error, 'error');
@@ -807,7 +807,7 @@ async function disable2FA() {
 }
 
 async function requestEmailVerify() {
-  const r = await api('/api/auth/email/verify/request', { method: 'POST' });
+  const r = await api('/auth/email/verify/request', { method: 'POST' });
   if (r.error) {
     if (r.error.includes('API offline') || r.error.includes('503')) { toast('Dev mode: link verifikasi (contoh) → /shop/verify-email.html?token=mock_token', 'info'); return; }
     return toast(r.error, 'error');
@@ -818,7 +818,7 @@ async function requestEmailVerify() {
 
 async function logoutAllDevices() {
   if (!confirm('Logout dari semua device? Kamu perlu login ulang.')) return;
-  const r = await api('/api/auth/logout-all', { method: 'POST' });
+  const r = await api('/auth/logout-all', { method: 'POST' });
   if (r.error && !r.error.includes('API offline')) toast(r.error, 'error');
   toast('Semua device logout', 'success');
   localStorage.removeItem('zcus_user'); localStorage.removeItem('zcus_token');

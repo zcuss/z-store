@@ -6,7 +6,7 @@
 <title>Invoice — Z Store</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -195,7 +195,7 @@ async function loadInvoice() {
   if (!id) { showError('Tidak ada order ID'); return; }
   // Try API
   try {
-    const r = await fetch(API + '/api/orders/' + id + '/invoice', { headers: { Authorization: 'Bearer ' + token } });
+    const r = await fetch(API + '/orders/' + id + '/invoice', { headers: { Authorization: 'Bearer ' + token } });
     if (r.ok) {
       const j = await r.json();
       invoiceData = j.invoice;

@@ -9,7 +9,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 <style>
 .admin-wrap{max-width:1400px;margin:0 auto;padding:24px}
 .admin-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
@@ -213,7 +213,7 @@ async function api(path, opts = {}) {
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPass').value;
-  const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  const r = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
   if (r.error) return toast(r.error, 'error');
   localStorage.setItem('zcus_user', JSON.stringify(r.user));
   localStorage.setItem('zcus_token', r.token);
@@ -224,7 +224,7 @@ async function doLogin() {
 
 async function checkAuth() {
   if (!token) { showLogin(); return; }
-  const r = await api('/api/auth/me');
+  const r = await api('/auth/me');
   if (r.error || !r.user) { showLogin(); return; }
   user = r.user; token = localStorage.getItem('zcus_token');
   if (user.role !== 'admin') { document.getElementById('adminGuard').style.display = 'block'; document.getElementById('adminContent').style.display = 'none'; document.getElementById('loginCard').style.display = 'none'; return; }
@@ -236,7 +236,7 @@ async function checkAuth() {
 }
 
 async function loadStats() {
-  const r = await api('/api/admin/stats');
+  const r = await api('/admin/stats');
   if (r.error) return toast(r.error, 'error');
   const cards = [
     { ico: 'fa-users', label: 'Total Users', val: r.users.total || 0, sub: `${r.users.buyers||0} buyer · ${r.users.sellers||0} seller` },
@@ -259,7 +259,7 @@ function filterWd(s, btn) { wdFilter = s; document.querySelectorAll('#wdFilters 
 async function loadOrders() {
   const tbody = document.querySelector('#ordersTable tbody');
   tbody.innerHTML = '<tr><td colspan="7" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
-  const r = await api('/api/admin/orders' + (orderFilter ? '?status=' + orderFilter : ''));
+  const r = await api('/admin/orders' + (orderFilter ? '?status=' + orderFilter : ''));
   if (r.error) { tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">${r.error}</td></tr>`; return; }
   if (!r.length) { tbody.innerHTML = '<tr><td colspan="7" class="admin-empty"><i class="fa-solid fa-box-open"></i>Tidak ada order</td></tr>'; return; }
   tbody.innerHTML = r.map(o => `<tr>
@@ -281,7 +281,7 @@ async function loadProducts() {
   const params = new URLSearchParams();
   if (search) params.set('search', search);
   if (status) params.set('status', status);
-  const r = await api('/api/admin/products?' + params.toString());
+  const r = await api('/admin/products?' + params.toString());
   if (r.error) { tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">${r.error}</td></tr>`; return; }
   if (!r.length) { tbody.innerHTML = '<tr><td colspan="8" class="admin-empty"><i class="fa-solid fa-cube"></i>Tidak ada produk</td></tr>'; return; }
   tbody.innerHTML = r.map(p => `<tr>
@@ -301,7 +301,7 @@ async function loadProducts() {
 
 async function toggleProductStatus(id, current) {
   const newStatus = current === 'active' ? 'archived' : 'active';
-  const r = await api('/api/products/' + id, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
+  const r = await api('/products/' + id, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
   if (r.error) return toast(r.error, 'error');
   toast('Status updated', 'success');
   loadProducts();
@@ -315,7 +315,7 @@ async function loadUsers() {
   const params = new URLSearchParams();
   if (search) params.set('search', search);
   if (role) params.set('role', role);
-  const r = await api('/api/admin/users?' + params.toString());
+  const r = await api('/admin/users?' + params.toString());
   if (r.error) { tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">${r.error}</td></tr>`; return; }
   if (!r.length) { tbody.innerHTML = '<tr><td colspan="7" class="admin-empty"><i class="fa-solid fa-users"></i>Tidak ada user</td></tr>'; return; }
   tbody.innerHTML = r.map(u => {
@@ -341,7 +341,7 @@ async function loadUsers() {
 }
 
 async function changeRole(id, role) {
-  const r = await api('/api/admin/users/' + id + '/role', { method: 'PUT', body: JSON.stringify({ role }) });
+  const r = await api('/admin/users/' + id + '/role', { method: 'PUT', body: JSON.stringify({ role }) });
   if (r.error) return toast(r.error, 'error');
   toast('Role updated', 'success');
   loadUsers();
@@ -349,7 +349,7 @@ async function changeRole(id, role) {
 
 async function deleteUser(id, email) {
   if (!confirm(`Hapus user ${email}? Tindakan ini tidak bisa dibatalkan.`)) return;
-  const r = await api('/api/admin/users/' + id, { method: 'DELETE' });
+  const r = await api('/admin/users/' + id, { method: 'DELETE' });
   if (r.error) return toast(r.error, 'error');
   toast('User dihapus', 'success');
   loadUsers();
@@ -358,7 +358,7 @@ async function deleteUser(id, email) {
 async function loadWithdrawals() {
   const tbody = document.querySelector('#wdTable tbody');
   tbody.innerHTML = '<tr><td colspan="8" class="admin-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>';
-  const r = await api('/api/admin/withdrawals' + (wdFilter ? '?status=' + wdFilter : ''));
+  const r = await api('/admin/withdrawals' + (wdFilter ? '?status=' + wdFilter : ''));
   if (r.error) { tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">${r.error}</td></tr>`; return; }
   if (!r.length) { tbody.innerHTML = '<tr><td colspan="8" class="admin-empty"><i class="fa-solid fa-money-bill-transfer"></i>Tidak ada withdrawal</td></tr>'; return; }
   tbody.innerHTML = r.map(w => `<tr>
@@ -375,7 +375,7 @@ async function loadWithdrawals() {
 
 async function approveWd(id) {
   if (!confirm('Setujui withdrawal ini?')) return;
-  const r = await api('/api/admin/withdrawals/' + id + '/approve', { method: 'POST' });
+  const r = await api('/admin/withdrawals/' + id + '/approve', { method: 'POST' });
   if (r.error) return toast(r.error, 'error');
   toast('Disetujui', 'success');
   loadWithdrawals();
@@ -383,7 +383,7 @@ async function approveWd(id) {
 
 async function rejectWd(id) {
   const reason = prompt('Alasan reject (opsional):') || '';
-  const r = await api('/api/admin/withdrawals/' + id + '/reject', { method: 'POST', body: JSON.stringify({ reason }) });
+  const r = await api('/admin/withdrawals/' + id + '/reject', { method: 'POST', body: JSON.stringify({ reason }) });
   if (r.error) return toast(r.error, 'error');
   toast('Ditolak. Saldo dikembalikan.', 'success');
   loadWithdrawals();
