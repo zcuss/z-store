@@ -64,7 +64,7 @@ await app.register(cookie);
 await app.register(formbody);
 await app.register(jwt, {
   secret: JWT_SECRET,
-  sign: { expiresIn: '30d', jti: () => crypto.randomUUID() },
+  sign: { expiresIn: '30d' },
   verify: { extractToken: (req) => {
     const h = req.headers.authorization;
     if (h?.startsWith('Bearer ')) return h.slice(7);
@@ -150,8 +150,12 @@ const rate = (key, max, windowMs) => async (req, reply) => {
   }
 };
 
-// ============ Helper: token + cookies ============
-const issueToken = (user) => app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+// ============ Helpers ============
+const issueToken = (user) => {
+  const jti = crypto.randomUUID();
+  const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name, jti });
+  return { token, jti };
+};
 const setAuthCookie = (reply, token) => {
   reply.setCookie('token', token, {
     httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',

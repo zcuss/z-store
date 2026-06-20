@@ -1,6 +1,5 @@
 // Auth routes: register, login, OTP, magic link, OAuth (Google/Telegram/Discord/WhatsApp), logout
 import bcrypt from 'bcryptjs';
-import crypto from 'node:crypto';
 import axios from 'axios';
 
 const genOtp = () => String(crypto.randomInt(100000, 1000000));
@@ -66,7 +65,7 @@ export async function authRoutes(app, { rate }) {
     } catch (e) { app.log.error('register email failed:', e.message); }
 
     const user = { id, email: cleanEmail, name: userName, role, email_verified: false };
-    const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+    const token = app.jwt.sign({  id: user.id, email: user.email, role: user.role, name: user.name , jti: crypto.randomUUID() });
     return reply.send({ user, token, requires_verification: true, otp_sent, message: 'Registrasi berhasil. Cek email untuk kode verifikasi.' });
   });
 
@@ -108,7 +107,7 @@ export async function authRoutes(app, { rate }) {
       });
     }
 
-    const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+    const token = app.jwt.sign({  id: user.id, email: user.email, role: user.role, name: user.name , jti: crypto.randomUUID() });
     reply.setCookie('token', token, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
     return reply.send({
       user: { id: user.id, email: user.email, name: user.name, role: user.role, email_verified: !!user.email_verified },
@@ -177,7 +176,7 @@ export async function authRoutes(app, { rate }) {
     }
     if (!valid) return reply.code(401).send({ error: 'invalid_2fa_code' });
     // Issue real token
-    const realToken = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+    const realToken = app.jwt.sign({  id: user.id, email: user.email, role: user.role, name: user.name , jti: crypto.randomUUID() });
     reply.setCookie('token', realToken, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
     return reply.send({
       user: { id: user.id, email: user.email, name: user.name, role: user.role, email_verified: !!user.email_verified },
@@ -261,7 +260,7 @@ export async function authRoutes(app, { rate }) {
     } else if (purpose === 'login') {
       const user = await app.db('users').where({ email: target }).first();
       if (!user) return reply.code(404).send({ error: 'user_not_found' });
-      const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+      const token = app.jwt.sign({  id: user.id, email: user.email, role: user.role, name: user.name , jti: crypto.randomUUID() });
       reply.setCookie('token', token, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
       return reply.send({ ok: true, user: { id: user.id, email: user.email, role: user.role }, token, message: 'Login via OTP berhasil' });
     }
@@ -307,7 +306,7 @@ export async function authRoutes(app, { rate }) {
     if (new Date(link.expires_at) < new Date()) return reply.code(400).send({ error: 'link_expired' });
     await app.db('magic_links').where({ id: link.id }).update({ used_at: app.db.fn.now() });
     const user = await app.db('users').where({ id: link.user_id }).first();
-    const tokenJwt = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+    const tokenJwt = app.jwt.sign({  id: user.id, email: user.email, role: user.role, name: user.name , jti: crypto.randomUUID() });
     reply.setCookie('token', tokenJwt, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
     return reply.send({ user: { id: user.id, email: user.email, name: user.name, role: user.role }, token: tokenJwt });
   });
@@ -542,7 +541,7 @@ export async function authRoutes(app, { rate }) {
     if (!user_id) return reply.code(400).send({ error: 'user_id required' });
     const target = await app.db('users').where({ id: user_id }).first();
     if (!target) return reply.code(404).send({ error: 'not_found' });
-    const token = app.jwt.sign({ id: target.id, email: target.email, role: target.role, name: target.name, view_as: true });
+    const token = app.jwt.sign({ id: target.id, email: target.email, role: target.role, name: target.name, jti: require('node:crypto').randomUUID(), view_as: true });
     return { token, user: { id: target.id, email: target.email, role: target.role, name: target.name } };
   });
 }
@@ -586,7 +585,7 @@ async function handleOAuthLink(app, reply, { platform, externalId, email, name, 
     } catch (e) { /* table may not have unique constraint, ignore */ }
   }
 
-  const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+  const token = app.jwt.sign({  id: user.id, email: user.email, role: user.role, name: user.name , jti: crypto.randomUUID() });
   reply.setCookie('token', token, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
   return {
     user: { id: user.id, email: user.email, name: user.name, role: user.role, email_verified: !!user.email_verified },
