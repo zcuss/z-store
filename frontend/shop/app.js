@@ -3,7 +3,10 @@
 // (orders.html, settings.html, etc. each declare their own `let user/token`).
 // Without this isolation, both `let user` declarations collide → SyntaxError
 // halts entire app.js, breaking cart/wishlist/theme on every page.
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : 'https://zcus.biz.id/shop-app/api';
+// API base — always same-origin relative /api (works on localhost, 5.zcus.biz.id tunnel, zcus.biz.id cPanel, etc.)
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') 
+  ? location.origin + '/api' 
+  : '/api';
 window.products = window.products || [];
 window.cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
 window.wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
