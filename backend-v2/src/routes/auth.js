@@ -510,13 +510,30 @@ export async function authRoutes(app, { rate }) {
 
   // ============ LOGOUT ============
   app.post('/logout', async (req, reply) => {
+    // Revoke token by jti
+    const h = req.headers.authorization;
+    if (h?.startsWith('Bearer ')) {
+      const token = h.slice(7);
+      try {
+        const decoded = app.jwt.verify(token);
+        if (decoded.jti && decoded.id) {
+          await app.db('user_sessions')
+            .insert({ jti: decoded.jti, user_id: decoded.id, revoked_at: app.db.fn.now() })
+            .onConflict('jti').ignore();
+        }
+      } catch (e) { /* ignore invalid token */ }
+    }
     reply.clearCookie('token', { path: '/' });
     return { ok: true };
   });
 
   app.post('/logout-all', { preHandler: app.authenticate }, async (req, reply) => {
+    // Revoke all tokens for this user
+    await app.db('user_sessions')
+      .where({ user_id: req.user.id, revoked_at: null })
+      .update({ revoked_at: app.db.fn.now() });
     reply.clearCookie('token', { path: '/' });
-    return { ok: true, message: 'logout_all' };
+    return { ok: true, message: 'Semua device logout. Silakan login ulang.' };
   });
 
   // ============ DEV: view-as-role (dev only) ============

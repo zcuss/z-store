@@ -64,7 +64,7 @@ await app.register(cookie);
 await app.register(formbody);
 await app.register(jwt, {
   secret: JWT_SECRET,
-  sign: { expiresIn: '30d' },
+  sign: { expiresIn: '30d', jti: () => crypto.randomUUID() },
   verify: { extractToken: (req) => {
     const h = req.headers.authorization;
     if (h?.startsWith('Bearer ')) return h.slice(7);
@@ -88,16 +88,25 @@ export const mailer = nodemailer.createTransport({
 app.decorate('db', db());
 app.decorate('mailer', mailer);
 app.decorate('authenticate', async (req, reply) => {
+  let decoded;
   try {
-    await req.jwtVerify();
+    decoded = await req.jwtVerify();
   } catch (err) {
     reply.code(401).send({ error: 'unauthorized' });
     return reply;
   }
+  // Token blacklist: check if this jti has been revoked
+  if (decoded.jti) {
+    const revoked = await app.db('user_sessions').where({ jti: decoded.jti }).whereNotNull('revoked_at').first();
+    if (revoked) {
+      reply.code(401).send({ error: 'token_revoked' });
+      return reply;
+    }
+  }
   // Re-fetch user from DB to get current email_verified/role/2fa status
   // (JWT may be stale; DB is source of truth for security decisions)
   try {
-    const u = await app.db('users').where({ id: req.user.id }).first();
+    const u = await app.db('users').where({ id: decoded.id }).first();
     if (!u) {
       reply.code(401).send({ error: 'user_not_found' });
       return reply;
