@@ -26,7 +26,12 @@ function base32Decode(str) {
 function totp(secret, time = Math.floor(Date.now() / 1000 / 30)) {
   const key = base32Decode(secret);
   const buf = Buffer.alloc(8);
-  for (let i = 0; i < 8; i++) buf[i] = (time >> (56 - i * 8)) & 0xff;
+  // IMPORTANT: use BigInt to avoid JS 32-bit shift masking bug
+  // (>> 56 in JS is treated as >> 24 because shift amount mod 32)
+  const timeBig = BigInt(time);
+  for (let i = 0; i < 8; i++) {
+    buf[i] = Number((timeBig >> BigInt(56 - i * 8)) & 0xffn);
+  }
   const hmac = crypto.createHmac('sha1', key).update(buf).digest();
   const offset = hmac[hmac.length - 1] & 0xf;
   const code = ((hmac[offset] & 0x7f) << 24 | (hmac[offset + 1] & 0xff) << 16 | (hmac[offset + 2] & 0xff) << 8 | (hmac[offset + 3] & 0xff)) % 1000000;

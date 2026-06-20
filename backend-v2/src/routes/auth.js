@@ -94,6 +94,20 @@ export async function authRoutes(app, { rate }) {
 
     await app.db('users').where({ id: user.id }).update({ last_login_at: app.db.fn.now() });
 
+    // 2FA challenge: if user has TOTP enabled, return a 2fa_required token + temp session
+    if (user.totp_enabled) {
+      const tempToken = app.jwt.sign(
+        { id: user.id, email: user.email, role: user.role, name: user.name, twofa: true },
+        { expiresIn: '5m' }
+      );
+      return reply.send({
+        user: { id: user.id, email: user.email, name: user.name, role: user.role, email_verified: !!user.email_verified, totp_enabled: true },
+        token: tempToken,
+        requires_2fa: true,
+        message: 'Masukkan kode 2FA dari authenticator app Anda',
+      });
+    }
+
     const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
     reply.setCookie('token', token, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
     return reply.send({
@@ -101,6 +115,74 @@ export async function authRoutes(app, { rate }) {
       token,
       requires_verification: !user.email_verified,
       message: user.email_verified ? 'ok' : 'Email belum diverifikasi. Cek inbox untuk kode OTP.',
+    });
+  });
+
+  // 2FA verify (after login with totp_enabled)
+  app.post('/2fa/verify', {
+    preHandler: rate('2fa-verify', 5, 10 * 60 * 1000),
+    schema: {
+      body: {
+        type: 'object',
+        required: ['token', 'code'],
+        properties: { token: { type: 'string' }, code: { type: 'string' } },
+      },
+    },
+  }, async (req, reply) => {
+    const { token, code } = req.body;
+    let payload;
+    try { payload = app.jwt.verify(token); }
+    catch (e) { return reply.code(401).send({ error: 'invalid_or_expired_token' }); }
+    if (!payload.twofa) return reply.code(400).send({ error: 'not_a_2fa_token' });
+    const user = await app.db('users').where({ id: payload.id }).first();
+    if (!user || !user.totp_secret) return reply.code(404).send({ error: 'user_not_found' });
+    // Verify TOTP code
+    const clean = String(code).replace(/\s/g, '');
+    if (!/^\d{6}$/.test(clean)) return reply.code(400).send({ error: 'invalid_code_format' });
+    // Inline TOTP verify (HMAC-SHA1)
+    const crypto = await import('node:crypto');
+    const base32Decode = (str) => {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+      const clean = str.replace(/=+$/, '').toUpperCase();
+      let bits = '', out = [];
+      for (let i = 0; i < clean.length; i++) {
+        const v = alphabet.indexOf(clean[i]);
+        if (v < 0) continue;
+        bits += v.toString(2).padStart(5, '0');
+      }
+      for (let i = 0; i < bits.length; i += 8) {
+        const b = parseInt(bits.slice(i, i + 8), 2);
+        if (!isNaN(b)) out.push(b);
+      }
+      return Buffer.from(out);
+    };
+    const totp = (secret, time) => {
+      const key = base32Decode(secret);
+      // IMPORTANT: use BigInt to avoid JS 32-bit shift masking bug
+      // (>> 56 in JS is treated as >> 24 because shift amount mod 32)
+      const timeBig = BigInt(time);
+      const buf = Buffer.alloc(8);
+      for (let i = 0; i < 8; i++) {
+        buf[i] = Number((timeBig >> BigInt(56 - i * 8)) & 0xffn);
+      }
+      const hmac = crypto.createHmac('sha1', key).update(buf).digest();
+      const offset = hmac[hmac.length - 1] & 0xf;
+      const code = ((hmac[offset] & 0x7f) << 24 | (hmac[offset + 1] & 0xff) << 16 | (hmac[offset + 2] & 0xff) << 8 | (hmac[offset + 3] & 0xff)) % 1000000;
+      return String(code).padStart(6, '0');
+    };
+    const now = Math.floor(Date.now() / 1000 / 30);
+    let valid = false;
+    for (let w = -1; w <= 1; w++) {
+      if (totp(user.totp_secret, now + w) === clean) { valid = true; break; }
+    }
+    if (!valid) return reply.code(401).send({ error: 'invalid_2fa_code' });
+    // Issue real token
+    const realToken = app.jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name });
+    reply.setCookie('token', realToken, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 30 * 24 * 60 * 60 });
+    return reply.send({
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, email_verified: !!user.email_verified },
+      token: realToken,
+      message: 'ok',
     });
   });
 
