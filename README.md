@@ -1,139 +1,255 @@
-# Z Store
+# Z Store v3 — Premium Digital Marketplace
 
-**Premium Digital Marketplace** — AI tools · Software · Vouchers · Game accounts · Hosting · Jasa
+> AI tools · Software · Vouchers · Game accounts · Hosting · Jasa
+> Instant delivery via email · Pembayaran via Midtrans (QRIS / VA / GoPay / ShopeePay / CC) · Garansi 30 hari
 
-Instant delivery via email · Pembayaran via Midtrans (QRIS / VA / GoPay / ShopeePay / CC) · Garansi 30 hari.
-
-🌐 **Live**: https://zcus.biz.id/shop/
-
----
-
-## Desktop Preview
-
-> Sleek dark theme · Hairline borders · Single sky-blue accent · 8px spacing grid · Inter typeface · 4-column product grid.
-
-### Home Page — Full View
-
-![Z Store Home — Desktop](docs/screenshots/04-home-final-desktop.png)
-
-### What You're Looking At
-
-| Region | Description |
-|---|---|
-| **Top bar** | Promo strip with rotating trust signals (instant delivery, secure pay, flash sale countdown, CS WhatsApp) |
-| **Header** | Sticky navigation — brand mark, search, theme toggle, orders, wishlist, cart (live count), account |
-| **Hero** | "Z STORE — PREMIUM DIGITAL ACCESS" with live stock badge + dual CTA + 4-stat card (products sold, buyers, delivery time) |
-| **Categories** | 7 quick-link chips — AI Tools, Voucher, Digital Goods, Merchandise, Software, Hosting, Game |
-| **Flash Sale** | Gradient banner with live countdown timer + "Lihat Promo" CTA |
-| **Trust strip** | 5-item horizontal — `<10min Delivery`, `Full Warranty`, `100% Original`, `Secure Payment`, `24/7 Support` |
-| **Sidebar** | Category filter (with counts), sort dropdown, price range, promo code, WhatsApp/Email support |
-| **Product grid** | 4-column responsive grid (2-col mobile), 20+ products with badges (HOT/DEAL/NEW), ratings, strikethrough pricing, stock indicators |
-| **Footer** | 4-column footer — brand + social, store links, payment methods, contact info, legal strip |
-
-### Design System
-
-```
-Background      #0a0a0b  (deep neutral black)
-Surface 1       #131316
-Surface 2       #1c1c1f
-Hairline        rgba(255,255,255,0.08)
-Accent          #38bdf8  (sky blue — single functional accent)
-Text            #fafafa  /  #a1a1aa  /  #71717a  (3-tier hierarchy)
-Type            Inter, system fallbacks
-Spacing         8px grid
-Radius          8px (down from glassmorphism's 12-18px)
-No              orbs · gradient mesh · backdrop blur · glow
-```
+🌐 **Live**: https://5.zcus.biz.id/shop/ (Cloudflare Tunnel · VPS1)
+🌐 **Production (main)**: https://zcus.biz.id/shop/ (cPanel + VPS2 — pending VPS2 restart)
+📋 **Preview Gallery**: [/preview/](./preview/) — visual tour 30+ fitur
 
 ---
 
-## Stack
+## 🏗️ Stack (v3.0 — June 2026)
 
 | Layer | Tech |
 |---|---|
-| Frontend | Static HTML + vanilla JS + CSS — no build step |
-| Backend | Node.js 22 + Express 4 + mysql2/promise |
-| Database | MySQL 8 (23 tables, escrow + audit log) |
-| Auth | JWT (30d) + bcrypt(12) + TOTP 2FA optional |
-| Payment | Midtrans Snap (sandbox default) |
-| Process | PM2 (`z-store`) |
-| Network | nginx → Cloudflare → Tunnel → VPS2 |
-| DB | MySQL on VPS4 over Tailscale |
+| **Frontend** | Static HTML + vanilla JS + CSS (no build step) + Tailwind CDN + shadcn-style components |
+| **Backend** | Node.js 22 + Express 4 (production v1) + Fastify 4.28 (v2 ready, see [docs/V2-FASTIFY-BACKEND.md](./docs/V2-FASTIFY-BACKEND.md)) |
+| **Database** | MySQL 8 (InnoDB, utf8mb4) · 23 tables · migrations via Knex (multi-driver ready) |
+| **Auth** | JWT (30d) · bcrypt(12) · TOTP 2FA · Email+Pass · OAuth (Google/Telegram/Discord/WhatsApp) · Magic Link · OTP (email/WA/TG channels) |
+| **RBAC** | `buyer` · `seller` · `admin` (sub: `cs`/`marketing`/`tech`/`service`) · `dev` (view-as-role) |
+| **Payment** | Midtrans Snap (sandbox default · prod toggle via env) |
+| **Multi-platform** | Telegram bot · Discord bot · WhatsApp Business · Catalog sync · Order broadcast · Auto-deliver credentials |
+| **Process** | PM2 (`z-store`) |
+| **CDN** | Cloudflare (free tier + trycloudflare dev tunnels) |
+| **Hosting** | cPanel shared (frontend) + VPS1/VPS2 (backend) + VPS4 (DB) · see [docs/CPANEL-DEPLOY.md](./docs/CPANEL-DEPLOY.md) |
+| **Tunnel** | Cloudflare Tunnel (named `zstore-shop`) — no public ports exposed |
 
 ---
 
-## Project Structure
+## ✨ Fitur (30+)
+
+### 🔐 Auth & Account
+1. **Register email + password** → auto-OTP email verification (wajib sebelum full access)
+2. **Login email + password** (rate-limited, bcrypt 12 rounds, account lockout)
+3. **OTP login** via email / WhatsApp / Telegram
+4. **Magic link** (15 min expiry, single-use)
+5. **OAuth Google** — auto-mark email verified
+6. **OAuth Telegram** (Login Widget) — link telegram_id
+7. **OAuth Discord** — fetch /users/@me, link discord_id
+8. **OAuth WhatsApp Business** — link E.164 phone
+9. **Multi-platform linking** — 1 akun, semua platform (web + TG + DC + WA)
+10. **2FA TOTP** — Authenticator app, 30s window
+
+### 🛒 E-commerce
+11. **Product catalog** — filter category / search / price / sort / discount
+12. **Product detail** — gallery, reviews, related, share buttons
+13. **Cart drawer** — localStorage + sync, qty controls, promo code
+14. **Wishlist** — heart icon, share via public link
+15. **Checkout (Midtrans Snap)** — 3-step, QRIS/VA/GoPay/ShopPay/CC
+16. **Order success** — auto-deliver credentials ke email + linked platforms
+17. **My orders** — tabs by status + escrow timeline
+18. **Invoice PDF/HTML** — printable
+
+### 💰 Payment + Escrow
+19. **Midtrans Snap** — sandbox + production toggle
+20. **Escrow 7-day auto-release** — protects both buyer + seller
+21. **Webhook idempotent** — atomic SQL update with WHERE clause
+22. **Garansi 30 hari** — replacement atau refund
+
+### 🛍️ Seller
+23. **Upload product** — auto-slug, bulk inventory
+24. **Dashboard** — stats, saldo, escrow holds, top products
+25. **Withdraw** — bank / e-wallet / crypto (min Rp 50k)
+26. **Afiliasi** — komisi 10% per referral, monthly payout
+
+### 👑 Admin (multi-role)
+27. **Dashboard stats** — users / orders / revenue / GMV
+28. **User moderation** — ban, role change, audit log
+29. **Withdrawal approval** — manual + auto-refund
+30. **Sub-roles** — CS / Marketing / Tech / Service
+31. **Dev view-as-role** — switch to any user for debugging
+
+### 📱 Multi-platform Sync
+32. **Telegram bot** — catalog sync, order notifications, auto-deliver
+33. **Discord bot** — slash commands, embeds, webhooks
+34. **WhatsApp Business** — catalog sync (Meta Commerce), humanized CS templates
+35. **Email SMTP** — Gmail SMTP for OTP + delivery (can swap to SendGrid/Resend)
+
+### 📚 Documentation (Tailwind styled)
+36. **Cara Order** — 5-step guide + payment + escrow + garansi
+37. **Garansi 30 Hari** — replacement / refund table
+38. **Refund Policy** — window + biaya admin
+39. **Syarat & Ketentuan** — 8-section T&C
+40. **Tentang Kami / About** — cerita + misi
+41. **FAQ** — searchable self-service
+42. **Bantuan / Support** — live chat + tiket
+42. **Afiliasi** — komisi program
+
+---
+
+## 📂 Project Structure
 
 ```
 z-store/
-├── backend/
-│   ├── server.js            # 1786 LOC, 93 routes
-│   ├── security.js          # 299 LOC middleware (CSP, CORS, rate-limit, injection guard)
-│   ├── schema.sql + v4-v7   # DB migrations (apply in order)
-│   ├── test-security.sh     # 44 security tests (SQLi/XSS/DDoS/rate limit/headers)
-│   └── test-features.sh     # 24 feature smoke tests
-├── frontend/shop/           # 18 pages, styles.css, app.js, products.js
-└── docs/                    # ARCHITECTURE / SECURITY / API / DEPLOYMENT / DATABASE / TESTING
+├── backend/                # v1 Express (production)
+│   ├── server.js
+│   ├── security.js
+│   ├── schema*.sql
+│   ├── test-security.sh
+│   └── test-features.sh
+├── backend-v2/             # v2 Fastify (ready, debug in progress)
+│   ├── src/
+│   │   ├── server.js
+│   │   ├── db/             # Knex adapter + migrations
+│   │   └── routes/         # auth, users, products, orders, admin, integrations, webhooks
+│   └── package.json
+├── frontend/shop/
+│   ├── index.html          # Homepage
+│   ├── product.html        # Product detail
+│   ├── orders.html         # My orders
+│   ├── payment.html        # Checkout
+│   ├── order-success.html  # Post-payment
+│   ├── admin.html          # Admin panel
+│   ├── seller.html         # Seller dashboard
+│   ├── settings.html       # Account + 2FA + linked platforms
+│   ├── cara-order.html     # Doc: how to order
+│   ├── garansi.html        # Doc: 30-day warranty
+│   ├── refund-policy.html  # Doc: refund window
+│   ├── terms.html          # Doc: T&C
+│   ├── support.html        # Live chat + tiket
+│   ├── affiliate.html      # Affiliate program
+│   ├── notifications.html  # In-app notifications
+│   ├── wishlist.html       # Wishlist
+│   ├── preview/index.html  # Visual tour (30+ features)
+│   ├── styles.css          # Custom design system (Slack minimalism)
+│   ├── tw-components.css   # Tailwind shadcn-style components
+│   ├── app.js              # Frontend logic (~1000 LOC)
+│   └── products.js         # 20-item fallback catalog
+└── docs/
+    ├── README.md           # Docs index
+    ├── ARCHITECTURE.md     # System architecture
+    ├── SECURITY.md         # Security audit + hardening
+    ├── API.md              # REST API reference
+    ├── DEPLOYMENT.md       # VPS + nginx setup
+    ├── DEVELOPMENT.md      # Local dev guide
+    ├── DATABASE.md         # Schema + ERD
+    ├── TESTING.md          # Test suites
+    ├── CHANGELOG.md        # Versioned history
+    ├── V2-FASTIFY-BACKEND.md   # v2 architecture
+    ├── TAILWIND-FRONTEND.md    # Tailwind design system
+    ├── BOT-CHANNELS.md         # Discord/Telegram/WA bot templates
+    ├── AUTH.md                  # Multi-OAuth + account linking
+    └── CPANEL-DEPLOY.md        # Static frontend deploy to cPanel
 ```
 
 ---
 
-## Status (June 2026)
+## 🚀 Quickstart
 
-| Area | Status | Details |
-|---|---|---|
-| Security tests | **39/44 pass (89%)** | See [docs/SECURITY.md](docs/SECURITY.md) |
-| Feature tests | 12/24 (50%) | See [docs/TESTING.md](docs/TESTING.md) |
-| Auth (register/login/JWT/2FA) | ✅ Production | bcrypt(12) + JWT 30d + TOTP |
-| Midtrans payments (sandbox) | ✅ Tested | Real prod toggle via env var |
-| Escrow + auto-release | ✅ Production | 7-day default + admin force-release |
-| UI redesign (sleek/minimal) | ✅ v3 deployed | See [CHANGELOG.md](docs/CHANGELOG.md) |
-| Promo codes + Newsletter | ⚠ Migration needed | Run `schema-v7-promos.sql` on VPS4 |
+### Live (production)
+Browse: **https://5.zcus.biz.id/shop/**
+
+### Local dev (with MySQL)
+```bash
+git clone https://github.com/zcuss/z-store.git
+cd z-store/backend
+npm install
+cp .env.example .env  # set DB_DRIVER, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, JWT_SECRET
+node server.js  # → http://localhost:3001
+```
+
+### Local dev (v2 Fastify, multi-DB)
+```bash
+cd z-store/backend-v2
+npm install
+DB_DRIVER=sqlite DB_FILE=./data/zstore.db JWT_SECRET=test node src/db/migrations.js
+DB_DRIVER=sqlite DB_FILE=./data/zstore.db JWT_SECRET=test node src/server.js
+# → http://localhost:3001 (sqlite, no MySQL needed)
+```
+
+### Frontend
+Static files in `frontend/shop/`. Serve any way:
+```bash
+# Node
+node frontend/shop/dev-server.js  # → http://localhost:3002
+
+# Python
+cd frontend/shop && python3 -m http.server 8000
+
+# nginx
+location /shop/ { alias /path/to/frontend/shop/; }
+```
 
 ---
 
-## Quickstart (Local)
+## 🧪 Testing
 
 ```bash
-# Clone
-git clone https://github.com/zcuss/z-store.git
-cd z-store
-
-# Frontend dev server (port 3002)
-cd frontend/shop
-node dev-server.js
-# → open http://localhost:3002
-
-# Backend (optional — without DB, API returns 503, frontend falls back to local PRODUCTS)
-cd ../../backend
-npm ci
-node server.js   # → http://localhost:3001
+cd backend
+bash test-security.sh                          # 44 security tests (SQLi/XSS/DDoS/auth/headers/traversal)
+bash test-features.sh                          # 24 feature smoke tests (products/auth/orders/admin)
+bash test-api.sh                              # E2E seller dashboard (against production)
 ```
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for full setup.
+Latest results (June 2026):
+- Security: **39 / 44 pass** (89%)
+- Features: **12 / 24** (rest are rate-limit false-positives + missing DB migrations)
+- See [docs/TESTING.md](./docs/TESTING.md) for full breakdown
 
 ---
 
-## Documentation
+## 🚢 Deploy
 
-- [docs/README.md](docs/README.md) — Docs index
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — System architecture + stack
-- [docs/SECURITY.md](docs/SECURITY.md) — Security audit + hardening playbook
-- [docs/API.md](docs/API.md) — REST API endpoint reference
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — VPS2 + VPS4 + cPanel + Cloudflare setup
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — Local dev + code style + gotchas
-- [docs/DATABASE.md](docs/DATABASE.md) — Schema (23 tables) + ERD
-- [docs/TESTING.md](docs/TESTING.md) — Test suites + known gaps
-- [docs/CHANGELOG.md](docs/CHANGELOG.md) — Versioned changelog
+### VPS (backend) — recommended via SSH
+
+```bash
+ssh zcus2
+cd /root/z-store
+git fetch origin && git reset --hard origin/master
+pm2 restart z-store
+nginx -s reload
+```
+
+### cPanel (frontend static files)
+
+See [docs/CPANEL-DEPLOY.md](./docs/CPANEL-DEPLOY.md) for full guide.
+
+TL;DR:
+1. Upload `frontend/shop/` to `public_html/shop/` via FTP
+2. Set perms: `chmod -R 755 public_html/shop`
+3. Configure Cloudflare proxy + Origin Certificate
+4. Reverse proxy `/shop-app/api/*` → VPS Node.js
 
 ---
 
-## Repo
+## 📸 Preview
 
-- **GitHub**: github.com/zcuss/z-store
-- **Live**: https://zcus.biz.id/shop/
-- **API**: https://zcus.biz.id/shop-app/api
+📋 **[/preview/](./preview/)** — visual tour 30+ fitur dengan click-through ke live pages.
 
-## License
+---
+
+## 🤝 Contributing
+
+1. Fork repo
+2. Branch: `git checkout -b feat/awesome`
+3. Test locally: `bash backend/test-security.sh`
+4. Commit: `git commit -m "feat: ..."`
+5. PR to `master`
+
+---
+
+## 📄 License
 
 Proprietary. © 2026 Z Store.
+
+---
+
+## 🔗 Links
+
+- **Live**: https://5.zcus.biz.id/shop/
+- **Production**: https://zcus.biz.id/shop/ (pending VPS2 restart)
+- **Preview Gallery**: `/preview/`
+- **Docs**: `/docs/`
+- **GitHub**: github.com/zcuss/z-store
+- **API Health**: `GET /api/health`
