@@ -711,7 +711,8 @@ input,textarea,select{font-family:inherit;color:inherit;transition:all .15s ease
 
 /* ===== FLASH SALE BANNER ===== */
 .flash-sale{
-  max-width:1280px;margin:0 auto 32px;padding:0 24px;
+  max-width:1280px;width:100%;margin:0 auto 32px;padding:0 24px;
+  box-sizing:border-box;overflow:hidden;min-width:0;
 }
 .flash-sale-inner{
   background:linear-gradient(135deg,#0a0a0b 0%,#1c1c1f 100%);
