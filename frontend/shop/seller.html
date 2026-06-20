@@ -261,7 +261,7 @@
 
 <script>
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : (location.hostname === 'zcus.biz.id' || location.hostname === 'www.zcus.biz.id' ? 'https://5.zcus.biz.id/api' : '/api');
 let token = localStorage.getItem('zcus_token') || null;
 let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
 let currentTab = 'overview';

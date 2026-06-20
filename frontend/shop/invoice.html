@@ -183,7 +183,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 
 <script>
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : (location.hostname === 'zcus.biz.id' || location.hostname === 'www.zcus.biz.id' ? 'https://5.zcus.biz.id/api' : '/api');
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-';
 let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
