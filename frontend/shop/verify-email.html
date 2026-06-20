@@ -33,6 +33,7 @@
 </div>
 
 <script>
+function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 
 async function verify() {

@@ -76,6 +76,7 @@
 </main>
 
 <script>
+function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 function toggleTheme() { const h = document.documentElement; const t = h.dataset.theme === 'dark' ? 'light' : 'dark'; h.dataset.theme = t; localStorage.setItem('zcus_theme', t); }
 function doSearch() {
   const q = document.getElementById('search404').value.trim();

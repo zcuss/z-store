@@ -260,6 +260,7 @@
 </div>
 
 <script>
+function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 const API = 'https://zcus.biz.id/shop-app/api';
 let token = localStorage.getItem('zcus_token') || null;
 let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');

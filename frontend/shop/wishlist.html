@@ -106,6 +106,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : '/api';
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
