@@ -21,11 +21,14 @@ if (typeof window !== 'undefined') {
 // Local alias for convenience (this DOES re-declare `const API` which would conflict, so use function)
 const _api = () => window.API;
 window.products = window.products || [];
-window.cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
-window.wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
-window.recentlyViewed = JSON.parse(localStorage.getItem('zcus_recent') || '[]');
-window.user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
-window.token = localStorage.getItem('zcus_token') || null;
+// Safe localStorage helpers — corrupt value must never kill the whole script
+const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
+const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+window.cart = _lsJSON('zcus_cart', []);
+window.wishlist = _lsJSON('zcus_wishlist', []);
+window.recentlyViewed = _lsJSON('zcus_recent', []);
+window.user = _lsJSON('zcus_user', null);
+window.token = _lsStr('zcus_token');
 window.currentFilter = { cat: '', search: '', sort: 'newest', min: '', max: '', promo: null };
 window.currentView = 'grid';
 
@@ -628,7 +631,7 @@ function resetFilter() {
 }
 
 // ===== SEARCH V2 =====
-let recentSearches = JSON.parse(localStorage.getItem('zcus_recent_searches') || '[]');
+let recentSearches = _lsJSON('zcus_recent_searches', []);
 let trendingSearches = ['Claude Pro', 'Netflix Premium', 'ChatGPT Plus', 'Capcut Pro', 'Hosting cPanel', 'Voucher Spotify'];
 let searchDebounce = null;
 

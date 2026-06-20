@@ -1,5 +1,7 @@
+const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
+const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 // Zcus Store — main script
-let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
+let cart = _lsJSON('zcus_cart', '[]');
 
 // ---- Render product cards ----
 function productCard(p) {

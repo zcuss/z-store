@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id">
 <head>
+<script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Order Berhasil — Z Store</title>
@@ -9,7 +10,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="styles.css?v=8">
 <style>
 .success-wrap{max-width:720px;margin:0 auto;padding:48px 24px;text-align:center}
 .success-icon{width:120px;height:120px;margin:0 auto 24px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.2),transparent 70%);display:flex;align-items:center;justify-content:center;position:relative;animation:successPop .6s cubic-bezier(.34,1.56,.64,1)}
@@ -176,11 +177,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
+const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
+const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : (location.hostname === 'zcus.biz.id' || location.hostname === 'www.zcus.biz.id' ? 'https://5.zcus.biz.id/api' : '/api');
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
-let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
+let user = _lsJSON('zcus_user', 'null');
 let orderData = null;
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
@@ -208,20 +211,20 @@ async function loadOrder() {
   let id = params.get('id');
   // Get from session if no id
   if (!id) {
-    const last = JSON.parse(localStorage.getItem('zcus_last_order') || 'null');
+    const last = _lsJSON('zcus_last_order', 'null');
     if (last) orderData = last;
   }
   if (id) {
     // Fetch from API or local mock
     try {
-      const r = await fetch(API + '/orders/' + id, { headers: { Authorization: 'Bearer ' + (localStorage.getItem('zcus_token') || '') } });
+      const r = await fetch(API + '/orders/' + id, { headers: { Authorization: 'Bearer ' + ((_lsStr('zcus_token') || '')) } });
       if (r.ok) orderData = await r.json();
     } catch (e) { /* dev mode */ }
   }
   if (!orderData) {
     // Dev fallback: read from localStorage orders OR use built-in mock
     try {
-      const orders = JSON.parse(localStorage.getItem('zcus_orders') || '[]');
+      const orders = _lsJSON('zcus_orders', '[]');
       orderData = orders[0] || null;
     } catch (e) { orderData = null; }
     if (!orderData) {

@@ -43,34 +43,47 @@
   --shadow-lg:0 12px 32px rgba(0,0,0,0.08);
 }
 
-/* Dark mode opt-in (was default in v1) */
+/* Dark mode — Slack-inspired dark palette (real, not light clone) */
 [data-theme="dark"]{
-  /* Slack pro minimalism — single light theme (dark override intentionally equals light) */
-  --bg:#ffffff;
-  --bg-soft:#f8f8f7;
-  --bg-elev:#ffffff;
-  --bg-hover:#f1f1ef;
-  --bg-active:#e8e8e6;
-  --glass:rgba(0,0,0,0.02);
-  --glass-hover:rgba(0,0,0,0.04);
-  --glass-border:#e8e8e6;
-  --glass-border-hover:#d1d1cf;
-  --text:#1d1c1b;
-  --text-2:#616061;
-  --text-dim:#868686;
-  --text-mute:#a1a1a1;
-  --accent:#1264a3;
-  --accent-2:#0b4d80;
-  --accent-dark:#0a3d66;
-  --accent-soft:rgba(18,100,163,0.08);
-  --success:#007a5a;
+  /* Canvas — Slack aubergine/black */
+  --bg:#1a1d21;
+  --bg-soft:#222529;
+  --bg-elev:#2c2e33;
+  --bg-hover:#34363b;
+  --bg-active:#3a3d43;
+  --glass:rgba(255,255,255,0.04);
+  --glass-hover:rgba(255,255,255,0.08);
+  --glass-border:#35363a;
+  --glass-border-hover:#4a4c52;
+
+  /* Text — Slack off-white */
+  --text:#d1d2d3;
+  --text-2:#ababad;
+  --text-dim:#8c8d8f;
+  --text-mute:#6b6c6f;
+
+  /* Accent — same Slack blue, slightly brighter for dark contrast */
+  --accent:#4a9eff;
+  --accent-2:#2e80e0;
+  --accent-dark:#1a5fb4;
+  --accent-soft:rgba(74,158,255,0.12);
+
+  /* Status — Slack dark palette */
   --warn:#ecb22e;
   --danger:#e01e5a;
-  --info:#1264a3;
-  --shadow-sm:0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg:0 12px 32px rgba(0,0,0,0.08);
+  --success:#2bac76;
+  --star:#ecb22e;
+  --info:#4a9eff;
+
+  /* Shape (same) */
+  --radius:6px;
+  --radius-lg:8px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.6);
 }
+[data-theme="dark"]{color-scheme:dark}
+[data-theme="dark"] img{filter:brightness(.92)}
 
 /* ===== RESET ===== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}

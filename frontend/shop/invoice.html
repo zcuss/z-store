@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invoice — Z Store</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="styles.css?v=8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -184,10 +185,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 <script>
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : (location.hostname === 'zcus.biz.id' || location.hostname === 'www.zcus.biz.id' ? 'https://5.zcus.biz.id/api' : '/api');
+const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
+const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = d => d ? new Date(d).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-';
-let user = JSON.parse(localStorage.getItem('zcus_user') || 'null');
-let token = localStorage.getItem('zcus_token') || '';
+let user = _lsJSON('zcus_user', null);
+let token = _lsStr('zcus_token') || '';
 let invoiceData = null;
 
 async function loadInvoice() {
@@ -205,7 +208,7 @@ async function loadInvoice() {
   } catch (e) { /* dev mode */ }
   // Dev fallback
   let local = null;
-  try { const orders = JSON.parse(localStorage.getItem('zcus_orders') || '[]'); local = orders.find(o => String(o.id) === String(id)); } catch (e) {}
+  try { const orders = JSON.parse((_lsStr('zcus_orders') || '[]')); local = orders.find(o => String(o.id) === String(id)); } catch (e) {}
   if (local) {
     invoiceData = {
       number: 'INV-' + new Date(local.created_at || Date.now()).getFullYear() + '-' + String(local.id).padStart(5, '0'),

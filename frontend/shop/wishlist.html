@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id">
 <head>
+<script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Wishlist — Z Store</title>
@@ -9,7 +10,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="styles.css?v=8">
 <style>
 .wl-wrap{max-width:1200px;margin:0 auto;padding:24px}
 .wl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
@@ -106,12 +107,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
+const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
+const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? location.origin + '/api' : (location.hostname === 'zcus.biz.id' || location.hostname === 'www.zcus.biz.id' ? 'https://5.zcus.biz.id/api' : '/api');
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const slugify = s => String(s||'').toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,80);
-let wishlist = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]');
-let cart = JSON.parse(localStorage.getItem('zcus_cart') || '[]');
+let wishlist = _lsJSON('zcus_wishlist', '[]');
+let cart = _lsJSON('zcus_cart', '[]');
 let products = [];
 
 function toast(msg, type='info') { const t = document.getElementById('toast'); t.className = 'toast ' + type; t.innerHTML = `<i class="fa-solid ${type==='error'?'fa-circle-xmark':type==='success'?'fa-circle-check':'fa-circle-info'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }

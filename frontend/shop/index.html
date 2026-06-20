@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id">
 <head>
+<script>try{var t=localStorage.getItem("zcus_theme");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Z Store — Premium Digital Marketplace | AI Tools, Software, Voucher</title>
@@ -64,9 +65,11 @@
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="styles.css?v=8">
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XXXXXXXXXXXX"></script>
 <script>
+const _lsJSON = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { try { localStorage.removeItem(k); } catch (_) {} return fb; } };
+const _lsStr = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 function goHome(e) { if (e) e.preventDefault(); location.href = "/shop/"; }
 // Block zoom + horizontal scroll on mobile
 (function(){
@@ -1038,8 +1041,8 @@ function sendLiveChat() {
 }
 </script>
 
-<script src="products.js?v=29"></script>
-<script src="app.js?v=46"></script>
+<script src="products.js?v=30"></script>
+<script src="app.js?v=47"></script>
 <script>
 // Service worker registration for PWA
 if ('serviceWorker' in navigator) {
@@ -1260,7 +1263,7 @@ function subscribeNewsletter(e){
   fetch(API + '/newsletter/subscribe', { method: 'POST', body: JSON.stringify({ email, source: 'homepage' }) })
     .then(r => r.json()).then(d => toast(d.message || 'Terima kasih! Kode WELCOME10 sudah dikirim.', 'success'))
     .catch(() => toast('Terima kasih! Kode diskon 10% sudah dikirim ke ' + email, 'success'));
-  const list = JSON.parse(localStorage.getItem('zcus_newsletter') || '[]');
+  const list = _lsJSON('zcus_newsletter', '[]');
   if (!list.includes(email)) list.push(email);
   localStorage.setItem('zcus_newsletter', JSON.stringify(list));
   document.getElementById('newsletterEmail').value = '';
@@ -1317,7 +1320,7 @@ function showSpinResult(prize) {
   document.getElementById('swResultCode').textContent = prize.label === 'ZONK' ? '-' : code;
   document.getElementById('swResultCode').style.display = prize.label === 'ZONK' ? 'none' : 'block';
   if (prize.label !== 'ZONK') {
-    const promos = JSON.parse(localStorage.getItem('zcus_promos') || '{}');
+    const promos = _lsJSON('zcus_promos', '{}');
     promos[code] = { ...prize, expires: Date.now() + 7 * 86400000 };
     localStorage.setItem('zcus_promos', JSON.stringify(promos));
   }
@@ -1468,7 +1471,7 @@ function showSkeleton(container, count = 6) {
 }
 
 // ===== COMPARE PRODUCTS =====
-let compareList = JSON.parse(localStorage.getItem('zcus_compare') || '[]');
+let compareList = _lsJSON('zcus_compare', '[]');
 function toggleCompare(id) {
   const idx = compareList.indexOf(id);
   if (idx >= 0) compareList.splice(idx, 1);
@@ -1494,7 +1497,7 @@ async function showCompare() {
   if (!products.length) {
     // Dev fallback — load from existing product list
     products = [];
-    const all = JSON.parse(localStorage.getItem('zcus_products_cache') || '[]');
+    const all = _lsJSON('zcus_products_cache', '[]');
     compareList.forEach(id => { const p = all.find(x => x.id === id); if (p) products.push(p); });
     if (!products.length) {
       // Try from rendered DOM — fallback use cart-style mock
@@ -1845,10 +1848,10 @@ window.addEventListener('unhandledrejection', function(e){
   }, { passive: true });
   // Update badges
   const updateBadges = () => {
-    const c = JSON.parse(localStorage.getItem('zcus_cart') || '[]').reduce((s, x) => s + x.qty, 0);
+    const c = _lsJSON('zcus_cart', '[]').reduce((s, x) => s + x.qty, 0);
     const cb = document.getElementById('mbnCartBadge');
     if (cb) { cb.textContent = c; cb.classList.toggle('show', c > 0); }
-    const w = JSON.parse(localStorage.getItem('zcus_wishlist') || '[]').length;
+    const w = _lsJSON('zcus_wishlist', '[]').length;
     const wb = document.getElementById('mbnWishBadge');
     if (wb) { wb.textContent = w; wb.classList.toggle('show', w > 0); }
   };
